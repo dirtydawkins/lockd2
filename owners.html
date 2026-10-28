@@ -84,6 +84,13 @@
                 <label class="owner-field"><span>Category</span><select id="listing-category" required><option value="">Choose a category</option><option value="stay">Rooms &amp; accommodation</option><option value="drive">Cars &amp; Mobility</option><option value="play">Gaming &amp; consoles</option><option value="technology">Technology &amp; gadgets</option><option value="phone">Phones</option><option value="laptop">Computers</option><option value="camera">Cameras &amp; creator equipment</option><option value="audio">Audio &amp; event equipment</option><option value="creative">Creative equipment</option><option value="experience">Destinations &amp; experiences</option><option value="other">Other supported rentals</option></select></label>
                 <label class="owner-field"><span>Listing title</span><input id="listing-title" type="text" maxlength="180" required placeholder="A clear name renters will recognize"></label>
                 <label class="owner-field"><span>Location</span><input id="listing-location" type="text" maxlength="160" required placeholder="Town, neighbourhood or pickup area"></label>
+                <div class="owner-field-wide owner-approximate-pin"><p class="owner-help">Optional: add an approximate map pin so this listing can appear in nearby discovery. Use a neighbourhood-level point, never a private entrance or exact home address. LOCKD shows distance approximately, not the coordinates.</p>
+                  <div class="owner-form-grid">
+                    <label class="owner-field"><span>Approximate latitude <small>Optional</small></span><input id="listing-latitude" type="number" min="-90" max="90" step="0.01" inputmode="decimal" placeholder="e.g. -1.29"></label>
+                    <label class="owner-field"><span>Approximate longitude <small>Optional</small></span><input id="listing-longitude" type="number" min="-180" max="180" step="0.01" inputmode="decimal" placeholder="e.g. 36.82"></label>
+                  </div>
+                  <label class="owner-location-clear"><input id="listing-clear-location-pin" type="checkbox"> Remove the saved approximate pin</label>
+                </div>
                 <label class="owner-field owner-field-wide"><span>Short introduction</span><input id="listing-summary" type="text" maxlength="240" placeholder="A concise summary for search results"></label>
                 <label class="owner-field owner-field-wide"><span>Description <small>At least 30 characters to publish</small></span><textarea id="listing-description" rows="4" maxlength="5000" placeholder="Describe the real item or property, its condition, what's included and any restrictions." required></textarea></label>
               </div>

@@ -70,10 +70,32 @@ module.exports = async function handler(req, res) {
     const body = readBody(req);
     if (!body) return send(res, 400, { error: "invalid_request", message: "The listing request is not valid JSON." });
 
-    const rpcName = req.method === "PATCH" ? "set_my_lockd_listing_status" : "create_lockd_listing";
+    const listing = body.listing && typeof body.listing === "object" && !Array.isArray(body.listing) ? { ...body.listing } : {};
+    const hasLatitude = Object.hasOwn(listing, "location_latitude");
+    const hasLongitude = Object.hasOwn(listing, "location_longitude");
+    const clearLocationPin = listing.clear_location_pin === true;
+    const latitude = hasLatitude && typeof listing.location_latitude === "number" ? listing.location_latitude : null;
+    const longitude = hasLongitude && typeof listing.location_longitude === "number" ? listing.location_longitude : null;
+    if (req.method === "POST" && !clearLocationPin && (hasLatitude !== hasLongitude || (hasLatitude && (!Number.isFinite(latitude) || latitude < -90 || latitude > 90 || !Number.isFinite(longitude) || longitude < -180 || longitude > 180)))) {
+      return send(res, 400, { error: "invalid_location_pin", message: "Add both approximate map coordinates or leave both blank." });
+    }
+    delete listing.location_latitude;
+    delete listing.location_longitude;
+    delete listing.clear_location_pin;
+    const useLocationRpc = req.method === "POST" && (hasLatitude || clearLocationPin);
+    const rpcName = req.method === "PATCH" ? "set_my_lockd_listing_status" : useLocationRpc ? "create_lockd_listing_with_location" : "create_lockd_listing";
     const rpcBody = req.method === "PATCH"
       ? { p_listing_id: body.listingId, p_status: body.status }
-      : { p_listing: body.listing, p_availability: body.availability || {}, p_publish: body.publish === true };
+      : {
+        p_listing: listing,
+        p_availability: body.availability || {},
+        p_publish: body.publish === true,
+        ...(useLocationRpc ? {
+          p_location_latitude: clearLocationPin ? null : hasLatitude ? Number(latitude.toFixed(2)) : null,
+          p_location_longitude: clearLocationPin ? null : hasLongitude ? Number(longitude.toFixed(2)) : null,
+          p_clear_location: clearLocationPin,
+        } : {}),
+      };
     const response = await request(config, token, `/rest/v1/rpc/${rpcName}`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
@@ -89,12 +111,15 @@ module.exports = async function handler(req, res) {
         "Add a future availability range with at least one available unit.", "Complete the required details for this category.",
         "Choose a valid deposit amount.", "This listing is unavailable or cannot be changed.",
         "Choose a valid listing and status.", "Sign in to manage your listings.",
+        "Add both approximate map coordinates or leave both blank.", "Choose valid approximate map coordinates.",
       ];
       if (allowedMessages.includes(message)) return send(res, 400, { error: "invalid_listing", message });
       return send(res, response.status === 404 ? 503 : response.status >= 500 ? 502 : 400, {
         error: response.status === 404 ? "owner_setup_pending" : "listing_save_failed",
         message: response.status === 404
-          ? "The owner publishing database migration has not been applied yet."
+          ? useLocationRpc
+            ? "Approximate nearby listing support needs its database migration. Remove the optional map pin or try again after the migration is applied."
+            : "The owner publishing database migration has not been applied yet."
           : "The listing could not be saved. Check your details and try again.",
       });
     }

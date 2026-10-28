@@ -267,6 +267,8 @@
       id: $("#listing-id").value || crypto.randomUUID(), category: categorySelect.value,
       title: $("#listing-title").value, summary: $("#listing-summary").value,
       description: $("#listing-description").value, location: $("#listing-location").value,
+      latitude: $("#listing-latitude").value, longitude: $("#listing-longitude").value,
+      clearLocationPin: $("#listing-clear-location-pin").checked,
       price: $("#listing-price").value, priceUnit: $("#listing-price-unit").value,
       deposit: $("#listing-deposit").value, minDays: $("#listing-min-days").value,
       startDate: $("#availability-start").value, endDate: $("#availability-end").value,
@@ -322,6 +324,9 @@
     $("#listing-summary").value = values.summary || "";
     $("#listing-description").value = values.description || "";
     $("#listing-location").value = values.location_label || values.location || "";
+    $("#listing-latitude").value = values.location_latitude ?? values.latitude ?? "";
+    $("#listing-longitude").value = values.location_longitude ?? values.longitude ?? "";
+    $("#listing-clear-location-pin").checked = Boolean(values.clearLocationPin);
     $("#listing-price").value = values.price_amount ?? values.price ?? "";
     $("#listing-price-unit").value = values.price_unit || values.priceUnit || "day";
     $("#listing-deposit").value = values.deposit_amount ?? values.deposit ?? "";
@@ -501,6 +506,10 @@
     if ($("#listing-location").value.trim().length < 2) errors.push("Add the location or pickup area.");
     if ($("#listing-description").value.trim().length < 30) errors.push("Add a description of at least 30 characters.");
     if (!(Number($("#listing-price").value) > 0)) errors.push("Set a rate greater than zero.");
+    const latitude = $("#listing-latitude").value.trim();
+    const longitude = $("#listing-longitude").value.trim();
+    if ((latitude && !longitude) || (!latitude && longitude)) errors.push("Add both approximate map coordinates or leave both blank.");
+    if (latitude && (!Number.isFinite(Number(latitude)) || Number(latitude) < -90 || Number(latitude) > 90 || !Number.isFinite(Number(longitude)) || Number(longitude) < -180 || Number(longitude) > 180)) errors.push("Choose valid approximate map coordinates.");
     if (selectedPhotos.length < 1 || selectedPhotos.length > 12) errors.push("Add between one and twelve photos of the real asset.");
     if (!$("#availability-start").value || !$("#availability-end").value || $("#availability-end").value <= $("#availability-start").value) errors.push("Choose a future availability range.");
     if (!Number.isInteger(Number($("#availability-units").value)) || Number($("#availability-units").value) < 1 || Number($("#availability-units").value) > 20) errors.push("Enter between one and twenty available units.");
@@ -521,6 +530,8 @@
     const baseSlug = title.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 92) || "lockd-rental";
     const price = $("#listing-price").value.trim();
     const deposit = $("#listing-deposit").value.trim();
+    const latitude = $("#listing-latitude").value.trim();
+    const longitude = $("#listing-longitude").value.trim();
     return {
       id, slug: `${baseSlug}-${id.slice(0, 8)}`, title, category: categorySelect.value,
       summary: $("#listing-summary").value.trim(), description: $("#listing-description").value.trim(),
@@ -531,6 +542,8 @@
       deposit_amount: deposit ? Number(deposit) : null,
       collection_available: $("#listing-collection").checked,
       delivery_available: $("#listing-delivery").checked,
+      ...(latitude && longitude ? { location_latitude: Number(latitude), location_longitude: Number(longitude) } : {}),
+      ...($("#listing-clear-location-pin").checked ? { clear_location_pin: true } : {}),
       min_rental_days: Number($("#listing-min-days").value || 1), attributes,
     };
   }

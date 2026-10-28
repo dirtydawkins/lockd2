@@ -18,6 +18,10 @@
 .owner-field textarea { min-height: 110px; resize: vertical; line-height: 1.6; }
 .owner-field input:focus-visible, .owner-field select:focus-visible, .owner-field textarea:focus-visible { border-color: var(--burgundy); box-shadow: 0 0 0 2px rgba(118,36,50,.12); background: #fff; }
 .owner-field-wide { grid-column: 1 / -1; }
+.owner-approximate-pin { display: grid; gap: .6rem; padding: .8rem; border: 1px solid var(--line); background: rgba(255,255,255,.28); }
+.owner-approximate-pin > .owner-help { margin: 0; }
+.owner-location-clear { display: inline-flex; align-items: center; gap: .45rem; width: fit-content; color: #746b65; font-size: .64rem; font-weight: 400; cursor: pointer; }
+.owner-location-clear input { accent-color: var(--burgundy); }
 .owner-auth-actions, .owner-form-footer > div { display: flex; flex-wrap: wrap; align-items: center; gap: .65rem; }
 .owner-text-link { min-height: 42px; padding: .5rem .7rem; border: 0; background: transparent; color: var(--burgundy); font: inherit; font-size: .72rem; text-decoration: underline; text-underline-offset: .2em; cursor: pointer; }
 .owner-form-status { min-height: 1.2rem; margin: 0; color: #625b56; font-size: .73rem; line-height: 1.55; }

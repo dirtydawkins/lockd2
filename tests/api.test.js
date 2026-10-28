@@ -348,6 +348,46 @@ test("catalogue keeps substring search available while the ranked-search migrati
   assert.match(requests[1].searchParams.get("and"), /location_label\.ilike\.\*Nairobi\*/);
 });
 
+test("catalogue falls back safely when the publication timestamp migration is pending", async (t) => {
+  configure(t);
+  const requests = [];
+  mockFetch(t, async (url) => {
+    const parsed = new URL(url);
+    requests.push(parsed);
+    if (parsed.searchParams.get("select")?.includes("published_at")) {
+      return httpResponse(400, { code: "PGRST204", message: "Could not find published_at in the schema cache" });
+    }
+    return httpResponse(200, []);
+  });
+  const res = await invoke(listings, { query: { category: "drive", sort: "price-low" } });
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.publicationTimestampReliable, false);
+  assert.equal(requests.length, 2);
+  assert.equal(requests[1].searchParams.get("published_at"), null);
+  assert.equal(requests[1].searchParams.get("order"), "price_amount.asc.nullslast");
+  assert.equal(requests[1].searchParams.get("listing_status"), "eq.published");
+  assert.equal(requests[1].searchParams.get("approval_status"), "eq.approved");
+});
+
+test("newest catalogue falls back to creation order and identifies that publication ordering is unavailable", async (t) => {
+  configure(t);
+  const requests = [];
+  mockFetch(t, async (url) => {
+    const parsed = new URL(url);
+    requests.push(parsed);
+    if (parsed.searchParams.get("select")?.includes("published_at")) {
+      return httpResponse(400, { code: "42703", message: "column published_at does not exist" });
+    }
+    return httpResponse(200, []);
+  });
+  const res = await invoke(listings, { query: { sort: "newest" } });
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.publicationTimestampReliable, false);
+  assert.equal(requests[0].searchParams.get("published_at"), "not.is.null");
+  assert.equal(requests[1].searchParams.get("published_at"), null);
+  assert.equal(requests[1].searchParams.get("order"), "created_at.desc");
+});
+
 test("catalogue rejects invalid paging, sorting and vehicle filters before database access", async (t) => {
   configure(t);
   mockFetch(t, async () => { throw new Error("fetch should not run for invalid requests"); });

@@ -70,6 +70,50 @@ test("owner publish uses the caller's user token and the database RPC", async (t
   });
 });
 
+test("owner approximate map pins are stored through the authenticated location RPC", async (t) => {
+  setup(t);
+  const token = "f".repeat(40);
+  const calls = [];
+  global.fetch = async (url, options) => {
+    calls.push({ url: String(url), options });
+    if (String(url).endsWith("/auth/v1/user")) return response(200, { id: "owner-1", email_confirmed_at: "2026-10-01T00:00:00Z" });
+    return response(200, { id: "listing-1", slug: "studio-1", listing_status: "published" });
+  };
+  const payload = {
+    listing: { id: "listing-1", title: "Studio", category: "stay", location_latitude: -1.28345, location_longitude: 36.82195 },
+    availability: {}, publish: false,
+  };
+  const result = await invoke({ method: "POST", headers: { authorization: `Bearer ${token}` }, body: payload });
+  assert.equal(result.statusCode, 201);
+  assert.match(calls[1].url, /rpc\/create_lockd_listing_with_location$/);
+  assert.equal(calls[1].options.headers.Authorization, `Bearer ${token}`);
+  const args = JSON.parse(calls[1].options.body);
+  assert.equal(args.p_location_latitude, -1.28);
+  assert.equal(args.p_location_longitude, 36.82);
+  assert.equal(args.p_clear_location, false);
+  assert.equal("location_latitude" in args.p_listing, false);
+  assert.equal("location_longitude" in args.p_listing, false);
+});
+
+test("owner API rejects null map coordinates and allows an explicit saved-pin removal", async (t) => {
+  setup(t);
+  let requestBody;
+  global.fetch = async (url, options) => {
+    if (String(url).endsWith("/auth/v1/user")) return response(200, { id: "owner-1", email_confirmed_at: "2026-10-01T00:00:00Z" });
+    requestBody = JSON.parse(options.body);
+    return response(200, { id: "listing-1" });
+  };
+  const headers = { authorization: `Bearer ${"g".repeat(40)}` };
+  const invalid = await invoke({ method: "POST", headers, body: { listing: { location_latitude: null, location_longitude: null } } });
+  assert.equal(invalid.statusCode, 400);
+  assert.equal(invalid.body.error, "invalid_location_pin");
+  const result = await invoke({ method: "POST", headers, body: { listing: { location_latitude: -1.28, location_longitude: 36.82, clear_location_pin: true } } });
+  assert.equal(result.statusCode, 201);
+  assert.equal(requestBody.p_location_latitude, null);
+  assert.equal(requestBody.p_location_longitude, null);
+  assert.equal(requestBody.p_clear_location, true);
+});
+
 test("owner list uses the authenticated database function and returns no cached response", async (t) => {
   setup(t);
   const calls = [];
@@ -77,11 +121,11 @@ test("owner list uses the authenticated database function and returns no cached 
     calls.push({ url: String(url), options });
     return String(url).endsWith("/auth/v1/user")
       ? response(200, { id: "owner-1", email_confirmed_at: "2026-10-01T00:00:00Z" })
-      : response(200, [{ id: "listing-1", listing_status: "draft" }]);
+      : response(200, [{ id: "listing-1", listing_status: "draft", location_latitude: -1.28, location_longitude: 36.82 }]);
   };
   const result = await invoke({ headers: { authorization: `Bearer ${"b".repeat(40)}` } });
   assert.equal(result.statusCode, 200);
-  assert.deepEqual(result.body.items, [{ id: "listing-1", listing_status: "draft", image_paths: [], images: [] }]);
+  assert.deepEqual(result.body.items, [{ id: "listing-1", listing_status: "draft", location_latitude: -1.28, location_longitude: 36.82, image_paths: [], images: [] }]);
   assert.match(calls[1].url, /rpc\/my_lockd_listings$/);
   assert.equal(calls[1].options.headers.Authorization, `Bearer ${"b".repeat(40)}`);
   assert.equal(result.headers["cache-control"], "no-store");

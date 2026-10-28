@@ -18,8 +18,10 @@
     <link rel="icon" href="./favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="./styles.css">
     <link rel="stylesheet" href="./destinations.css">
+    <link rel="stylesheet" href="./discovery.css">
     <script src="./motion.js" defer></script>
     <script src="./app.js" defer></script>
+    <script src="./discovery.js" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
@@ -43,6 +45,7 @@
         <a href="rentals.html?category=drive">Cars &amp; Mobility</a>
         <a href="destinations.html">Destinations</a>
         <a href="tech.html">Tech &amp; Gadgets</a>
+        <a href="#discover-feed">Discover nearby</a>
         <a href="#how-it-works">How it works</a>
         <a href="#about">About LOCKD</a>
         <a class="owner-nav-link" href="owners.html">List your asset</a>
@@ -146,6 +149,50 @@
           </a>
         </div>
         <p class="image-disclaimer">The photography shows the kind of things that inspire LOCKD. It does not confirm that a pictured item, property or experience is available to rent.</p>
+      </section>
+
+      <section class="discovery-feed section-shell" id="discover-feed" aria-labelledby="discovery-feed-title">
+        <div class="discovery-feed-heading">
+          <div><p class="eyebrow"><span class="eyebrow-rule"></span> Made for where you are</p><h2 id="discovery-feed-title">Find what fits<br><em>around you.</em></h2></div>
+          <p>Explore genuine published rentals nearby, or start with a place you have in mind. Location is optional and stays private.</p>
+        </div>
+        <div class="discovery-location-bar">
+          <div><span class="discovery-overline">YOUR AREA</span><p id="discovery-location-label">No location selected</p></div>
+          <button class="text-button" id="open-location-picker" type="button" aria-haspopup="dialog">Choose a location</button>
+          <button class="discovery-clear-location" id="clear-location" type="button" hidden>Clear</button>
+        </div>
+        <form class="discovery-filters" id="discovery-filters">
+          <label><span>Category</span><select id="discovery-category"><option value="">All rentals</option><option value="stay">Accommodation</option><option value="drive">Cars &amp; Mobility</option><option value="experience">Experiences</option><option value="technology">Technology</option><option value="play">Gaming</option><option value="camera">Cameras</option><option value="phone">Phones</option><option value="laptop">Computers</option><option value="audio">Audio</option><option value="creative">Creator equipment</option><option value="other">Other rentals</option></select></label>
+          <label><span>From KSh</span><input id="discovery-min-price" type="number" min="0" max="100000000" inputmode="numeric" placeholder="Any"></label>
+          <label><span>To KSh</span><input id="discovery-max-price" type="number" min="0" max="100000000" inputmode="numeric" placeholder="Any"></label>
+          <label><span>Available from</span><input id="discovery-start-date" type="date"></label>
+          <label><span>Return by</span><input id="discovery-end-date" type="date"></label>
+          <label><span>Quantity</span><input id="discovery-quantity" type="number" min="1" max="20" value="1" inputmode="numeric"></label>
+          <label class="discovery-guests-field"><span>Guests <small>for stays</small></span><input id="discovery-guests" type="number" min="1" max="20" inputmode="numeric" placeholder="Any"></label>
+          <button class="button button-burgundy" type="submit">Update feed</button>
+        </form>
+        <p class="discovery-feed-status" id="discovery-feed-status" role="status" aria-live="polite">Choose a location to see nearby listings. You can browse without sharing your location.</p>
+
+        <section class="discovery-row" id="nearby-row" aria-labelledby="nearby-row-title" hidden>
+          <div class="discovery-row-heading"><div><p class="eyebrow">A little closer</p><h3 id="nearby-row-title">Around your area</h3></div><p id="nearby-row-note"></p></div>
+          <div class="discovery-card-grid" id="nearby-listings"></div>
+          <button class="discovery-more" id="expand-nearby" type="button" hidden>Explore a wider area</button>
+          <button class="discovery-more" id="load-more-nearby" type="button" hidden>Load more nearby rentals</button>
+        </section>
+
+        <section class="discovery-row" id="available-row" aria-labelledby="available-row-title" hidden>
+          <div class="discovery-row-heading"><div><p class="eyebrow">Dates checked against listing calendars</p><h3 id="available-row-title">Available for your dates</h3></div><p id="available-row-note"></p></div>
+          <div class="discovery-card-grid" id="available-listings"></div>
+          <button class="discovery-more" id="load-more-available" type="button" hidden>Load more available rentals</button>
+        </section>
+
+        <section class="discovery-row" id="recent-row" aria-labelledby="recent-row-title" hidden>
+          <div class="discovery-row-heading"><div><p class="eyebrow">Freshly published</p><h3 id="recent-row-title">Recently added</h3></div><p>Published LOCKD listings, ordered by publication time when the live database supports it.</p></div>
+          <div class="discovery-card-grid" id="recent-listings"></div>
+          <button class="discovery-more" id="load-more-recent" type="button" hidden>Load more listings</button>
+        </section>
+
+        <div class="discovery-shelves" id="discovery-shelves"></div>
       </section>
 
       <section class="destination-preview section-shell" aria-labelledby="destination-preview-title">
@@ -261,6 +308,28 @@
         </div>
       </section>
     </main>
+
+    <dialog class="location-dialog" id="location-dialog" aria-labelledby="location-dialog-title">
+      <form method="dialog" class="location-dialog-close-form"><button class="location-dialog-close" type="submit" aria-label="Close location options">×</button></form>
+      <p class="eyebrow">Your location, your choice</p>
+      <h2 id="location-dialog-title">Discover what’s around you.</h2>
+      <p>Find stays, cars, gear and experiences near a place you choose. Nearby search uses an approximate location and never blocks browsing.</p>
+      <div class="location-dialog-actions">
+        <button class="button button-burgundy" id="use-current-location" type="button">Use my current location</button>
+        <button class="text-button" id="choose-manual-location" type="button">Choose a location manually</button>
+      </div>
+      <form class="manual-location-form" id="manual-location-form" hidden>
+        <label for="manual-location-input">Town or neighbourhood</label>
+        <input id="manual-location-input" type="search" list="manual-location-suggestions" placeholder="For example, Nairobi or Ruiru" autocomplete="off" maxlength="80">
+        <datalist id="manual-location-suggestions">
+          <option value="Nairobi"><option value="Westlands, Nairobi"><option value="Kilimani, Nairobi"><option value="Karen, Nairobi"><option value="Ruiru"><option value="Kiambu"><option value="Mombasa"><option value="Kisumu"><option value="Nakuru"><option value="Eldoret"><option value="Maasai Mara"><option value="Amboseli">
+        </datalist>
+        <button class="button button-dark" type="submit">Use this area</button>
+        <small>Suggestions are places to search, not a promise that rentals are listed there.</small>
+      </form>
+      <p class="location-dialog-status" id="location-dialog-status" role="status" aria-live="polite"></p>
+      <button class="location-not-now" id="location-not-now" type="button">Not now</button>
+    </dialog>
 
     <footer class="site-footer">
       <a class="brand brand-footer" href="#top" aria-label="LOCKD home">

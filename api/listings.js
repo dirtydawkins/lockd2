@@ -145,13 +145,14 @@ module.exports = async function handler(req, res) {
 
   const limit = 24;
   const query = new URLSearchParams({
-    select: "id,slug,title,category,market_category,summary,description,images,image_alt,location_label,price_amount,currency,price_unit,deposit_amount,deposit_currency,rental_durations,collection_available,delivery_available,attributes,requires_approval,checkout_enabled,listing_status,approval_status,created_at",
+    select: "id,slug,title,category,market_category,summary,description,images,image_alt,location_label,price_amount,currency,price_unit,deposit_amount,deposit_currency,rental_durations,collection_available,delivery_available,attributes,requires_approval,checkout_enabled,listing_status,approval_status,created_at,published_at",
     listing_status: "eq.published",
     approval_status: "eq.approved",
     limit: String(limit + 1),
     offset: String(page * limit),
-    order: sort === "price-low" ? "price_amount.asc.nullslast" : sort === "price-high" ? "price_amount.desc.nullslast" : "created_at.desc",
+    order: sort === "price-low" ? "price_amount.asc.nullslast" : sort === "price-high" ? "price_amount.desc.nullslast" : sort === "newest" ? "published_at.desc.nullslast" : "created_at.desc",
   });
+  if (sort === "newest") query.set("published_at", "not.is.null");
   const andFilters = [];
   if (category) query.set("category", `eq.${category}`);
   else if (hasVehicleFilters) query.set("category", "eq.drive");
@@ -255,12 +256,28 @@ module.exports = async function handler(req, res) {
         if (andFilters.length) query.set("and", `(${andFilters.join(",")})`);
       }
     }
-    const response = await fetch(`${config.url}/rest/v1/lockd_listings?${query}`, {
+    let publicationTimestampReliable = true;
+    let response = await fetch(`${config.url}/rest/v1/lockd_listings?${query}`, {
       headers: {
         ...config.headers,
         Accept: "application/json",
       },
     });
+    if (!response.ok) {
+      const failure = await response.json().catch(() => ({}));
+      const missingPublishedAt = failure?.code === "42703"
+        || (failure?.code === "PGRST204" && /published_at/i.test(failure?.message || ""))
+        || (/published_at/i.test(failure?.message || "") && /does not exist|schema cache/i.test(failure?.message || ""));
+      if (missingPublishedAt) {
+        publicationTimestampReliable = false;
+        query.set("select", query.get("select").replace(",published_at", ""));
+        query.delete("published_at");
+        if (sort === "newest") query.set("order", "created_at.desc");
+        response = await fetch(`${config.url}/rest/v1/lockd_listings?${query}`, {
+          headers: { ...config.headers, Accept: "application/json" },
+        });
+      } else return send(res, 502, { error: "catalogue_unavailable", message: "The rental catalogue is temporarily unavailable." });
+    }
     if (!response.ok) return send(res, 502, { error: "catalogue_unavailable", message: "The rental catalogue is temporarily unavailable." });
     const rows = await response.json();
     const hasMore = rankedIds ? (page + 1) * limit < rankedTotal : rows.length > limit;
@@ -289,9 +306,10 @@ module.exports = async function handler(req, res) {
       attributes: row.attributes || {},
       requires_approval: Boolean(row.requires_approval),
       checkout_enabled: Boolean(row.checkout_enabled),
+      published_at: row.published_at || null,
     })));
     if (slug) return send(res, 200, { item: items[0] || null });
-    return send(res, 200, { items, page, hasMore, ...(rankedTotal === null ? {} : { total: rankedTotal }) });
+    return send(res, 200, { items, page, hasMore, publicationTimestampReliable, ...(rankedTotal === null ? {} : { total: rankedTotal }) });
   } catch {
     return send(res, 502, { error: "catalogue_unavailable", message: "The rental catalogue is temporarily unavailable." });
   }
