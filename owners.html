@@ -4,44 +4,36 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#f7f4ef">
-    <meta name="description" content="Learn how listing a property, car or equipment with LOCKD will work, and contact the owner team while the owner portal is being prepared.">
+    <meta name="description" content="Create and manage rental listings with LOCKD. Set your rate, availability, and rental details in one place.">
     <link rel="canonical" href="https://lockd2.vercel.app/owners.html">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="LOCKD">
     <meta property="og:title" content="List Your Asset — LOCKD">
-    <meta property="og:description" content="Learn how listing a property, car or equipment with LOCKD will work.">
+    <meta property="og:description" content="Create and manage rental listings with LOCKD.">
     <meta property="og:url" content="https://lockd2.vercel.app/owners.html">
     <meta name="twitter:card" content="summary">
     <title>List Your Asset — LOCKD</title>
     <link rel="icon" href="./favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./owners-market.css">
     <script src="./motion.js" defer></script>
     <script src="./owners.js" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
-
     <header class="site-header" id="top">
       <a class="brand" href="index.html#top" aria-label="LOCKD home">
-        <svg class="brand-mark" viewBox="0 0 34 34" aria-hidden="true">
-          <path d="M7 5.5h15.5L28 11v17.5H7z" fill="none" stroke="currentColor" stroke-width="1.6" />
-          <path d="M22.5 5.5V11H28M12 16.5v7h10v-7z" fill="none" stroke="currentColor" stroke-width="1.6" />
-        </svg>
+        <svg class="brand-mark" viewBox="0 0 34 34" aria-hidden="true"><path d="M7 5.5h15.5L28 11v17.5H7z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M22.5 5.5V11H28M12 16.5v7h10v-7z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
         <span class="brand-word">lockd<span class="brand-period">.</span></span>
       </a>
-
-      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
-        <span></span><span></span>
-      </button>
-
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu"><span></span><span></span></button>
       <nav class="primary-nav" id="primary-nav" aria-label="Main navigation">
         <a href="index.html#categories">Explore rentals</a>
         <a href="rooms.html">Book a Room</a>
+        <a href="rentals.html?category=drive">Cars &amp; Mobility</a>
         <a href="tech.html">Tech &amp; Gadgets</a>
-        <a href="#owner-process">How it works</a>
-        <a href="#owner-contact">Owner support</a>
+        <a href="owners.html#owner-portal">List your asset</a>
       </nav>
-
       <a class="header-cta" href="index.html#categories">Explore Rentals</a>
     </header>
 
@@ -50,81 +42,96 @@
         <div class="owner-hero-copy">
           <p class="eyebrow"><span class="eyebrow-rule"></span> For owners</p>
           <h1 id="owner-title">Have something worth <em>renting?</em></h1>
-          <p class="owner-hero-lede">List your property, car or equipment with LOCKD. We’re preparing a considered way to bring good assets to people looking to rent.</p>
-          <a class="text-button" href="#owner-process">See how owner listings will work</a>
-          <aside class="owner-status" id="owner-status" aria-label="Owner portal status">
-            <span class="owner-status-mark" aria-hidden="true">i</span>
-            <p><strong>Owner registration isn’t open yet.</strong>The secure owner portal is not connected in this preview, so LOCKD can’t accept accounts, listings, availability, booking changes or payout details here.</p>
-          </aside>
+          <p class="owner-hero-lede">List your property, car or equipment with LOCKD. Set the details, rate and dates that work for you.</p>
+          <a class="button button-dark" href="#owner-portal">Start a listing</a>
         </div>
         <figure class="owner-hero-image">
           <img src="./WhatsApp%20Image%202026-10-27%20at%2023.36.04.jpeg" alt="Modern home with a landscaped front garden" width="735" height="686" fetchpriority="high">
         </figure>
       </section>
 
-      <section class="owner-process section-shell" id="owner-process" aria-labelledby="owner-process-title">
-        <div class="owner-process-heading">
-          <div>
-            <p class="eyebrow">A clear path for every listing</p>
-            <h2 id="owner-process-title">From your asset<br>to a good booking.</h2>
+      <section class="owner-portal section-shell" id="owner-portal" aria-labelledby="owner-portal-title">
+        <div class="owner-portal-heading">
+          <div><p class="eyebrow">Owner workspace</p><h2 id="owner-portal-title">Your listings,<br><em>in your hands.</em></h2></div>
+          <p>Use one account to save a draft, publish a complete listing, and pause or resume it later. Published listings are available in the public catalogue as soon as LOCKD confirms the save.</p>
+        </div>
+        <p class="owner-live-status" id="owner-live-status" role="status" aria-live="polite">Connecting to the secure owner service…</p>
+
+        <section class="owner-auth" id="owner-auth" aria-labelledby="owner-auth-title" hidden>
+          <div class="owner-auth-copy"><p class="eyebrow">Secure access</p><h3 id="owner-auth-title">Sign in to continue.</h3><p id="owner-auth-intro">Create an account to save and manage your own listings.</p></div>
+          <form id="owner-auth-form" class="owner-form" autocomplete="on">
+            <label class="owner-field" id="owner-name-row" hidden><span>Your name</span><input id="owner-name" name="name" type="text" maxlength="100" autocomplete="name"></label>
+            <label class="owner-field"><span>Email address</span><input id="owner-email" name="email" type="email" maxlength="254" autocomplete="email" required></label>
+            <label class="owner-field"><span>Password</span><input id="owner-password" name="password" type="password" minlength="8" maxlength="128" autocomplete="current-password" required></label>
+            <div class="owner-auth-actions"><button class="button button-dark" id="owner-auth-submit" type="submit">Sign in</button><button class="owner-text-link" id="owner-auth-switch" type="button">Create an account</button></div>
+            <p class="owner-form-status" id="owner-auth-status" role="status" aria-live="polite"></p>
+            <p class="owner-privacy-note">Use your own account. LOCKD will not ask you to email identity documents or payment details.</p>
+          </form>
+        </section>
+
+        <section class="owner-workspace" id="owner-workspace" hidden aria-label="Owner listings workspace">
+          <div class="owner-account-bar"><p id="owner-account-label"></p><button class="owner-text-link" id="owner-signout" type="button">Sign out</button></div>
+          <div class="owner-dashboard">
+            <div><p class="eyebrow">Your catalogue</p><h3>Listings</h3></div>
+            <div class="owner-listings" id="owner-listings" aria-live="polite"><p>Loading your listings…</p></div>
           </div>
-          <p>When the owner portal is ready, these steps will let owners manage the details and decisions that matter. They are not active services in this preview.</p>
-        </div>
-        <div class="owner-process-list">
-          <article class="owner-process-step">
-            <span>01</span>
-            <h3>Create an owner account</h3>
-            <p>Register securely and add the contact and identity details needed to verify your account.</p>
-            <span class="owner-step-status">Not connected</span>
-          </article>
-          <article class="owner-process-step">
-            <span>02</span>
-            <h3>Build your listing</h3>
-            <p>Add clear photos, an accurate description, location and the details renters need to choose well.</p>
-            <span class="owner-step-status">Not connected</span>
-          </article>
-          <article class="owner-process-step">
-            <span>03</span>
-            <h3>Set price and availability</h3>
-            <p>Choose your rental rates, dates, quantities and any delivery, collection or accessory options.</p>
-            <span class="owner-step-status">Not connected</span>
-          </article>
-          <article class="owner-process-step">
-            <span>04</span>
-            <h3>Complete verification</h3>
-            <p>LOCKD will review the owner and asset details before a listing is approved for renters.</p>
-            <span class="owner-step-status">Not connected</span>
-          </article>
-          <article class="owner-process-step">
-            <span>05</span>
-            <h3>Manage bookings and payouts</h3>
-            <p>Use the owner portal to track booking requests, update availability and configure payouts through a secure payment service.</p>
-            <span class="owner-step-status">Not connected</span>
-          </article>
-        </div>
+
+          <div class="owner-wizard-heading"><div><p class="eyebrow" id="wizard-eyebrow">Create a listing</p><h3 id="wizard-title">Tell renters what you offer.</h3></div><p>Required fields are checked before publication. You can save a draft at any time.</p></div>
+          <form class="owner-form owner-listing-form" id="owner-listing-form" novalidate>
+            <input id="listing-id" type="hidden">
+            <div class="owner-form-section"><h4>1. The basics</h4>
+              <div class="owner-form-grid">
+                <label class="owner-field"><span>Category</span><select id="listing-category" required><option value="">Choose a category</option><option value="stay">Rooms &amp; accommodation</option><option value="drive">Cars &amp; Mobility</option><option value="play">Gaming &amp; consoles</option><option value="technology">Technology &amp; gadgets</option><option value="phone">Phones</option><option value="laptop">Computers</option><option value="camera">Cameras &amp; creator equipment</option><option value="audio">Audio &amp; event equipment</option><option value="creative">Creative equipment</option><option value="experience">Destinations &amp; experiences</option><option value="other">Other supported rentals</option></select></label>
+                <label class="owner-field"><span>Listing title</span><input id="listing-title" type="text" maxlength="180" required placeholder="A clear name renters will recognize"></label>
+                <label class="owner-field"><span>Location</span><input id="listing-location" type="text" maxlength="160" required placeholder="Town, neighbourhood or pickup area"></label>
+                <label class="owner-field owner-field-wide"><span>Short introduction</span><input id="listing-summary" type="text" maxlength="240" placeholder="A concise summary for search results"></label>
+                <label class="owner-field owner-field-wide"><span>Description <small>At least 30 characters to publish</small></span><textarea id="listing-description" rows="4" maxlength="5000" placeholder="Describe the real item or property, its condition, what's included and any restrictions." required></textarea></label>
+              </div>
+              <div class="owner-category-fields" id="owner-category-fields"></div>
+            </div>
+
+            <div class="owner-form-section"><h4>2. Price and availability</h4>
+              <div class="owner-form-grid owner-price-grid">
+                <label class="owner-field"><span>Rate (KSh)</span><input id="listing-price" type="number" min="1" max="100000000" step="1" inputmode="decimal" placeholder="e.g. 5000"></label>
+                <label class="owner-field"><span>Rate unit</span><select id="listing-price-unit"><option value="day">Per day</option><option value="night">Per night</option><option value="hour">Per hour</option><option value="week">Per week</option><option value="month">Per month</option><option value="trip">Per trip</option></select></label>
+                <label class="owner-field"><span>Refundable deposit (KSh) <small>Optional</small></span><input id="listing-deposit" type="number" min="0" max="100000000" step="1" inputmode="decimal" placeholder="No deposit"></label>
+                <label class="owner-field"><span>Minimum rental period (days)</span><input id="listing-min-days" type="number" min="1" max="90" value="1" required></label>
+                <label class="owner-field"><span>Available from</span><input id="availability-start" type="date"></label>
+                <label class="owner-field"><span>Available until</span><input id="availability-end" type="date"></label>
+                <label class="owner-field"><span>Available units</span><input id="availability-units" type="number" min="1" max="20" value="1"></label>
+                <div class="owner-field owner-checks"><label><input id="listing-collection" type="checkbox"> Collection is available</label><label><input id="listing-delivery" type="checkbox"> Delivery is available</label></div>
+              </div>
+              <p class="owner-help">Availability is a continuous date range, with the same number of units available on each date. Dates outside this range are treated as unavailable.</p>
+            </div>
+
+            <div class="owner-form-section"><h4>3. Real photographs</h4>
+              <label class="owner-upload" for="listing-photos"><strong>Add up to 12 photos</strong><span>JPEG, PNG or WebP · up to 8 MB each · choose your cover photo first</span><input id="listing-photos" type="file" accept="image/jpeg,image/png,image/webp" multiple></label>
+              <div class="owner-photo-list" id="owner-photo-list" aria-live="polite"></div>
+              <progress id="owner-upload-progress" max="100" value="0" hidden></progress>
+              <p class="owner-help">Use photos of the actual item or property you are listing. Editorial images elsewhere on LOCKD are not submitted as inventory.</p>
+            </div>
+
+            <div class="owner-form-footer"><p class="owner-form-status" id="owner-listing-status" role="status" aria-live="polite"></p><div><button class="owner-text-link" id="owner-preview-open" type="button">Preview listing</button><button class="owner-text-link" id="owner-reset-form" type="button">Start a new listing</button><button class="button button-light" type="submit" name="intent" value="draft">Save draft</button><button class="button button-dark" type="submit" name="intent" value="publish">Publish listing</button></div></div>
+          </form>
+          <dialog class="owner-preview-dialog" id="owner-preview-dialog" aria-labelledby="owner-preview-heading">
+            <div class="owner-preview-top"><div><p class="eyebrow">Customer view</p><h3 id="owner-preview-heading">Listing preview</h3></div><button class="owner-text-link" id="owner-preview-close" type="button">Close</button></div>
+            <div class="owner-preview-content"><img id="owner-preview-image" alt="" hidden><div><p id="owner-preview-meta" class="eyebrow"></p><h4 id="owner-preview-title"></h4><p id="owner-preview-price"></p><p id="owner-preview-summary"></p><p id="owner-preview-description"></p><p class="owner-help">Preview only. This does not publish, reserve or confirm the listing.</p></div></div>
+          </dialog>
+        </section>
       </section>
 
-      <section class="owner-contact section-shell" id="owner-contact" aria-labelledby="owner-contact-title">
-        <div>
-          <p class="eyebrow">Until the portal opens</p>
-          <h2 id="owner-contact-title">Start with a conversation.</h2>
-          <p>For owner onboarding updates, contact the LOCKD team. Please don’t email identity documents, bank details or other sensitive information.</p>
+      <section class="owner-process section-shell" id="owner-process" aria-labelledby="owner-process-title">
+        <div class="owner-process-heading"><div><p class="eyebrow">A clear path for every listing</p><h2 id="owner-process-title">From your asset<br>to a good booking.</h2></div><p>Owners remain in control of their listing details and availability. Reservations and payments are not confirmed merely because an item appears in the catalogue.</p></div>
+        <div class="owner-process-list">
+          <article class="owner-process-step"><span>01</span><h3>Create an account</h3><p>Sign in securely and keep your listing drafts and published assets in your account.</p><span class="owner-step-status">Available</span></article>
+          <article class="owner-process-step"><span>02</span><h3>Add the real details</h3><p>Describe the actual asset, location, rate, terms, availability and photographs.</p><span class="owner-step-status">Available</span></article>
+          <article class="owner-process-step"><span>03</span><h3>Publish or save a draft</h3><p>Complete listings appear in their matching public category after the database confirms publication.</p><span class="owner-step-status">Available</span></article>
+          <article class="owner-process-step"><span>04</span><h3>Manage visibility</h3><p>Pause or resume a listing from your workspace. A paused item is removed from public search.</p><span class="owner-step-status">Available</span></article>
+          <article class="owner-process-step"><span>05</span><h3>Bookings and payouts</h3><p>LOCKD checkout, booking acceptance, refunds and payouts are not connected yet. No payment will be reported as successful until a verified payment service is configured.</p><span class="owner-step-status">Not connected</span></article>
         </div>
-        <a class="button button-dark" href="mailto:elorengo26@gmail.com?subject=LOCKD%20owner%20onboarding">Contact owner support</a>
       </section>
     </main>
 
-    <footer class="site-footer">
-      <a class="brand brand-footer" href="index.html#top" aria-label="LOCKD home">
-        <svg class="brand-mark" viewBox="0 0 34 34" aria-hidden="true"><path d="M7 5.5h15.5L28 11v17.5H7z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M22.5 5.5V11H28M12 16.5v7h10v-7z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
-        <span class="brand-word">lockd<span class="brand-period">.</span></span>
-      </a>
-      <p class="footer-line">Your next move, locked in.</p>
-      <div class="footer-bottom">
-        <span>© <span id="year">2026</span> LOCKD</span>
-        <span>Stay. Drive. Play. Explore.</span>
-        <a href="#top">Back to top</a>
-      </div>
-    </footer>
+    <footer class="site-footer"><a class="brand brand-footer" href="index.html#top" aria-label="LOCKD home"><svg class="brand-mark" viewBox="0 0 34 34" aria-hidden="true"><path d="M7 5.5h15.5L28 11v17.5H7z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M22.5 5.5V11H28M12 16.5v7h10v-7z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span class="brand-word">lockd<span class="brand-period">.</span></span></a><p class="footer-line">Your next move, locked in.</p><div class="footer-bottom"><span>© <span id="year">2026</span> LOCKD</span><span>Stay. Drive. Play. Explore.</span><a href="#top">Back to top</a></div></footer>
   </body>
 </html>

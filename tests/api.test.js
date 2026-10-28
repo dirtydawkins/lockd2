@@ -5,6 +5,7 @@ const listings = require("../api/listings.js");
 const availability = require("../api/availability.js");
 const config = require("../api/config.js");
 const sitemap = require("../api/sitemap.js");
+const listingImages = require("../api/listing-images.js");
 
 function mockResponse() {
   return {
@@ -123,11 +124,18 @@ test("catalogue rejects unsupported methods and categories", async (t) => {
 test("catalogue query returns only explicitly selected public listing fields", async (t) => {
   configure(t);
   let requestedUrl;
+  let searchRequest;
+  const id = "b97f0876-a29a-4b6a-b8ca-a11111111111";
   mockFetch(t, async (url, options) => {
-    requestedUrl = new URL(url);
+    const parsed = new URL(url);
+    if (parsed.pathname.endsWith("/rpc/search_lockd_listings")) {
+      searchRequest = { parsed, options };
+      return httpResponse(200, [{ listing_id: id, search_rank: 100, total_count: 1 }]);
+    }
+    requestedUrl = parsed;
     assert.equal(options.headers.apikey, "public-test-key");
     return httpResponse(200, [{
-      id: "listing-1", slug: "camera-one", title: "Camera", category: "camera",
+      id, slug: "camera-one", title: "Camera", category: "camera",
       price_amount: 100, currency: "KES", price_unit: "day", images: [],
       listing_status: "published", approval_status: "approved", owner_id: "must-not-leak",
     }]);
@@ -140,19 +148,56 @@ test("catalogue query returns only explicitly selected public listing fields", a
   assert.equal(requestedUrl.searchParams.get("listing_status"), "eq.published");
   assert.equal(requestedUrl.searchParams.get("approval_status"), "eq.approved");
   assert.equal(requestedUrl.searchParams.get("category"), "eq.camera");
+  assert.equal(requestedUrl.searchParams.get("id"), `in.(${id})`);
   assert.equal(requestedUrl.searchParams.get("order"), "price_amount.asc.nullslast");
-  assert.equal(requestedUrl.searchParams.get("or").includes("select"), true);
-  assert.equal(requestedUrl.searchParams.get("or").includes(";"), false);
-  assert.equal(requestedUrl.searchParams.get("or").includes("select="), false);
+  assert.equal(requestedUrl.searchParams.get("currency"), "eq.KES");
+  assert.equal(requestedUrl.searchParams.get("or"), null);
+  assert.equal(JSON.parse(searchRequest.options.body).p_query, "camera select");
+  assert.equal(JSON.parse(searchRequest.options.body).p_filters.category, "camera");
+  assert.equal(JSON.stringify(searchRequest).includes("select=*"), false);
+});
+
+test("private listing images are signed only for trusted same-project storage paths", async (t) => {
+  configure(t);
+  const id = "b97f0876-a29a-4b6a-b8ca-a11111111111";
+  const path = `b97f0876-a29a-4b6a-b8ca-a11111111112/${id}/b97f0876-a29a-4b6a-b8ca-a11111111113.jpg`;
+  const calls = [];
+  mockFetch(t, async (url, options) => {
+    const parsed = new URL(url);
+    calls.push({ parsed, options });
+    if (parsed.pathname.includes("/storage/v1/object/sign/")) {
+      return httpResponse(200, { signedURL: `/object/sign/lockd-listings/${path}?token=signed` });
+    }
+    return httpResponse(200, [{ id, slug: "published-camera", title: "Published camera", category: "camera", images: [path], listing_status: "published", approval_status: "approved" }]);
+  });
+  const result = await invoke(listings, { query: { slug: "published-camera" } });
+  assert.equal(result.statusCode, 200);
+  assert.equal(result.body.item.images[0], `https://example-project.supabase.co/storage/v1/object/sign/lockd-listings/${path}?token=signed`);
+  assert.equal(calls.length, 2);
+  assert.match(calls[1].parsed.pathname, /\/storage\/v1\/object\/sign\/lockd-listings\//);
+  assert.equal(JSON.parse(calls[1].options.body).expiresIn, 3600);
+
+  const config = { url: "https://example-project.supabase.co", key: "sb_publishable_test", headers: { apikey: "sb_publishable_test" } };
+  await listingImages.signOne(config, path);
+  assert.equal(calls[2].options.headers.Authorization, undefined);
+  assert.equal(listingImages.storagePath(`https://attacker.example/image.jpg`, config), null);
+  assert.equal(listingImages.storagePath("https://example-project.supabase.co/storage/v1/object/public/lockd-listings/unscoped/image.jpg", config), null);
 });
 
 test("technology catalogue filters use published records and validated listing fields", async (t) => {
   configure(t);
   let requestedUrl;
-  mockFetch(t, async (url) => {
-    requestedUrl = new URL(url);
+  const id = "b97f0876-a29a-4b6a-b8ca-a11111111112";
+  let searchRequest;
+  mockFetch(t, async (url, options) => {
+    const parsed = new URL(url);
+    if (parsed.pathname.endsWith("/rpc/search_lockd_listings")) {
+      searchRequest = JSON.parse(options.body);
+      return httpResponse(200, [{ listing_id: id, search_rank: 90, total_count: 1 }]);
+    }
+    requestedUrl = parsed;
     return httpResponse(200, [{
-      id: "listing-2", slug: "camera-two", title: "Camera two", category: "camera", market_category: "creator",
+      id, slug: "camera-two", title: "Camera two", category: "camera", market_category: "creator",
       price_amount: 5000, currency: "KES", price_unit: "day", attributes: { brand: "Sony", model: "A7" },
       listing_status: "published", approval_status: "approved", owner_id: "must-not-leak",
     }]);
@@ -168,6 +213,7 @@ test("technology catalogue filters use published records and validated listing f
   assert.equal(requestedUrl.searchParams.get("listing_status"), "eq.published");
   assert.equal(requestedUrl.searchParams.get("approval_status"), "eq.approved");
   assert.equal(requestedUrl.searchParams.get("market_category"), null);
+  assert.equal(requestedUrl.searchParams.get("id"), `in.(${id})`);
   assert.equal(requestedUrl.searchParams.get("and"), "(or(market_category.eq.creator,category.in.(camera,creative)),price_amount.gte.500,price_amount.lte.5000)");
   assert.equal(requestedUrl.searchParams.get("attributes->>brand"), "ilike.*Sony*");
   assert.equal(requestedUrl.searchParams.get("attributes->>product_type"), "eq.camera");
@@ -179,7 +225,11 @@ test("technology catalogue filters use published records and validated listing f
   assert.equal(requestedUrl.searchParams.get("delivery_available"), "eq.true");
   assert.equal(requestedUrl.searchParams.get("collection_available"), "eq.true");
   assert.equal(requestedUrl.searchParams.get("attributes->use_cases"), 'cs.["content_creation"]');
-  assert.match(requestedUrl.searchParams.get("or"), /title\.ilike/);
+  assert.equal(searchRequest.p_filters.market, "tech");
+  assert.equal(searchRequest.p_filters.group, "creator");
+  assert.equal(searchRequest.p_filters.location, "Nairobi");
+  assert.equal(searchRequest.p_filters.minPrice, "500");
+  assert.equal(searchRequest.p_query, "camera");
 });
 
 test("technology filters reject unsafe values and invalid price ranges before database access", async (t) => {
@@ -214,6 +264,101 @@ test("room catalogue accepts the supported accommodation filters", async (t) => 
   assert.equal(requestedUrl.searchParams.get("currency"), "eq.KES");
   assert.equal(requestedUrl.searchParams.get("and"), "(price_amount.gte.1000,price_amount.lte.8000)");
   assert.equal(requestedUrl.searchParams.get("attributes->>room_count"), null);
+});
+
+test("Cars & Mobility search filters only real published drive listings and checks date capacity", async (t) => {
+  configure(t);
+  const id = "b97f0876-a29a-4b6a-b8ca-a11111111111";
+  const start = new Date();
+  start.setUTCDate(start.getUTCDate() + 3);
+  const end = new Date(start);
+  end.setUTCDate(end.getUTCDate() + 2);
+  const fmt = (date) => date.toISOString().slice(0, 10);
+  const seen = [];
+  mockFetch(t, async (url, options) => {
+    const parsed = new URL(url);
+    seen.push({ parsed, options });
+    if (parsed.pathname.endsWith("/rpc/search_lockd_available_listings")) return httpResponse(200, [{ listing_id: id }]);
+    if (parsed.pathname.endsWith("/rpc/search_lockd_listings")) return httpResponse(200, [{ listing_id: id, search_rank: 100, total_count: 1 }]);
+    return httpResponse(200, [{
+      id, slug: "bmw-x3", title: "BMW X3", category: "drive", location_label: "Nairobi",
+      price_amount: 8000, currency: "KES", price_unit: "day",
+      attributes: { brand: "BMW", model: "X3", vehicle_type: "suv", transmission: "automatic", fuel_type: "petrol", seating_capacity: 5, minimum_driver_age: 23, service_mode: "both" },
+    }]);
+  });
+  const res = await invoke(listings, { query: {
+    category: "drive", q: "BMW X3", location: "Nairobi", vehicleType: "suv", transmission: "automatic",
+    fuelType: "petrol", seats: "5", driverAge: "25", serviceMode: "self_drive",
+    minPrice: "5000", maxPrice: "10000", startDate: fmt(start), endDate: fmt(end), sort: "price-low",
+  } });
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.items[0].title, "BMW X3");
+  assert.match(seen[0].parsed.pathname, /rpc\/search_lockd_available_listings$/);
+  const query = seen[2].parsed.searchParams;
+  assert.equal(query.get("category"), "eq.drive");
+  assert.equal(query.get("location_label"), "ilike.*Nairobi*");
+  assert.equal(query.get("attributes->>vehicle_type"), "eq.suv");
+  assert.equal(query.get("attributes->>transmission"), "eq.automatic");
+  assert.equal(query.get("attributes->>fuel_type"), "eq.petrol");
+  assert.equal(query.get("attributes->seating_capacity"), "gte.5");
+  assert.equal(query.get("attributes->minimum_driver_age"), "lte.25");
+  const search = JSON.parse(seen[1].options.body);
+  assert.equal(search.p_filters.serviceMode, "self_drive");
+  assert.equal(search.p_filters.minPrice, "5000");
+  assert.deepEqual(search.p_available_ids, [id]);
+  assert.equal(search.p_query, "BMW X3");
+  assert.match(query.get("and"), /attributes->>service_mode\.eq\.self_drive/);
+  assert.match(query.get("and"), /price_amount\.gte\.5000/);
+  assert.equal(query.get("currency"), "eq.KES");
+  assert.equal(query.get("or"), null);
+});
+
+test("unified text search uses all meaningful words across listing fields and category words", async (t) => {
+  configure(t);
+  let searchRequest;
+  mockFetch(t, async (url, options) => {
+    const parsed = new URL(url);
+    if (parsed.pathname.endsWith("/rpc/search_lockd_listings")) searchRequest = JSON.parse(options.body);
+    return httpResponse(200, []);
+  });
+  const res = await invoke(listings, { query: { q: "gaming PC in Nairobi" } });
+  assert.equal(res.statusCode, 200);
+  assert.equal(searchRequest.p_query, "gaming PC in Nairobi");
+  assert.equal(searchRequest.p_filters.market, "");
+  assert.equal(searchRequest.p_filters.location, "");
+  assert.equal(searchRequest.p_sort, "relevance");
+});
+
+test("catalogue keeps substring search available while the ranked-search migration is pending", async (t) => {
+  configure(t);
+  const requests = [];
+  mockFetch(t, async (url) => {
+    const parsed = new URL(url);
+    requests.push(parsed);
+    if (parsed.pathname.endsWith("/rpc/search_lockd_listings")) {
+      return { ...httpResponse(404, { code: "PGRST202", message: "function not found" }), status: 404 };
+    }
+    return httpResponse(200, []);
+  });
+  const res = await invoke(listings, { query: { q: "gaming PC in Nairobi" } });
+  assert.equal(res.statusCode, 200);
+  assert.equal(requests.length, 2);
+  assert.equal(requests[1].searchParams.get("listing_status"), "eq.published");
+  assert.match(requests[1].searchParams.get("and"), /title\.ilike\.\*gaming\*/);
+  assert.match(requests[1].searchParams.get("and"), /location_label\.ilike\.\*Nairobi\*/);
+});
+
+test("catalogue rejects invalid paging, sorting and vehicle filters before database access", async (t) => {
+  configure(t);
+  mockFetch(t, async () => { throw new Error("fetch should not run for invalid requests"); });
+  const page = await invoke(listings, { query: { page: "-1" } });
+  const sort = await invoke(listings, { query: { sort: "popularity" } });
+  const vehicle = await invoke(listings, { query: { category: "drive", vehicleType: "spaceship" } });
+  const conflict = await invoke(listings, { query: { category: "stay", seats: "4" } });
+  assert.equal(page.body.error, "invalid_page");
+  assert.equal(sort.body.error, "invalid_sort");
+  assert.equal(vehicle.body.error, "invalid_vehicle_type");
+  assert.equal(conflict.body.error, "conflicting_category");
 });
 
 test("date-filtered technology catalogue calls the approved-listing availability search", async (t) => {
@@ -276,16 +421,27 @@ test("availability calls the server-side calendar RPC and returns its result", a
   assert.equal(JSON.parse(request.options.body).p_quantity, 2);
 });
 
-test("public config exposes only a valid support email, never other environment values", async (t) => {
+test("public config exposes the public Supabase client config but never other environment values", async (t) => {
   const oldEmail = process.env.LOCKD_SUPPORT_EMAIL;
+  const oldUrl = process.env.SUPABASE_URL;
+  const oldKey = process.env.SUPABASE_PUBLISHABLE_KEY;
   process.env.LOCKD_SUPPORT_EMAIL = "support@example.com";
+  process.env.SUPABASE_URL = "https://example-project.supabase.co";
+  process.env.SUPABASE_PUBLISHABLE_KEY = "public-test-key";
   t.after(() => {
     if (oldEmail === undefined) delete process.env.LOCKD_SUPPORT_EMAIL;
     else process.env.LOCKD_SUPPORT_EMAIL = oldEmail;
+    if (oldUrl === undefined) delete process.env.SUPABASE_URL;
+    else process.env.SUPABASE_URL = oldUrl;
+    if (oldKey === undefined) delete process.env.SUPABASE_PUBLISHABLE_KEY;
+    else process.env.SUPABASE_PUBLISHABLE_KEY = oldKey;
   });
   const res = await invoke(config);
-  assert.deepEqual(res.body, { supportEmail: "support@example.com" });
-  assert.equal(JSON.stringify(res.body).includes("public-test-key"), false);
+  assert.deepEqual(res.body, {
+    supportEmail: "support@example.com",
+    supabase: { url: "https://example-project.supabase.co", publishableKey: "public-test-key" },
+  });
+  assert.equal(JSON.stringify(res.body).includes("service_role"), false);
 });
 
 test("sitemap emits only public shell pages when Supabase is unavailable", async (t) => {

@@ -1,3 +1,5 @@
+const supabaseConfig = require("./supabase-config.js");
+
 module.exports = function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
   if (req.method !== "GET") {
@@ -5,5 +7,9 @@ module.exports = function handler(req, res) {
     return res.status(405).json({ error: "method_not_allowed" });
   }
   const supportEmail = process.env.LOCKD_SUPPORT_EMAIL || "";
-  return res.status(200).json({ supportEmail: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail) ? supportEmail : null });
+  const config = supabaseConfig();
+  return res.status(200).json({
+    supportEmail: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail) ? supportEmail : null,
+    supabase: config ? { url: config.url, publishableKey: config.key } : null,
+  });
 };

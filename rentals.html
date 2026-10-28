@@ -33,6 +33,7 @@
       <nav class="primary-nav" id="primary-nav" aria-label="Main navigation">
         <a href="rentals.html">Explore Rentals</a>
         <a href="rooms.html">Book a Room</a>
+        <a href="rentals.html?category=drive">Cars &amp; Mobility</a>
         <a href="tech.html">Tech &amp; Gadgets</a>
         <a href="index.html#how-it-works">How it works</a>
         <a href="index.html#about">About LOCKD</a>
@@ -43,10 +44,23 @@
 
     <main id="main" class="catalogue-shell">
       <nav class="breadcrumbs" aria-label="Breadcrumb">
-        <a href="index.html">Home</a><span aria-hidden="true">/</span><span>Rentals</span>
+        <a href="index.html">Home</a><span aria-hidden="true">/</span><span id="catalogue-breadcrumb">Rentals</span>
       </nav>
 
-      <section class="catalogue-intro" aria-labelledby="catalogue-title">
+      <section class="vehicle-hero" id="vehicle-hero" aria-labelledby="vehicle-hero-title" hidden>
+        <div class="vehicle-hero-copy">
+          <p class="eyebrow"><span class="eyebrow-rule"></span> Cars &amp; Mobility</p>
+          <h1 id="vehicle-hero-title">Find your<br><em>next drive.</em></h1>
+          <p>From everyday escapes to extraordinary drives.</p>
+          <p class="catalogue-count" id="vehicle-result-count" aria-live="polite"></p>
+        </div>
+        <figure class="vehicle-hero-image">
+          <img src="./assets/photos/bmw-performance-coupe-red-front.jpeg" alt="Red BMW M4 coupe among trees" width="736" height="1104" fetchpriority="high">
+          <figcaption>BMW M4 · a LOCKD drive edit</figcaption>
+        </figure>
+      </section>
+
+      <section class="catalogue-intro" id="catalogue-intro" aria-labelledby="catalogue-title">
         <p class="eyebrow"><span class="eyebrow-rule"></span> Stay. Drive. Play. Explore.</p>
         <div class="catalogue-heading-row">
           <div>
@@ -60,14 +74,31 @@
 
       <section class="catalogue-controls" aria-label="Search and filter rentals">
         <form class="catalogue-search" id="catalogue-search-form" role="search">
-          <label class="visually-hidden" for="catalogue-search">Search listings</label>
-          <input id="catalogue-search" type="search" name="q" placeholder="Search listings" autocomplete="off">
-          <label class="visually-hidden" for="catalogue-location">Destination or location</label>
-          <input id="catalogue-location" type="search" name="location" placeholder="Destination or location" autocomplete="off">
-          <button type="submit" class="button button-dark">Search</button>
+          <div class="catalogue-search-main">
+            <label class="visually-hidden" for="catalogue-category">Search category</label>
+            <select id="catalogue-category" name="category" aria-label="All categories">
+              <option value="">All categories</option><option value="stay">Accommodation</option><option value="drive">Cars &amp; Mobility</option><option value="experience">Experiences</option><option value="technology">Technology</option><option value="play">Gaming</option><option value="camera">Cameras</option><option value="phone">Phones</option><option value="laptop">Computers</option><option value="audio">Audio</option><option value="creative">Creative equipment</option><option value="other">Other rentals</option>
+            </select>
+            <label class="visually-hidden" for="catalogue-search">Search listings</label>
+            <input id="catalogue-search" type="search" name="q" list="catalogue-suggestions" placeholder="Search by name, model or type" autocomplete="off">
+            <datalist id="catalogue-suggestions"></datalist>
+            <label class="visually-hidden" for="catalogue-location">Destination or location</label>
+            <input id="catalogue-location" type="search" name="location" placeholder="City or area" autocomplete="off">
+            <button type="submit" class="button button-dark">Search</button>
+          </div>
+          <div class="catalogue-search-optional">
+            <label>Min price<input id="catalogue-min-price" name="minPrice" type="number" min="0" step="100" inputmode="numeric" placeholder="Any"></label>
+            <label>Max price<input id="catalogue-max-price" name="maxPrice" type="number" min="0" step="100" inputmode="numeric" placeholder="Any"></label>
+            <label>Currency<select id="catalogue-currency" name="currency"><option value="">Any</option><option value="KES">KES</option><option value="USD">USD</option><option value="EUR">EUR</option></select></label>
+            <label>From<input id="catalogue-start-date" name="startDate" type="date"></label>
+            <label>To<input id="catalogue-end-date" name="endDate" type="date"></label>
+            <label>Quantity<input id="catalogue-quantity" name="quantity" type="number" min="1" max="20" value="1" inputmode="numeric"></label>
+            <button type="button" class="catalogue-clear" id="catalogue-clear">Clear filters</button>
+          </div>
         </form>
         <label class="sort-control" for="catalogue-sort">Sort
           <select id="catalogue-sort" name="sort">
+            <option value="relevance">Most relevant</option>
             <option value="newest">Recently added</option>
             <option value="price-low">Price: low to high</option>
             <option value="price-high">Price: high to low</option>
@@ -75,10 +106,19 @@
         </label>
       </section>
 
+      <section class="vehicle-filter-panel" id="vehicle-filters" aria-label="Cars & Mobility filters" hidden>
+        <label>Vehicle type<select id="vehicle-type" name="vehicleType"><option value="">Any type</option><option value="car">Car</option><option value="suv">SUV</option><option value="sedan">Sedan</option><option value="coupe">Coupe</option><option value="hatchback">Hatchback</option><option value="van">Van</option><option value="pickup">Pickup</option><option value="motorcycle">Motorcycle</option><option value="4x4">4×4</option><option value="other">Other</option></select></label>
+        <label>Transmission<select id="vehicle-transmission" name="transmission"><option value="">Any</option><option value="automatic">Automatic</option><option value="manual">Manual</option></select></label>
+        <label>Powertrain<select id="vehicle-fuel" name="fuelType"><option value="">Any</option><option value="petrol">Petrol</option><option value="diesel">Diesel</option><option value="hybrid">Hybrid</option><option value="plug_in_hybrid">Plug-in hybrid</option><option value="electric">Electric</option><option value="other">Other</option></select></label>
+        <label>Minimum seats<input id="vehicle-seats" name="seats" type="number" min="1" max="40" inputmode="numeric" placeholder="Any"></label>
+        <label>Your age<input id="vehicle-driver-age" name="driverAge" type="number" min="18" max="100" inputmode="numeric" placeholder="Optional"></label>
+        <label>Service<select id="vehicle-service-mode" name="serviceMode"><option value="">Any service</option><option value="self_drive">Self-drive</option><option value="chauffeur">Chauffeur-driven</option></select></label>
+      </section>
+
       <nav class="catalogue-categories" aria-label="Rental categories" id="catalogue-categories">
         <a href="rentals.html" data-filter="all">All rentals</a>
         <a href="rooms.html" data-filter="stay">Book a Room</a>
-        <a href="rentals.html?category=drive" data-filter="drive">Drive</a>
+        <a href="rentals.html?category=drive" data-filter="drive">Cars &amp; Mobility</a>
         <a href="rentals.html?category=play" data-filter="play">Play</a>
         <a href="rentals.html?category=technology" data-filter="technology">Technology</a>
         <a href="tech.html">Tech &amp; Gadgets</a>
@@ -90,6 +130,7 @@
       <div class="catalogue-layout">
         <section class="catalogue-results" aria-label="Rental listings">
           <div class="catalogue-status" id="catalogue-status" role="status" aria-live="polite">Loading published rentals…</div>
+          <button class="catalogue-retry" id="catalogue-retry" type="button" hidden>Try again</button>
           <div class="listing-grid" id="listing-grid"></div>
           <button class="load-more button button-paper" type="button" id="load-more" hidden>Load more</button>
         </section>
@@ -122,22 +163,17 @@
 
       <section class="vehicle-photo-guide" id="vehicle-photo-guide" aria-labelledby="vehicle-guide-title" hidden>
         <div class="vehicle-guide-heading">
-          <div><p class="eyebrow">Choose your drive</p><h2 id="vehicle-guide-title">Cars with<br><em>presence.</em></h2></div>
-          <p>Browse vehicle types for inspiration. Published LOCKD listings carry the confirmed model, specifications, location, rate and rental terms.</p>
+          <div><p class="eyebrow">The LOCKD drive edit</p><h2 id="vehicle-guide-title">A few good<br><em>ways to go.</em></h2></div>
+          <p>These photographs set the mood. Current rates and date availability appear only on genuine owner-published listings above.</p>
         </div>
         <div class="vehicle-guide-grid">
-          <a class="vehicle-reference-card" href="rentals.html?category=drive">
-            <img src="./assets/photos/mercedes-g-class-sand.jpeg" alt="Light-coloured four-wheel-drive vehicle on a sunny street" width="736" height="1104" loading="lazy">
-            <div><p class="eyebrow">FOUR-WHEEL DRIVE</p><h3>Built to explore</h3><p>Find a vehicle with the right space and capability for your route.</p><span class="text-button">Browse vehicles</span></div>
-          </a>
-          <a class="vehicle-reference-card" href="rentals.html?category=drive">
-            <img src="./assets/photos/mercedes-maybach-sedan.jpeg" alt="Silver premium sedan in a studio" width="736" height="1104" loading="lazy">
-            <div><p class="eyebrow">PREMIUM SEDANS</p><h3>Arrive in style</h3><p>Review each owner’s exact vehicle details, inclusions and collection options.</p><span class="text-button">Browse vehicles</span></div>
-          </a>
-          <a class="vehicle-reference-card" href="rentals.html?category=drive">
-            <img src="./assets/photos/bmw-xm-black.jpeg" alt="Dark performance vehicle in a studio" width="736" height="1104" loading="lazy">
-            <div><p class="eyebrow">PERFORMANCE</p><h3>Make the drive count</h3><p>Actual vehicle specifications and booking requirements appear on approved listings.</p><span class="text-button">Browse vehicles</span></div>
-          </a>
+          <article class="vehicle-reference-card"><img src="./assets/photos/mercedes-g-class-sand.jpeg" alt="Light sand-coloured Mercedes-Benz G-Class SUV" width="736" height="1104" loading="lazy"><div><p class="eyebrow">SUV · FOUR-WHEEL DRIVE</p><h3>Mercedes-Benz G-Class</h3></div></article>
+          <article class="vehicle-reference-card"><img src="./assets/photos/mercedes-maybach-sedan.jpeg" alt="Silver Mercedes-Maybach S-Class sedan" width="736" height="1104" loading="lazy"><div><p class="eyebrow">LUXURY SEDAN</p><h3>Mercedes-Maybach S-Class</h3></div></article>
+          <article class="vehicle-reference-card"><img src="./assets/photos/mercedes-amg-gle.jpeg" alt="Burgundy Mercedes-AMG GLE SUV coupe" width="736" height="1104" loading="lazy"><div><p class="eyebrow">PERFORMANCE SUV</p><h3>Mercedes-AMG GLE</h3></div></article>
+          <article class="vehicle-reference-card"><img src="./assets/photos/bmw-xm-black.jpeg" alt="Black BMW XM performance SUV" width="736" height="1104" loading="lazy"><div><p class="eyebrow">PERFORMANCE SUV</p><h3>BMW XM</h3></div></article>
+          <article class="vehicle-reference-card"><img src="./assets/photos/bmw-x7-black.jpeg" alt="Black BMW X7 SUV shown from front and rear" width="736" height="1104" loading="lazy"><div><p class="eyebrow">LARGE SUV</p><h3>BMW X7</h3></div></article>
+          <article class="vehicle-reference-card"><div class="vehicle-reference-gallery"><img src="./assets/photos/bmw-performance-coupe-red-front.jpeg" alt="Red BMW M4 coupe from the front in a wooded setting" width="736" height="1104" loading="lazy"><img src="./assets/photos/bmw-performance-coupe-red-rear.jpeg" alt="The same red BMW M4 coupe from the rear" width="736" height="1104" loading="lazy"></div><div><p class="eyebrow">PERFORMANCE COUPE</p><h3>BMW M4</h3></div></article>
+          <article class="vehicle-reference-card"><img src="./assets/photos/tesla-electric-sedan.jpeg" alt="Dark Tesla Model S electric sedan at a show" width="736" height="1104" loading="lazy"><div><p class="eyebrow">ELECTRIC SEDAN</p><h3>Tesla Model S</h3></div></article>
         </div>
       </section>
     </main>

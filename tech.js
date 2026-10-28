@@ -349,7 +349,9 @@
       rows.forEach((listing, index) => grid.append(makeCard(listing, index)));
       page = nextPage;
       hasMore = data.hasMore === true;
-      count.textContent = `${loadedListings.length}${hasMore ? "+" : ""} published LOCKD ${loadedListings.length === 1 ? "rental" : "rentals"}`;
+      const totalLabel = Number.isInteger(data.total) ? data.total : loadedListings.length;
+      const countSuffix = Number.isInteger(data.total) ? "" : hasMore ? "+" : "";
+      count.textContent = `${totalLabel}${countSuffix} published LOCKD ${totalLabel === 1 ? "rental" : "rentals"}`;
       if (!loadedListings.length) {
         status.dataset.kind = "empty";
         status.textContent = Object.keys(filters).some((key) => !["sort", "quantity"].includes(key))
@@ -520,7 +522,7 @@
     for (const [key, value] of Object.entries(filters)) {
       if (key !== "group" && key !== "sort" && !(key === "quantity" && value === "1")) url.searchParams.set(key, value);
     }
-    if (filters.sort && filters.sort !== "newest") url.searchParams.set("sort", filters.sort);
+    if (filters.sort && filters.sort !== (filters.q ? "relevance" : "newest")) url.searchParams.set("sort", filters.sort);
     window.history.replaceState({}, "", url);
     updateFilterToggle();
   }
@@ -570,7 +572,7 @@
   if (params.has("quantity")) filterFields.quantity.value = params.get("quantity");
   if (params.has("collection")) filterFields.collection.value = params.get("collection");
   if (params.has("delivery")) filterFields.delivery.value = params.get("delivery");
-  if (params.has("sort")) filterFields.sort.value = params.get("sort");
+  filterFields.sort.value = params.get("sort") || (params.has("q") ? "relevance" : "newest");
   const today = new Date();
   const localDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
   filterFields.startDate.min = localDate;
@@ -594,6 +596,9 @@
   });
   [filterFields.q, filterFields.brand, filterFields.accessory, filterFields.location, filterFields.minPrice, filterFields.maxPrice].forEach((field) => {
     field.addEventListener("input", () => {
+      if (field === filterFields.q && field.value.trim() && !new URLSearchParams(window.location.search).has("sort") && filterFields.sort.value === "newest") {
+        filterFields.sort.value = "relevance";
+      }
       window.clearTimeout(searchTimer);
       searchTimer = window.setTimeout(() => { setUrlFromFilters(); loadListings(); }, 350);
     });

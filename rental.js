@@ -10,7 +10,7 @@
   let galleryRequest = 0;
 
   const categoryLabels = {
-    stay: "Stay", drive: "Drive", play: "Play", technology: "Technology", experience: "Experiences",
+    stay: "Stay", drive: "Cars & Mobility", play: "Play", technology: "Technology", experience: "Experiences",
     camera: "Cameras", phone: "Phones", laptop: "Laptops", audio: "Audio", creative: "Creative equipment",
   };
 
@@ -304,7 +304,7 @@
     const facts = document.querySelector("#rental-facts");
     facts.replaceChildren();
     const attributes = record.attributes && typeof record.attributes === "object" ? record.attributes : {};
-    ["brand", "model", "configuration", "generation", "storage", "memory", "condition", "included_accessories", "specifications", "mandatory_fees", "property_type", "room_type", "max_guests", "bedrooms", "beds", "bed_configuration", "bathrooms", "amenities", "check_in_time", "check_out_time", "cancellation_policy", "house_rules", "minimum_stay_nights", "price_basis", "pricing_basis"].forEach((key) => {
+    ["brand", "model", "configuration", "generation", "storage", "memory", "condition", "product_type", "included_accessories", "specifications", "mandatory_fees", "rental_restrictions", "property_type", "room_type", "max_guests", "bedrooms", "beds", "bed_configuration", "bathrooms", "amenities", "check_in_time", "check_out_time", "cancellation_policy", "house_rules", "minimum_stay_nights", "price_basis", "pricing_basis", "year", "vehicle_type", "seating_capacity", "transmission", "fuel_type", "service_mode", "minimum_driver_age", "luggage_capacity", "mileage_restriction", "mileage_limit_km", "excess_mileage_fee", "insurance_requirements", "pickup_instructions", "rental_terms", "duration", "capacity", "included_services", "excluded_services", "booking_rules"].forEach((key) => {
       addFact(facts, factLabel(key), attributes[key]);
     });
     if (record.rental_durations?.length) addFact(facts, "Available durations", record.rental_durations);

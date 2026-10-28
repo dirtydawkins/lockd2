@@ -40,6 +40,7 @@
       <nav class="primary-nav" id="primary-nav" aria-label="Main navigation">
         <a href="#categories">Explore</a>
         <a href="rooms.html">Book a Room</a>
+        <a href="rentals.html?category=drive">Cars &amp; Mobility</a>
         <a href="destinations.html">Destinations</a>
         <a href="tech.html">Tech &amp; Gadgets</a>
         <a href="#how-it-works">How it works</a>
@@ -85,7 +86,14 @@
         <form class="idea-search" id="idea-search-form" role="search">
           <label class="visually-hidden" for="idea-search">Describe what you are looking for</label>
           <span class="search-mark" aria-hidden="true">⌕</span>
-          <input id="idea-search" name="idea" type="search" placeholder="Try “a place to stay by the coast”" autocomplete="off">
+          <input id="idea-search" name="idea" type="search" list="idea-suggestions" placeholder="Try “PS5 Pro”, “room in Nairobi”…”" autocomplete="off">
+          <datalist id="idea-suggestions"></datalist>
+          <label class="visually-hidden" for="idea-category">Category</label>
+          <select id="idea-category" name="category" aria-label="All categories">
+            <option value="">All categories</option><option value="stay">Accommodation</option><option value="drive">Cars &amp; Mobility</option><option value="experience">Experiences</option><option value="technology">Technology</option><option value="play">Gaming</option><option value="camera">Cameras</option><option value="phone">Phones</option><option value="laptop">Computers</option><option value="audio">Audio</option><option value="creative">Creative equipment</option>
+          </select>
+          <label class="visually-hidden" for="idea-location">Location</label>
+          <input id="idea-location" name="location" type="search" placeholder="City or area" autocomplete="off">
           <button class="button button-burgundy" type="submit">Search rentals</button>
         </form>
         <p class="search-note" id="search-note">Searches published rental listings. Availability is checked for your dates on each listing.</p>
@@ -111,7 +119,7 @@
           <a class="category-card category-drive" href="rentals.html?category=drive" aria-label="Explore vehicles">
             <img src="./WhatsApp%20Image%202026-10-27%20at%2023.35.55.jpeg" alt="Silver luxury sedan photographed in a dark studio" width="736" height="980" loading="lazy">
             <span class="card-shade"></span>
-            <span class="category-meta"><span>02</span><span>Drive</span></span>
+            <span class="category-meta"><span>02</span><span>Cars &amp; Mobility</span></span>
             <span class="category-title">Take the<br>long way.</span>
             <span class="category-link">Explore vehicles</span>
           </a>
