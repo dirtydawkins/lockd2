@@ -44,6 +44,7 @@ Audit date: 2026-10-28. The production URL was also checked after deployment. Th
 ## What this checkout can safely claim
 
 - The catalogue UI is deployed, but the current Vercel API returns `503 catalogue_not_configured`; it cannot yet serve live rental records. It can read only approved, published rows after valid Supabase settings and the migration are in place.
+- Both `SUPABASE_*` and common `NEXT_PUBLIC_SUPABASE_*` environment names are supported. After deploying that compatibility change, the public API still returned `503 catalogue_not_configured`, so neither accepted URL/key pair is available to the current production functions.
 - It can ask the database whether configured date capacity appears available. This is a read-only check; it creates no hold, request or reservation.
 - The package builder is a browser-local draft. It does not submit a booking, guarantee availability or calculate fees/taxes or a combined checkout total.
 - No completed payment, refund, payout, email, identity verification, owner approval or legal compliance is established by this code.
