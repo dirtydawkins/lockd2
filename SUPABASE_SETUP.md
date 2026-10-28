@@ -17,8 +17,8 @@ Add these variables to the Vercel project connected to this repository, then red
 
 | Variable | Purpose |
 | --- | --- |
-| `SUPABASE_URL` | The HTTPS URL for the Supabase project. |
-| `SUPABASE_ANON_KEY` | The public anon/publishable key. RLS remains the access boundary. |
+| `SUPABASE_URL` or `NEXT_PUBLIC_SUPABASE_URL` | The HTTPS URL for the Supabase project. |
+| `SUPABASE_ANON_KEY` or `NEXT_PUBLIC_SUPABASE_ANON_KEY` | The public anon key. RLS remains the access boundary. The serverless API accepts either naming convention. |
 | `LOCKD_SUPPORT_EMAIL` | Optional LOCKD contact email used to create contextual owner-approval enquiries. |
 
 The catalogue endpoints use only the anon key. Do not add a service-role key, database password, payment secret, or OAuth client secret to browser code or these variables.

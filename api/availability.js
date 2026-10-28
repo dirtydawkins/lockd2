@@ -15,8 +15,8 @@ module.exports = async function handler(req, res) {
     return send(res, 405, { error: "method_not_allowed", message: "Use POST to check rental dates." });
   }
 
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_ANON_KEY;
+  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   let origin;
   try {
     const parsed = new URL(url);

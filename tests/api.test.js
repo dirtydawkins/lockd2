@@ -63,6 +63,33 @@ test("catalogue fails closed when Supabase is not configured", async (t) => {
   assert.equal(res.body.error, "catalogue_not_configured");
 });
 
+test("public NEXT_PUBLIC Supabase environment names are accepted by the serverless handlers", async (t) => {
+  const names = ["SUPABASE_URL", "SUPABASE_ANON_KEY", "NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY"];
+  const oldValues = Object.fromEntries(names.map((name) => [name, process.env[name]]));
+  delete process.env.SUPABASE_URL;
+  delete process.env.SUPABASE_ANON_KEY;
+  process.env.NEXT_PUBLIC_SUPABASE_URL = "https://example-project.supabase.co";
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "public-test-key";
+  t.after(() => names.forEach((name) => {
+    if (oldValues[name] === undefined) delete process.env[name];
+    else process.env[name] = oldValues[name];
+  }));
+  mockFetch(t, async (url) => httpResponse(200, new URL(url).pathname.endsWith("/rpc/check_lockd_listing_availability") ? true : []));
+  const catalog = await invoke(listings);
+  assert.equal(catalog.statusCode, 200);
+  assert.deepEqual(catalog.body.items, []);
+  const tomorrow = new Date();
+  tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+  const nextDay = new Date(tomorrow);
+  nextDay.setUTCDate(nextDay.getUTCDate() + 1);
+  const format = (date) => date.toISOString().slice(0, 10);
+  const check = await invoke(availability, { method: "POST", body: {
+    listingId: "b97f0876-a29a-4b6a-b8ca-a11111111111",
+    startDate: format(tomorrow), endDate: format(nextDay), quantity: 1,
+  } });
+  assert.deepEqual(check.body, { available: true });
+});
+
 test("catalogue rejects unsupported methods and categories", async (t) => {
   configure(t);
   mockFetch(t, async () => { throw new Error("fetch should not run for invalid requests"); });
