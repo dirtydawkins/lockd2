@@ -32,6 +32,7 @@
       <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu"><span></span><span></span></button>
       <nav class="primary-nav" id="primary-nav" aria-label="Main navigation">
         <a href="rentals.html">Explore Rentals</a>
+        <a href="rooms.html">Book a Room</a>
         <a href="tech.html">Tech &amp; Gadgets</a>
         <a href="index.html#how-it-works">How it works</a>
         <a href="index.html#about">About LOCKD</a>
@@ -76,7 +77,7 @@
 
       <nav class="catalogue-categories" aria-label="Rental categories" id="catalogue-categories">
         <a href="rentals.html" data-filter="all">All rentals</a>
-        <a href="rentals.html?category=stay" data-filter="stay">Stay</a>
+        <a href="rooms.html" data-filter="stay">Book a Room</a>
         <a href="rentals.html?category=drive" data-filter="drive">Drive</a>
         <a href="rentals.html?category=play" data-filter="play">Play</a>
         <a href="rentals.html?category=technology" data-filter="technology">Technology</a>
@@ -121,40 +122,23 @@
 
       <section class="vehicle-photo-guide" id="vehicle-photo-guide" aria-labelledby="vehicle-guide-title" hidden>
         <div class="vehicle-guide-heading">
-          <div><p class="eyebrow">Recognized from your photos · image references</p><h2 id="vehicle-guide-title">Cars with<br><em>presence.</em></h2></div>
-          <p>These photographs are visual references, not published LOCKD vehicles. Exact year, trim, registration, equipment and owner pricing must be confirmed in an approved listing before a booking can be priced.</p>
+          <div><p class="eyebrow">Choose your drive</p><h2 id="vehicle-guide-title">Cars with<br><em>presence.</em></h2></div>
+          <p>Browse vehicle types for inspiration. Published LOCKD listings carry the confirmed model, specifications, location, rate and rental terms.</p>
         </div>
         <div class="vehicle-guide-grid">
-          <article class="vehicle-reference-card">
-            <img src="./assets/photos/mercedes-g-class-sand.jpeg" alt="Beige Mercedes-Benz G-Class SUV with black wheels" width="736" height="1104" loading="lazy">
-            <div><p class="eyebrow">SUV · MODEL FAMILY MATCH</p><h3>Mercedes-Benz G-Class</h3><p>G-Wagon body · four doors · upright SUV profile. The image does not verify model year, engine, transmission, seating configuration or drive option.</p><p class="vehicle-reference-price">Published Nairobi comparator: KSh 45,000–95,000 / day across variants.</p><a href="https://elitemotionluxury.com/model/G-Class" target="_blank" rel="noopener noreferrer">View provider rates</a></div>
-          </article>
-          <article class="vehicle-reference-card">
-            <img src="./assets/photos/mercedes-amg-gle.jpeg" alt="Burgundy Mercedes-Benz GLE Coupe with a vertical-bar grille" width="736" height="1104" loading="lazy">
-            <div><p class="eyebrow">SUV COUPE · VISUAL MATCH</p><h3>Mercedes-Benz GLE Coupe</h3><p>Coupe-style roofline · SUV stance · vertical-bar grille. AMG trim and mechanical specifications are not verified from this photo.</p><p class="vehicle-reference-price">Published Nairobi comparator: KSh 60,000–65,000 / 24 hours for GLE variants.</p><a href="https://elitemotionluxury.com/model/GLE" target="_blank" rel="noopener noreferrer">View provider rates</a></div>
-          </article>
-          <article class="vehicle-reference-card">
-            <img src="./assets/photos/mercedes-maybach-sedan.jpeg" alt="Mercedes-Maybach luxury sedan in a studio" width="736" height="1104" loading="lazy">
-            <div><p class="eyebrow">LUXURY SEDAN · VISUAL MATCH</p><h3>Mercedes-Maybach sedan</h3><p>Long-wheelbase sedan profile · Maybach grille and hood ornament. The exact S-Class generation, year and drivetrain are not visible.</p><p class="vehicle-reference-price">Historical comparator: KSh 100,000 / full day in a 2025 Kenya rate guide.</p><a href="https://www.businessradar.co.ke/blog/2025/03/10/prestige-car-hire-rates-in-kenya-2025-how-much-to-hire-a-luxury-car-limousine-or-chopper/" target="_blank" rel="noopener noreferrer">View dated rate guide</a></div>
-          </article>
-          <article class="vehicle-reference-card">
-            <img src="./assets/photos/bmw-x7-black.jpeg" alt="Black BMW X7-style luxury SUV photographed from front and rear" width="736" height="1104" loading="lazy">
-            <div><p class="eyebrow">LUXURY SUV · PHOTO MATCH</p><h3>BMW X7</h3><p>Three-row SUV body · split headlight treatment · large twin-kidney grille. Photo appears modified; year and factory trim are unverified.</p><p class="vehicle-reference-price">No comparable current Kenyan X7 rental rate was verified.</p><a href="https://www.icabs.co.ke/rentals" target="_blank" rel="noopener noreferrer">See general Kenya vehicle-rate context</a></div>
-          </article>
-          <article class="vehicle-reference-card">
-            <img src="./assets/photos/bmw-xm-black.jpeg" alt="Black BMW XM-style performance SUV in a dark studio" width="736" height="1104" loading="lazy">
-            <div><p class="eyebrow">PERFORMANCE SUV · PHOTO MATCH</p><h3>BMW XM</h3><p>High-performance SUV form · split twin-kidney grille · sculpted bodywork. Exact variant, powertrain and specifications cannot be confirmed from this image.</p><p class="vehicle-reference-price">No comparable current Kenyan XM rental rate was verified.</p><a href="https://www.icabs.co.ke/rentals" target="_blank" rel="noopener noreferrer">See general Kenya vehicle-rate context</a></div>
-          </article>
-          <article class="vehicle-reference-card">
-            <img src="./assets/photos/tesla-electric-sedan.jpeg" alt="Dark electric sedan shown at an auto exhibition" width="564" height="420" loading="lazy">
-            <div><p class="eyebrow">ELECTRIC SEDAN · VISUAL CUE</p><h3>Tesla-style electric sedan</h3><p>Low sedan body · full-width front light bar · electric-vehicle styling. The photo does not verify make, model, range, battery or charging connector.</p><p class="vehicle-reference-price">No comparable current Kenyan short-term rental rate was verified.</p><a href="https://www.icabs.co.ke/rentals" target="_blank" rel="noopener noreferrer">See general Kenya vehicle-rate context</a></div>
-          </article>
-          <article class="vehicle-reference-card">
-            <img src="./assets/photos/bmw-performance-coupe-red-front.jpeg" alt="Red BMW performance coupe photographed through foliage" width="736" height="1104" loading="lazy">
-            <div><p class="eyebrow">SPORT COUPE · VISUAL MATCH</p><h3>BMW performance coupe</h3><p>Two-door coupe · twin-kidney grille · M-style body details. Exact model, engine and factory trim are unverified.</p><p class="vehicle-reference-price">No comparable current Kenyan short-term rental rate was verified.</p><a href="https://www.icabs.co.ke/rentals" target="_blank" rel="noopener noreferrer">See general Kenya vehicle-rate context</a></div>
-          </article>
+          <a class="vehicle-reference-card" href="rentals.html?category=drive">
+            <img src="./assets/photos/mercedes-g-class-sand.jpeg" alt="Light-coloured four-wheel-drive vehicle on a sunny street" width="736" height="1104" loading="lazy">
+            <div><p class="eyebrow">FOUR-WHEEL DRIVE</p><h3>Built to explore</h3><p>Find a vehicle with the right space and capability for your route.</p><span class="text-button">Browse vehicles</span></div>
+          </a>
+          <a class="vehicle-reference-card" href="rentals.html?category=drive">
+            <img src="./assets/photos/mercedes-maybach-sedan.jpeg" alt="Silver premium sedan in a studio" width="736" height="1104" loading="lazy">
+            <div><p class="eyebrow">PREMIUM SEDANS</p><h3>Arrive in style</h3><p>Review each owner’s exact vehicle details, inclusions and collection options.</p><span class="text-button">Browse vehicles</span></div>
+          </a>
+          <a class="vehicle-reference-card" href="rentals.html?category=drive">
+            <img src="./assets/photos/bmw-xm-black.jpeg" alt="Dark performance vehicle in a studio" width="736" height="1104" loading="lazy">
+            <div><p class="eyebrow">PERFORMANCE</p><h3>Make the drive count</h3><p>Actual vehicle specifications and booking requirements appear on approved listings.</p><span class="text-button">Browse vehicles</span></div>
+          </a>
         </div>
-        <p class="vehicle-guide-disclaimer">Provider prices are third-party comparisons and cannot be booked through LOCKD. Live LOCKD rates appear only on approved owner listings with their own published price and availability calendar.</p>
       </section>
     </main>
 

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#f7f4ef">
-    <meta name="description" content="Browse technology, gaming, camera and audio rentals on LOCKD. See actual published rental listings and separately sourced Kenyan market references.">
+    <meta name="description" content="Browse published technology, gaming, camera and audio rentals on LOCKD. Listing rates and availability come from approved owners.">
     <link rel="canonical" href="https://lockd2.vercel.app/tech.html">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="LOCKD">
@@ -34,6 +34,7 @@
       <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu"><span></span><span></span></button>
       <nav class="primary-nav" id="primary-nav" aria-label="Main navigation">
         <a href="rentals.html">Explore Rentals</a>
+        <a href="rooms.html">Book a Room</a>
         <a href="tech.html" aria-current="page">Tech &amp; Gadgets</a>
         <a href="index.html#how-it-works">How it works</a>
         <a href="index.html#about">About LOCKD</a>
@@ -132,36 +133,27 @@
 
       <section class="tech-photo-guide" aria-labelledby="tech-photo-guide-title">
         <div class="tech-section-heading">
-          <div><p class="eyebrow">Photo-identified gear · visual reference only</p><h2 id="tech-photo-guide-title">Gear in<br><em>your photos.</em></h2></div>
-          <p class="tech-section-copy">Product-family matches and visible details are identified from the images you supplied. Exact model, internal specifications, accessories and availability need owner confirmation.</p>
+          <div><p class="eyebrow">Browse by category</p><h2 id="tech-photo-guide-title">Find the right<br><em>kit for now.</em></h2></div>
+          <p class="tech-section-copy">Explore gaming, phones and computer equipment. Published listings show the model, specifications, accessories, location and owner-confirmed rate.</p>
         </div>
         <div class="tech-photo-grid">
-          <article class="tech-photo-card">
+          <a class="tech-photo-card" href="tech.html?group=gaming">
             <img src="./assets/photos/playstation5-setup.jpeg" alt="PlayStation 5-family console and white DualSense controller beside a television" width="736" height="1104" loading="lazy">
-            <div><p class="eyebrow">GAMING CONSOLE · FAMILY MATCH</p><h3>PlayStation 5 console</h3><p>White curved side panels · black center spine · DualSense-style wireless controller pictured. Slim/standard edition, storage, included games and controller count are unverified.</p><p class="tech-photo-price">Market reference: PS5 Slim listed at KSh 5,500 / day by Flexi Gear.</p><a href="https://flexigear.co.ke/" target="_blank" rel="noopener noreferrer">View provider catalogue</a></div>
-          </article>
-          <article class="tech-photo-card">
+            <div><p class="eyebrow">PLAY · GAMING</p><h3>Gaming</h3><p>Consoles, controllers and complete setups listed by verified owners.</p><span class="text-button">Browse gaming</span></div>
+          </a>
+          <a class="tech-photo-card" href="tech.html?group=phones">
             <img src="./assets/photos/iphone-pro-burgundy.jpeg" alt="Burgundy iPhone-style phone with three rear camera lenses" width="736" height="1104" loading="lazy">
-            <div><p class="eyebrow">SMARTPHONE · VISUAL MATCH</p><h3>Burgundy iPhone Pro</h3><p>Three rear camera lenses · Apple logo · dark burgundy finish. Exact generation, storage, condition and included accessories are not identifiable from these photos.</p><p class="tech-photo-price">No comparable Kenyan short-term phone hire rate was verified. No price is estimated.</p></div>
-          </article>
-          <article class="tech-photo-card">
+            <div><p class="eyebrow">PHONES · EVERYDAY TECH</p><h3>Phones</h3><p>Find the exact model, condition, included accessories and rate on a published listing.</p><span class="text-button">Browse phones</span></div>
+          </a>
+          <a class="tech-photo-card" href="tech.html?group=computers">
             <img src="./assets/photos/gaming-pc-purple-rgb.jpeg" alt="Custom gaming PC tower with purple RGB fans and a glass side panel" width="736" height="1104" loading="lazy">
-            <div><p class="eyebrow">COMPUTER · VISIBLE CONFIGURATION</p><h3>Purple RGB gaming PC</h3><p>Glass-sided tower · multiple purple RGB fans. CPU, graphics card, memory, storage, cooling and performance cannot be read from the photo.</p><p class="tech-photo-price">No comparable Kenyan gaming-PC hire rate was verified.</p></div>
-          </article>
-          <article class="tech-photo-card">
+            <div><p class="eyebrow">COMPUTERS · WORK &amp; PLAY</p><h3>Computers</h3><p>Browse laptops, desktops and the specifications provided with each approved listing.</p><span class="text-button">Browse computers</span></div>
+          </a>
+          <a class="tech-photo-card" href="tech.html?group=creator">
             <img src="./assets/photos/gaming-pc-white-liquid-cooled.jpeg" alt="White custom PC tower with RGB lighting and visible liquid-cooling components" width="736" height="1104" loading="lazy">
-            <div><p class="eyebrow">COMPUTER · VISIBLE CONFIGURATION</p><h3>White liquid-cooled PC</h3><p>White case · RGB lighting · liquid-cooling parts visible. The photo does not identify the CPU, GPU, memory, storage or cooling model.</p><p class="tech-photo-price">No comparable Kenyan gaming-PC hire rate was verified.</p></div>
-          </article>
-          <article class="tech-photo-card">
-            <img src="./assets/photos/gaming-pc-black-rgb.jpeg" alt="Black custom gaming PC tower with RGB lighting" width="736" height="1104" loading="lazy">
-            <div><p class="eyebrow">COMPUTER · VISIBLE CONFIGURATION</p><h3>Black RGB gaming PC</h3><p>Black tower · illuminated RGB components. Internal part names and performance are not visible, so no processor or graphics specification is inferred.</p><p class="tech-photo-price">No comparable Kenyan gaming-PC hire rate was verified.</p></div>
-          </article>
-          <article class="tech-photo-card">
-            <img src="./assets/photos/dual-monitor-gaming-setup.jpeg" alt="Gaming desk setup with two monitors, keyboard, mouse and a desktop tower" width="736" height="1104" loading="lazy">
-            <div><p class="eyebrow">GAMING SETUP · VISIBLE COMPONENTS</p><h3>Dual-monitor setup</h3><p>Two displays · gaming keyboard and mouse pictured. Screen size, resolution, refresh rate and computer specifications are unverified.</p><p class="tech-photo-price">No complete setup rental rate was verified. Components must be priced separately by an owner.</p></div>
-          </article>
+            <div><p class="eyebrow">CREATOR GEAR</p><h3>Make something</h3><p>Look for cameras, creator computers and accessories in published rentals.</p><span class="text-button">Browse creator gear</span></div>
+          </a>
         </div>
-        <p class="tech-photo-disclaimer">These image references are not LOCKD stock and cannot be added to a bundle. Live booking rates and specifications are shown only after an owner publishes an approved listing.</p>
       </section>
 
       <section class="tech-usecases" id="use-case-section" aria-labelledby="use-case-title" hidden>
@@ -170,23 +162,6 @@
           <p class="tech-section-copy">These use cases are based on details owners have added to published listings.</p>
         </div>
         <div class="use-case-links" id="use-case-links"></div>
-      </section>
-
-      <section class="market-reference" id="market-references" aria-labelledby="market-reference-title">
-        <div class="market-reference-top">
-          <div><p class="eyebrow">Independent Kenyan provider rates</p><h2 id="market-reference-title">A useful point<br><em>of reference.</em></h2></div>
-          <p class="market-reference-intro">These are published prices observed on other providers’ websites. They are not LOCKD inventory, do not represent owner-configured LOCKD prices, and cannot be booked here.</p>
-        </div>
-        <div class="market-reference-toolbar">
-          <label for="benchmark-category">Show references
-            <select id="benchmark-category"><option value="all">All researched categories</option><option value="gaming">Gaming</option><option value="phone">Phones</option><option value="computer">Computers</option><option value="camera_creator">Cameras &amp; creator gear</option><option value="audio">Audio</option><option value="drone">Drones</option><option value="projector">Projectors</option></select>
-          </label>
-          <p id="benchmark-count" aria-live="polite"></p>
-        </div>
-        <div class="benchmark-grid" id="benchmark-grid"></div>
-        <button class="text-button benchmark-show-all" id="benchmark-show-all" type="button" hidden>Show all references</button>
-        <p class="benchmark-footnote" id="benchmark-footnote">Prices reflect the source page on the research date shown per record. Provider availability was not checked for your dates; fees, deposits, terms and stock can change. Confirm directly with the provider before relying on a reference.</p>
-        <p class="benchmark-error" id="benchmark-error" role="status" hidden></p>
       </section>
 
       <aside class="tech-compare" id="tech-compare" aria-live="polite" hidden>

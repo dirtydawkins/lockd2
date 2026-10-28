@@ -43,7 +43,7 @@
     const term = document.createElement("dt");
     term.textContent = label;
     const definition = document.createElement("dd");
-    definition.textContent = Array.isArray(value) ? value.map(String).join(", ") : String(value);
+    definition.textContent = (Array.isArray(value) ? value.map(String).join(", ") : String(value)).replaceAll("_", " ");
     row.append(term, definition);
     facts.append(row);
   }
@@ -87,11 +87,25 @@
       setEstimate(output, "A rental subtotal cannot be estimated from these dates, quantity or listing rate.");
       return;
     }
+    let estimateQuantity = units;
+    if (listing.category === "stay") {
+      const attrs = listing.attributes && typeof listing.attributes === "object" ? listing.attributes : {};
+      const basis = attrs.price_basis || attrs.pricing_basis;
+      if (basis !== "per_room_per_night" && basis !== "per_property_per_night") {
+        setEstimate(output, "The stay’s rate basis is not specified, so a total cannot be estimated yet.");
+        return;
+      }
+      if (basis === "per_property_per_night" && units > 1) {
+        setEstimate(output, "This rate is per property. Confirm the total for multiple rooms or properties with the host.");
+        return;
+      }
+      estimateQuantity = basis === "per_room_per_night" ? units : 1;
+    }
     const estimate = window.LockdRentalPricing?.estimateRentalSubtotal({
       amount: rate,
       currency: listing.currency,
       unit: listing.price_unit,
-      quantity: units,
+      quantity: estimateQuantity,
       startDate,
       endDate,
     });
@@ -290,7 +304,7 @@
     const facts = document.querySelector("#rental-facts");
     facts.replaceChildren();
     const attributes = record.attributes && typeof record.attributes === "object" ? record.attributes : {};
-    ["brand", "model", "configuration", "generation", "storage", "memory", "condition", "included_accessories", "specifications", "mandatory_fees"].forEach((key) => {
+    ["brand", "model", "configuration", "generation", "storage", "memory", "condition", "included_accessories", "specifications", "mandatory_fees", "property_type", "room_type", "max_guests", "bedrooms", "beds", "bed_configuration", "bathrooms", "amenities", "check_in_time", "check_out_time", "cancellation_policy", "house_rules", "minimum_stay_nights", "price_basis", "pricing_basis"].forEach((key) => {
       addFact(facts, factLabel(key), attributes[key]);
     });
     if (record.rental_durations?.length) addFact(facts, "Available durations", record.rental_durations);
@@ -449,7 +463,7 @@
   if (returnTo && backLink) {
     try {
       const destination = new URL(returnTo, window.location.origin);
-      const allowedPaths = new Set(["/rentals.html", "/tech.html"]);
+      const allowedPaths = new Set(["/rentals.html", "/rooms.html", "/tech.html"]);
       if (destination.origin === window.location.origin && allowedPaths.has(destination.pathname)) {
         backLink.href = destination.href;
         hasValidReturnTarget = true;

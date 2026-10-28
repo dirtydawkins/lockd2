@@ -48,8 +48,6 @@
   let recent = readStringList(recentKey);
   let compared = readStringList(compareKey).slice(0, 3);
   let savedSearches = readSavedSearches();
-  let benchmarks = [];
-  let showAllBenchmarks = false;
   let selectedUseCase = params.get("useCase") || "";
 
   function readStringList(key) {
@@ -341,7 +339,7 @@
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
         if (response.status === 503 || data.error === "catalogue_not_configured") {
-          throw new Error("The live LOCKD catalogue is not connected yet. Market references below are for research only and are not available to book.");
+          throw new Error("The live LOCKD catalogue is not connected yet. Please check back later.");
         }
         throw new Error(data.message || "LOCKD rentals could not be loaded. Please try again shortly.");
       }
@@ -356,7 +354,7 @@
         status.dataset.kind = "empty";
         status.textContent = Object.keys(filters).some((key) => !["sort", "quantity"].includes(key))
           ? "No published LOCKD technology rentals match these filters yet. Clear a filter or try another category."
-          : "No published LOCKD technology rentals are available to show yet. The market references below are not LOCKD inventory.";
+          : "No published LOCKD technology rentals are available to show yet. Check back after owners publish approved listings.";
       } else {
         status.dataset.kind = "loaded";
         status.textContent = "Published, approved LOCKD listings only. Check each listing’s terms and availability.";
@@ -514,104 +512,6 @@
     }));
   }
 
-  function formatBenchmarkPrice(record) {
-    const amount = Number(record.price);
-    let price = `${record.currency || "KES"} ${amount.toLocaleString("en-KE")}`;
-    const unit = { hour: "hour", day: "day", night: "night", week: "week", month: "month", trip: "trip" }[record.unit];
-    if (unit) price += ` / ${unit}`;
-    return price;
-  }
-
-  function addText(parent, tag, className, value) {
-    const element = document.createElement(tag);
-    if (className) element.className = className;
-    element.textContent = value;
-    parent.append(element);
-    return element;
-  }
-
-  function makeBenchmarkCard(record) {
-    const article = document.createElement("article");
-    article.className = "benchmark-card";
-    addText(article, "p", "benchmark-tag", "Market reference · not a LOCKD listing");
-    addText(article, "h3", "", record.product);
-    addText(article, "p", "benchmark-provider", record.provider);
-    const price = addText(article, "p", "benchmark-price", "");
-    price.append(document.createTextNode(formatBenchmarkPrice(record)));
-    const notes = document.createElement("dl");
-    notes.className = "benchmark-notes";
-    [
-      ["Area", record.location], ["Included", record.included], ["Fees", record.fees],
-      ["Dates", record.availability], ["Limit", record.limitations],
-    ].forEach(([label, value]) => {
-      if (!value) return;
-      const term = document.createElement("dt");
-      term.textContent = `${label}:`;
-      const definition = document.createElement("dd");
-      definition.textContent = value;
-      notes.append(term, definition);
-    });
-    article.append(notes);
-    const footer = document.createElement("footer");
-    const source = document.createElement("a");
-    source.href = record.sourceUrl;
-    source.target = "_blank";
-    source.rel = "noopener noreferrer";
-    source.textContent = "View provider source";
-    const date = document.createElement("span");
-    date.textContent = `Researched ${record.researchedOn}`;
-    footer.append(source, date);
-    article.append(footer);
-    return article;
-  }
-
-  function renderBenchmarks() {
-    const category = document.querySelector("#benchmark-category").value;
-    const selected = category === "all" ? benchmarks : benchmarks.filter((record) => record.category === category);
-    const grid = document.querySelector("#benchmark-grid");
-    const visible = showAllBenchmarks ? selected : selected.slice(0, 9);
-    grid.replaceChildren(...visible.map(makeBenchmarkCard));
-    document.querySelector("#benchmark-count").textContent = `${selected.length} researched ${selected.length === 1 ? "reference" : "references"}`;
-    const moreButton = document.querySelector("#benchmark-show-all");
-    moreButton.hidden = selected.length <= 9;
-    moreButton.textContent = showAllBenchmarks ? "Show fewer references" : "Show all references";
-    if (!selected.length) {
-      const empty = document.createElement("p");
-      empty.className = "benchmark-footnote";
-      empty.textContent = category === "phone"
-        ? "No current Kenyan short-term phone rental rate with clear rental terms was verified. Rent-to-own and credit offers were excluded."
-        : "No comparable published rate was verified in this research. No price has been estimated.";
-      grid.append(empty);
-    }
-  }
-
-  async function loadBenchmarks() {
-    try {
-      let data;
-      try {
-        const response = await fetch("/api/benchmarks", { headers: { Accept: "application/json" }, cache: "no-store" });
-        const apiData = await response.json().catch(() => ({}));
-        if (response.ok && Array.isArray(apiData.records)) data = apiData;
-      } catch { /* Static previews can read the same non-bookable snapshot directly. */ }
-      if (!data) {
-        const response = await fetch("./data/tech-market-benchmarks.json", { headers: { Accept: "application/json" }, cache: "no-store" });
-        const snapshot = await response.json().catch(() => ({}));
-        if (!response.ok || !Array.isArray(snapshot.records)) throw new Error("Research references are temporarily unavailable.");
-        data = { ...snapshot, source: "snapshot", notice: "Local preview uses the checked-in, source-linked research snapshot. These are not LOCKD prices." };
-      }
-      benchmarks = data.records;
-      if (data.source === "snapshot") {
-        document.querySelector("#benchmark-footnote").textContent = `${data.notice || "Curated research snapshot shown."} ${data.researchNotes?.join(" ") || ""}`;
-      } else if (Array.isArray(data.researchNotes) && data.researchNotes.length) {
-        document.querySelector("#benchmark-footnote").textContent += ` ${data.researchNotes.join(" ")}`;
-      }
-      renderBenchmarks();
-    } catch (error) {
-      document.querySelector("#benchmark-error").textContent = error.message || "Research references could not be loaded.";
-      document.querySelector("#benchmark-error").hidden = false;
-    }
-  }
-
   function setUrlFromFilters() {
     const url = new URL(window.location.href);
     const filters = activeParams();
@@ -709,8 +609,6 @@
     loadListings();
   }, 0));
   loadMore.addEventListener("click", () => loadListings({ append: true }));
-  document.querySelector("#benchmark-category").addEventListener("change", () => { showAllBenchmarks = false; renderBenchmarks(); });
-  document.querySelector("#benchmark-show-all").addEventListener("click", () => { showAllBenchmarks = !showAllBenchmarks; renderBenchmarks(); });
   document.querySelector("#save-tech-search").addEventListener("click", () => {
     setUrlFromFilters();
     const url = new URL(window.location.href);
@@ -738,9 +636,6 @@
     });
   });
 
-  document.querySelector("#benchmark-footnote").textContent += " No current Kenyan short-term phone hire rate with clear rental terms was verified; financing and rent-to-own offers are excluded.";
   renderPersonal();
-  renderBenchmarks();
-  loadBenchmarks();
   loadListings();
 })();

@@ -86,16 +86,15 @@
 .vehicle-guide-heading h2 em { color: var(--burgundy); font-family: var(--serif); font-weight: 400; }
 .vehicle-guide-heading > p { max-width: 450px; margin: 0 0 .3rem; color: var(--muted); font-size: .74rem; line-height: 1.65; }
 .vehicle-guide-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
-.vehicle-reference-card { min-width: 0; border-top: 1px solid var(--line); }
+.vehicle-reference-card { display: block; min-width: 0; border-top: 1px solid var(--line); color: inherit; text-decoration: none; }
+.vehicle-reference-card:hover, .vehicle-reference-card:focus-visible { color: inherit; }
+.vehicle-reference-card:focus-visible { outline: 2px solid var(--burgundy); outline-offset: 3px; }
 .vehicle-reference-card > img { width: 100%; aspect-ratio: 4/3; object-fit: cover; background: var(--stone); }
 .vehicle-reference-card > div { padding: .85rem .1rem 1rem; }
 .vehicle-reference-card .eyebrow { margin: 0 0 .5rem; font-size: .51rem; }
 .vehicle-reference-card h3 { margin: 0 0 .45rem; font-family: var(--serif); font-size: 1.35rem; font-weight: 400; line-height: 1.1; }
 .vehicle-reference-card > div > p:not(.eyebrow) { margin: 0 0 .6rem; color: #69615c; font-size: .67rem; line-height: 1.55; }
-.vehicle-reference-card .vehicle-reference-price { padding-top: .55rem; border-top: 1px solid var(--line); color: var(--oxblood); font-weight: 600; }
-.vehicle-reference-card a { color: var(--burgundy); font-size: .65rem; text-decoration: underline; text-underline-offset: 3px; }
-.vehicle-reference-card a:hover { color: var(--oxblood); }
-.vehicle-guide-disclaimer { margin: 1rem 0 0; padding-top: .85rem; border-top: 1px solid var(--line); color: #817972; font-size: .64rem; line-height: 1.6; }
+.vehicle-reference-card .text-button { margin-top: .25rem; color: var(--burgundy); font-size: .65rem; }
 
 .rental-shell { padding-bottom: 7rem; }
 .rental-transition-placeholder { position: relative; width: min(100%, 720px); aspect-ratio: 1.12; margin: 1.4rem 0; overflow: hidden; background: #e8e2dc; }

@@ -75,10 +75,20 @@ module.exports = async function handler(req, res) {
   const brand = filterText(req.query?.brand);
   const location = filterText(req.query?.location);
   const accessory = filterText(req.query?.accessory);
+  const propertyType = filterText(req.query?.propertyType, 40);
+  const amenity = filterText(req.query?.amenity, 40);
+  const guestCount = req.query?.guests === undefined || req.query?.guests === "" ? null : Number(req.query.guests);
+  const roomCount = req.query?.rooms === undefined || req.query?.rooms === "" ? null : Number(req.query.rooms);
+  const allowedPropertyTypes = new Set(["hotel", "guesthouse", "apartment", "holiday_home", "lodge", "hostel"]);
+  const allowedAmenities = new Set(["wifi", "kitchen", "parking", "pool", "breakfast", "workspace", "air_conditioning"]);
   const productType = req.query?.type;
   const condition = req.query?.condition;
   const duration = req.query?.duration;
-  if (brand === null || location === null || accessory === null) return send(res, 400, { error: "invalid_filter", message: "Use plain words and numbers in catalogue filters." });
+  if (brand === null || location === null || accessory === null || propertyType === null || amenity === null) return send(res, 400, { error: "invalid_filter", message: "Use plain words and numbers in catalogue filters." });
+  if (propertyType && !allowedPropertyTypes.has(propertyType)) return send(res, 400, { error: "invalid_property_type", message: "Choose a supported property type." });
+  if (amenity && !allowedAmenities.has(amenity)) return send(res, 400, { error: "invalid_amenity", message: "Choose a supported stay amenity." });
+  if (guestCount !== null && (!Number.isInteger(guestCount) || guestCount < 1 || guestCount > 20)) return send(res, 400, { error: "invalid_guests", message: "Guest count must be between 1 and 20." });
+  if (roomCount !== null && (!Number.isInteger(roomCount) || roomCount < 1 || roomCount > 20)) return send(res, 400, { error: "invalid_rooms", message: "Room count must be between 1 and 20." });
   if (req.query?.type && !productTypes.has(productType)) return send(res, 400, { error: "invalid_type", message: "Choose a supported product type." });
   if (condition && !conditions.has(condition)) return send(res, 400, { error: "invalid_condition", message: "Choose a supported item condition." });
   if (duration && !billingUnits.has(duration)) return send(res, 400, { error: "invalid_duration", message: "Choose a supported rental duration." });
@@ -86,9 +96,11 @@ module.exports = async function handler(req, res) {
 
   const minPrice = numericFilter(req.query?.minPrice);
   const maxPrice = numericFilter(req.query?.maxPrice);
+  const currency = req.query?.currency === undefined || req.query?.currency === "" ? "" : req.query.currency;
   if (Number.isNaN(minPrice) || Number.isNaN(maxPrice) || (minPrice !== null && maxPrice !== null && minPrice > maxPrice)) {
     return send(res, 400, { error: "invalid_price_range", message: "Choose a valid minimum and maximum price." });
   }
+  if (currency && (typeof currency !== "string" || !/^[A-Z]{3}$/.test(currency))) return send(res, 400, { error: "invalid_currency", message: "Choose a three-letter currency code." });
 
   const { startDate, endDate } = req.query || {};
   let quantity = 1;
@@ -125,8 +137,15 @@ module.exports = async function handler(req, res) {
   if (duration) query.set("rental_durations", `cs.{${duration}}`);
   if (accessory) query.set("attributes->included_accessories", `cs.["${accessory}"]`);
   if (location) query.set("location_label", `ilike.*${location}*`);
+  // Compare the JSON number itself so guest capacities such as 12 are not
+  // treated as lexicographically smaller than 3. The calendar RPC receives
+  // the requested room quantity separately and remains the source of truth.
+  if (guestCount !== null) query.set("attributes->max_guests", `gte.${guestCount}`);
+  if (propertyType) query.set("attributes->>property_type", `eq.${propertyType}`);
+  if (amenity) query.set("attributes->amenities", `cs.["${amenity}"]`);
   if (minPrice !== null) andFilters.push(`price_amount.gte.${minPrice}`);
   if (maxPrice !== null) andFilters.push(`price_amount.lte.${maxPrice}`);
+  if (currency) query.set("currency", `eq.${currency}`);
   if (andFilters.length) query.set("and", `(${andFilters.join(",")})`);
   if (req.query?.collection === "yes") query.set("collection_available", "eq.true");
   if (req.query?.delivery === "yes") query.set("delivery_available", "eq.true");

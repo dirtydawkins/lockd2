@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f7f4ef">
+    <meta name="description" content="Search published LOCKD rooms and stays by destination, dates and guest count.">
+    <link rel="canonical" href="https://lockd2.vercel.app/rooms.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="LOCKD">
+    <meta property="og:title" content="Book a Room — LOCKD">
+    <meta property="og:description" content="Find published rooms and stays by destination, dates and guest count.">
+    <meta property="og:url" content="https://lockd2.vercel.app/rooms.html">
+    <meta name="twitter:card" content="summary">
+    <title>Book a Room — LOCKD</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./rooms.css">
+    <script src="./motion.js" defer></script>
+    <script src="./app.js" defer></script>
+    <script src="./rental-pricing.js" defer></script>
+    <script src="./photo-fallbacks.js" defer></script>
+    <script src="./rooms.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header" id="top">
+      <a class="brand" href="index.html#top" aria-label="LOCKD home">
+        <svg class="brand-mark" viewBox="0 0 34 34" aria-hidden="true"><path d="M7 5.5h15.5L28 11v17.5H7z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M22.5 5.5V11H28M12 16.5v7h10v-7z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+        <span class="brand-word">lockd<span class="brand-period">.</span></span>
+      </a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu"><span></span><span></span></button>
+      <nav class="primary-nav" id="primary-nav" aria-label="Main navigation">
+        <a href="rentals.html">Explore Rentals</a>
+        <a href="rooms.html" aria-current="page">Book a Room</a>
+        <a href="destinations.html">Destinations</a>
+        <a href="tech.html">Tech &amp; Gadgets</a>
+        <a href="index.html#how-it-works">How it works</a>
+        <a href="index.html#about">About LOCKD</a>
+        <a class="owner-nav-link" href="owners.html">List your asset</a>
+      </nav>
+      <a class="header-cta" href="rentals.html?bundle=1">Build Your Bundle</a>
+    </header>
+
+    <main class="rooms-shell" id="main">
+      <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span aria-hidden="true">/</span><span>Book a Room</span></nav>
+      <section class="rooms-intro" aria-labelledby="rooms-title">
+        <p class="eyebrow"><span class="eyebrow-rule"></span> STAYS, ROOMS AND HOLIDAY HOMES</p>
+        <h1 id="rooms-title">Find a place<br><em>to land.</em></h1>
+        <p>Search published rooms and stays by place, dates and guests. Rates and availability come from each approved listing.</p>
+      </section>
+
+      <section class="room-search-panel" aria-labelledby="room-search-title">
+        <h2 class="visually-hidden" id="room-search-title">Search rooms and stays</h2>
+        <form id="room-search-form" class="room-search-form" role="search">
+          <label class="room-location">Where
+            <input id="room-location" name="location" type="search" placeholder="City, area or destination" autocomplete="off">
+          </label>
+          <label>Check in<input id="room-checkin" name="startDate" type="date" required></label>
+          <label>Check out<input id="room-checkout" name="endDate" type="date" required></label>
+          <label>Adults<input id="room-adults" name="adults" type="number" min="1" max="20" value="2" required></label>
+          <label>Children<input id="room-children" name="children" type="number" min="0" max="19" value="0"></label>
+          <label>Rooms<input id="room-count" name="rooms" type="number" min="1" max="20" value="1" required></label>
+          <label>Property type
+            <select id="room-property-type" name="propertyType">
+              <option value="">Any type</option><option value="hotel">Hotel</option><option value="guesthouse">Guesthouse</option><option value="apartment">Apartment</option><option value="holiday_home">Holiday home</option><option value="lodge">Lodge or camp</option><option value="hostel">Hostel</option>
+            </select>
+          </label>
+          <label>Amenity
+            <select id="room-amenity" name="amenity"><option value="">Any amenity</option><option value="wifi">Wi-Fi</option><option value="kitchen">Kitchen</option><option value="parking">Parking</option><option value="pool">Pool</option><option value="breakfast">Breakfast</option><option value="workspace">Workspace</option><option value="air_conditioning">Air conditioning</option></select>
+          </label>
+          <label>Min price (KES)<input id="room-min-price" name="minPrice" type="number" min="0" max="100000000" step="1" inputmode="numeric" placeholder="Any"></label>
+          <label>Max price (KES)<input id="room-max-price" name="maxPrice" type="number" min="0" max="100000000" step="1" inputmode="numeric" placeholder="Any"></label>
+          <button class="button button-dark" type="submit">Search rooms</button>
+        </form>
+        <p class="room-search-hint">Availability is checked against the listing calendar. A date check does not reserve a room.</p>
+      </section>
+
+      <section class="room-results" aria-labelledby="room-results-title">
+        <div class="room-results-heading"><div><p class="eyebrow">THE LOCKD STAY COLLECTION</p><h2 id="room-results-title">Places to stay</h2></div><p id="room-result-count" aria-live="polite"></p></div>
+        <p class="room-results-status" id="room-results-status" role="status" aria-live="polite">Add dates and search to check published availability.</p>
+        <div class="room-results-grid" id="room-results-grid"></div>
+        <button class="button button-paper room-load-more" id="room-load-more" type="button" hidden>Load more stays</button>
+      </section>
+      <p class="room-booking-note">LOCKD can currently search published stays and check their calendars. Online reservation and payment are not enabled yet; a room is confirmed only through the process shown on its listing.</p>
+    </main>
+    <footer class="catalogue-footer">
+      <a class="brand" href="index.html#top" aria-label="LOCKD home"><span class="brand-word">lockd<span class="brand-period">.</span></span></a>
+      <a href="rentals.html">Browse all rentals</a>
+    </footer>
+  </body>
+</html>

@@ -5,7 +5,6 @@ const listings = require("../api/listings.js");
 const availability = require("../api/availability.js");
 const config = require("../api/config.js");
 const sitemap = require("../api/sitemap.js");
-const benchmarks = require("../api/benchmarks.js");
 
 function mockResponse() {
   return {
@@ -196,6 +195,27 @@ test("technology filters reject unsafe values and invalid price ranges before da
   assert.equal(duration.body.error, "invalid_duration");
 });
 
+test("room catalogue accepts the supported accommodation filters", async (t) => {
+  configure(t);
+  let requestedUrl;
+  mockFetch(t, async (url) => {
+    requestedUrl = new URL(url);
+    return httpResponse(200, []);
+  });
+  const res = await invoke(listings, { query: {
+    category: "stay", location: "Nairobi", guests: "12", rooms: "2", propertyType: "apartment", amenity: "wifi", minPrice: "1000", maxPrice: "8000", currency: "KES",
+  } });
+  assert.equal(res.statusCode, 200);
+  assert.equal(requestedUrl.searchParams.get("category"), "eq.stay");
+  assert.equal(requestedUrl.searchParams.get("location_label"), "ilike.*Nairobi*");
+  assert.equal(requestedUrl.searchParams.get("attributes->max_guests"), "gte.12");
+  assert.equal(requestedUrl.searchParams.get("attributes->>property_type"), "eq.apartment");
+  assert.equal(requestedUrl.searchParams.get("attributes->amenities"), 'cs.["wifi"]');
+  assert.equal(requestedUrl.searchParams.get("currency"), "eq.KES");
+  assert.equal(requestedUrl.searchParams.get("and"), "(price_amount.gte.1000,price_amount.lte.8000)");
+  assert.equal(requestedUrl.searchParams.get("attributes->>room_count"), null);
+});
+
 test("date-filtered technology catalogue calls the approved-listing availability search", async (t) => {
   configure(t);
   const id = "b97f0876-a29a-4b6a-b8ca-a11111111111";
@@ -218,25 +238,6 @@ test("date-filtered technology catalogue calls the approved-listing availability
   assert.equal(JSON.parse(seen[0].options.body).p_quantity, 2);
   assert.equal(seen[1].parsed.searchParams.get("id"), `in.(${id})`);
   assert.equal(seen[1].parsed.searchParams.get("listing_status"), "eq.published");
-});
-
-test("market reference endpoint provides source-dated references without turning them into listings", async (t) => {
-  const oldUrl = process.env.SUPABASE_URL;
-  const oldKey = process.env.SUPABASE_ANON_KEY;
-  delete process.env.SUPABASE_URL;
-  delete process.env.SUPABASE_ANON_KEY;
-  t.after(() => {
-    if (oldUrl === undefined) delete process.env.SUPABASE_URL;
-    else process.env.SUPABASE_URL = oldUrl;
-    if (oldKey === undefined) delete process.env.SUPABASE_ANON_KEY;
-    else process.env.SUPABASE_ANON_KEY = oldKey;
-  });
-  const res = await invoke(benchmarks);
-  assert.equal(res.statusCode, 200);
-  assert.equal(res.body.source, "snapshot");
-  assert.ok(res.body.records.length >= 20);
-  assert.ok(res.body.records.every((record) => record.sourceUrl.startsWith("https://") && record.researchedOn));
-  assert.ok(res.body.records.every((record) => !("listingId" in record) && !("bookingUrl" in record)));
 });
 
 test("availability rejects invalid, reversed and past date ranges without calling Supabase", async (t) => {
@@ -302,6 +303,7 @@ test("sitemap emits only public shell pages when Supabase is unavailable", async
   assert.equal(res.statusCode, 200);
   assert.match(res.headers["content-type"], /application\/xml/);
   assert.match(res.body, /https:\/\/lockd2\.vercel\.app\/rentals\.html/);
+  assert.match(res.body, /https:\/\/lockd2\.vercel\.app\/rooms\.html/);
   assert.match(res.body, /https:\/\/lockd2\.vercel\.app\/tech\.html/);
   assert.doesNotMatch(res.body, /rental\.html\?slug=/);
 });
