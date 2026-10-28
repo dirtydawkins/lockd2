@@ -245,7 +245,10 @@
       title.textContent = record.title;
       const price = document.createElement("p");
       price.textContent = priceText(record.price_amount, record.currency, record.price_unit);
-      card.append(link, title, price);
+      const saveButton = window.LockdAccount?.createFavoriteButton(record, { className: "listing-save" });
+      card.append(link);
+      if (saveButton) card.append(saveButton);
+      card.append(title, price);
       return card;
     }));
   }
@@ -279,6 +282,10 @@
     document.querySelector("#rental-title").textContent = record.title;
     document.querySelector("#rental-location").textContent = record.location_label || "Location details to be confirmed";
     document.querySelector("#rental-price").textContent = priceText(record.price_amount, record.currency, record.price_unit);
+    const saveButton = window.LockdAccount?.createFavoriteButton(record, { className: "rental-save" });
+    if (saveButton) {
+      document.querySelector("#rental-title").insertAdjacentElement("afterend", saveButton);
+    }
     const approvalNote = document.querySelector("#approval-note");
     const enquiryLink = document.querySelector("#manual-enquiry");
     if (record.requires_approval && approvalNote) {

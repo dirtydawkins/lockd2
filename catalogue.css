@@ -34,7 +34,7 @@
 .skeleton-line { width: 72%; height: .72rem; }
 .skeleton-short { width: 42%; margin-top: .3rem; }
 .skeleton-price { width: 34%; height: .8rem; margin-top: .4rem; background: #e1d5d1; }
-.listing-card { min-width: 0; border-bottom: 1px solid var(--line); padding-bottom: 1.05rem; }
+.listing-card { position: relative; min-width: 0; border-bottom: 1px solid var(--line); padding-bottom: 1.05rem; }
 .listing-card-image { position: relative; display: block; overflow: hidden; aspect-ratio: 1.12; background: #e9e3dc; }
 .listing-card-image img { width: 100%; height: 100%; object-fit: cover; transition: transform var(--motion-image) var(--motion-ease); }
 .listing-card[data-category="drive"] .listing-card-image { aspect-ratio: 16 / 10; }
@@ -190,7 +190,7 @@
 .related-rentals-heading h2 em { color: var(--burgundy); font-family: var(--serif); font-weight: 400; }
 .related-rentals-heading > p { max-width: 360px; color: var(--muted); font-size: .75rem; }
 .related-rentals-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 1rem; }
-.related-rental-card { min-width: 0; }
+.related-rental-card { position: relative; min-width: 0; }
 .related-rental-card > a { display: block; aspect-ratio: 4/3; overflow: hidden; background: #e8e2dc; }
 .related-rental-card img { width: 100%; height: 100%; object-fit: cover; transition: transform .25s ease; }
 .related-rental-card:hover img { transform: scale(1.025); }

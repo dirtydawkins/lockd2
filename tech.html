@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="./tech.css">
     <script src="./motion.js" defer></script>
     <script src="./app.js" defer></script>
+    <script src="./account-service.js" defer></script>
     <script src="./photo-fallbacks.js" defer></script>
     <script src="./tech.js" defer></script>
   </head>
@@ -39,6 +40,7 @@
         <a href="tech.html" aria-current="page">Tech &amp; Gadgets</a>
         <a href="index.html#how-it-works">How it works</a>
         <a href="index.html#about">About LOCKD</a>
+        <a class="account-nav-link" href="account.html">Account</a>
         <a class="owner-nav-link" href="owners.html">List your asset</a>
       </nav>
       <a class="header-cta" href="rentals.html">Explore Rentals</a>
@@ -122,9 +124,9 @@
       </section>
 
       <section class="tech-personal" aria-label="Your saved items and history">
-        <div class="tech-personal-panel" id="saved-panel" hidden>
-          <div class="tech-personal-heading"><div><p class="eyebrow">Saved on this device</p><h2>Things to<br><em>come back to.</em></h2></div><a class="text-button" href="#published-rentals">Browse rentals</a></div>
-          <div class="tech-mini-grid" id="saved-grid"></div>
+        <div class="tech-personal-panel" id="saved-panel">
+          <div class="tech-personal-heading"><div><p class="eyebrow">Your LOCKD account</p><h2>Keep what<br><em>catches your eye.</em></h2></div><a class="text-button" href="account.html#saved">Saved rentals</a></div>
+          <p class="local-data-note">Save a published rental to your account and find it again across devices.</p>
         </div>
         <div class="tech-personal-panel" id="recent-panel" hidden>
           <div class="tech-personal-heading"><div><p class="eyebrow">Your browsing history</p><h2>Recently<br><em>viewed.</em></h2></div><span class="local-data-note">Saved on this device</span></div>

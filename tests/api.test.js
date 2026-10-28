@@ -64,6 +64,36 @@ test("catalogue fails closed when Supabase is not configured", async (t) => {
   assert.equal(res.body.error, "catalogue_not_configured");
 });
 
+test("saved-listing lookup accepts bounded UUIDs and returns only public catalogue rows", async (t) => {
+  configure(t);
+  const ids = ["8a7b5db5-59ea-4f97-a4ad-5483c6cd4a41", "ef0478d7-f4cf-4786-b865-e3dfae2fb195"];
+  let requestedUrl;
+  mockFetch(t, async (url) => {
+    requestedUrl = new URL(url);
+    return httpResponse(200, [{
+      id: ids[0], slug: "camera-kit", title: "Camera kit", category: "camera", images: [],
+      listing_status: "published", approval_status: "approved", attributes: {},
+    }]);
+  });
+  const result = await invoke(listings, { query: { ids: ids.join(",") } });
+  assert.equal(result.statusCode, 200);
+  assert.deepEqual(result.body.items.map((item) => item.id), [ids[0]]);
+  assert.equal(requestedUrl.searchParams.get("id"), `in.(${ids.join(",")})`);
+  assert.equal(requestedUrl.searchParams.get("listing_status"), "eq.published");
+  assert.equal(requestedUrl.searchParams.get("approval_status"), "eq.approved");
+});
+
+test("saved-listing lookup rejects malformed IDs and mixed search filters", async (t) => {
+  configure(t);
+  mockFetch(t, async () => { throw new Error("Invalid requests must not query Supabase."); });
+  const malformed = await invoke(listings, { query: { ids: "not-a-uuid" } });
+  assert.equal(malformed.statusCode, 400);
+  assert.equal(malformed.body.error, "invalid_listing_ids");
+  const mixed = await invoke(listings, { query: { ids: "8a7b5db5-59ea-4f97-a4ad-5483c6cd4a41", minPrice: "10" } });
+  assert.equal(mixed.statusCode, 400);
+  assert.equal(mixed.body.error, "conflicting_listing_ids");
+});
+
 test("publishable and legacy public Supabase environment names are accepted by the serverless handlers", async (t) => {
   const names = [
     "SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_URL",

@@ -84,6 +84,8 @@
       }
     }
     card.append(link);
+    const saveButton = window.LockdAccount?.createFavoriteButton(listing, { className: "listing-save" });
+    if (saveButton) card.append(saveButton);
     const meta = document.createElement("div");
     meta.className = "room-result-meta";
     const attrs = listing.attributes && typeof listing.attributes === "object" ? listing.attributes : {};

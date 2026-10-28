@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f7f4ef">
+    <meta name="description" content="Sign in to manage your LOCKD profile and saved rentals.">
+    <meta name="robots" content="noindex,follow">
+    <link rel="canonical" href="https://lockd2.vercel.app/account.html">
+    <title>Your LOCKD account</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./account.css">
+    <script src="./motion.js" defer></script>
+    <script src="./app.js" defer></script>
+    <script src="./account-service.js" defer></script>
+    <script src="./account.js" defer></script>
+  </head>
+  <body class="account-page">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header" id="top">
+      <a class="brand" href="index.html#top" aria-label="LOCKD home">
+        <svg class="brand-mark" viewBox="0 0 34 34" aria-hidden="true"><path d="M7 5.5h15.5L28 11v17.5H7z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M22.5 5.5V11H28M12 16.5v7h10v-7z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+        <span class="brand-word">lockd<span class="brand-period">.</span></span>
+      </a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu"><span></span><span></span></button>
+      <nav class="primary-nav" id="primary-nav" aria-label="Main navigation">
+        <a href="rentals.html">Explore rentals</a>
+        <a href="rooms.html">Book a room</a>
+        <a href="rentals.html?category=drive">Cars &amp; Mobility</a>
+        <a href="destinations.html">Destinations</a>
+        <a href="tech.html">Tech &amp; Gadgets</a>
+        <a href="account.html" aria-current="page">Account</a>
+        <a class="owner-nav-link" href="owners.html">List your asset</a>
+      </nav>
+      <a class="header-cta" href="rentals.html">Explore Rentals</a>
+    </header>
+
+    <main class="account-main" id="main">
+      <div class="account-intro" id="account-intro">
+        <p class="eyebrow"><span class="eyebrow-rule"></span> YOUR LOCKD ACCOUNT</p>
+        <h1>Your world,<br><em>all in one place.</em></h1>
+        <p>Sign in to manage your profile, save rentals, and pick up where you left off.</p>
+      </div>
+
+      <p class="account-status" id="account-status" role="status" aria-live="polite"></p>
+
+      <section class="account-auth-panel" id="account-auth" aria-labelledby="account-auth-heading">
+        <div class="account-auth-heading">
+          <p class="eyebrow" id="account-mode-eyebrow">WELCOME BACK</p>
+          <h2 id="account-auth-heading">Sign in to LOCKD.</h2>
+          <p id="account-auth-copy">Your bookings, saved rentals and account details live here.</p>
+        </div>
+        <div class="account-auth-content">
+          <div class="account-auth-tabs" role="group" aria-label="Account access">
+            <button type="button" class="account-tab is-active" data-auth-mode="signin" aria-pressed="true">Sign in</button>
+            <button type="button" class="account-tab" data-auth-mode="signup" aria-pressed="false">Create account</button>
+          </div>
+
+          <div class="account-social-actions">
+            <button type="button" class="account-social account-social-google" data-provider="google">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.35 12.23c0-.71-.06-1.39-.18-2.05H12v3.88h5.23a4.47 4.47 0 0 1-1.94 2.93v2.43h3.14c1.84-1.69 2.92-4.18 2.92-7.19Z"/><path fill="#34A853" d="M12 21.75c2.63 0 4.84-.87 6.45-2.33l-3.14-2.43c-.87.58-1.98.93-3.31.93-2.55 0-4.71-1.72-5.49-4.03H3.27v2.51A9.75 9.75 0 0 0 12 21.75Z"/><path fill="#FBBC05" d="M6.51 13.89A5.86 5.86 0 0 1 6.2 12c0-.66.11-1.3.31-1.89V7.6H3.27A9.75 9.75 0 0 0 2.25 12c0 1.58.38 3.07 1.02 4.4l3.24-2.51Z"/><path fill="#EA4335" d="M12 6.08c1.43 0 2.71.49 3.72 1.46l2.79-2.79C16.84 3.16 14.63 2.25 12 2.25A9.75 9.75 0 0 0 3.27 7.6l3.24 2.51c.78-2.31 2.94-4.03 5.49-4.03Z"/></svg>
+              <span>Continue with Google</span>
+            </button>
+            <button type="button" class="account-social account-social-apple" data-provider="apple">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.75 12.78c.02 2.12 1.86 2.83 1.88 2.84-.02.05-.29 1.02-.97 2.02-.58.86-1.18 1.72-2.13 1.74-.93.02-1.23-.56-2.29-.56s-1.39.54-2.27.58c-.92.03-1.63-.93-2.22-1.78-1.2-1.74-2.12-4.9-.88-7.04a3.44 3.44 0 0 1 2.9-1.77c.91-.02 1.76.62 2.31.62.56 0 1.6-.77 2.7-.66.46.02 1.76.18 2.59 1.41-.07.05-1.55.9-1.53 2.6ZM14.98 6.91c.47-.57.79-1.36.7-2.15-.68.03-1.5.45-1.98 1.02-.44.5-.82 1.31-.72 2.08.75.06 1.53-.38 2-.95Z"/></svg>
+              <span>Continue with Apple</span>
+            </button>
+          </div>
+
+          <div class="account-divider"><span>or use email</span></div>
+          <form id="account-form" class="account-form" novalidate>
+            <label class="account-field" id="account-name-field" hidden><span>Your name</span><input id="account-name" name="name" type="text" maxlength="100" autocomplete="name"></label>
+            <label class="account-field"><span>Email address</span><input id="account-email" name="email" type="email" maxlength="254" autocomplete="email" required></label>
+            <label class="account-field"><span>Password</span><input id="account-password" name="password" type="password" minlength="8" maxlength="128" autocomplete="current-password" required></label>
+            <label class="account-field" id="account-confirm-field" hidden><span>Confirm password</span><input id="account-confirm-password" name="confirmPassword" type="password" minlength="8" maxlength="128" autocomplete="new-password"></label>
+            <label class="account-consent" id="account-consent" hidden><input type="checkbox" id="account-privacy-consent"><span>I agree to the <a href="privacy.html">Privacy Notice</a>.</span></label>
+            <button class="button button-dark account-submit" id="account-submit" type="submit">Sign in</button>
+            <div class="account-inline-links" id="account-signin-links"><button type="button" class="account-link" id="forgot-password-open">Forgot password?</button><button type="button" class="account-link" id="resend-verification-open">Resend verification email</button></div>
+            <p class="account-privacy-note">You can browse LOCKD without an account. We only ask you to sign in for saved account features.</p>
+          </form>
+        </div>
+      </section>
+
+      <section class="account-recovery-panel" id="account-forgot" hidden aria-labelledby="forgot-heading">
+        <p class="eyebrow">ACCOUNT RECOVERY</p><h2 id="forgot-heading">Reset your password.</h2>
+        <p>Enter your email and we’ll send a reset link if an account is associated with it.</p>
+        <form id="forgot-form" class="account-form">
+          <label class="account-field"><span>Email address</span><input id="forgot-email" type="email" maxlength="254" autocomplete="email" required></label>
+          <button class="button button-dark account-submit" type="submit">Send reset link</button>
+          <button class="account-link" type="button" data-show-auth>Back to sign in</button>
+        </form>
+      </section>
+
+      <section class="account-recovery-panel" id="account-reset" hidden aria-labelledby="reset-heading">
+        <p class="eyebrow">SECURE YOUR ACCOUNT</p><h2 id="reset-heading">Choose a new password.</h2>
+        <p>Use a new password you don’t use on other sites.</p>
+        <form id="reset-form" class="account-form">
+          <label class="account-field"><span>New password</span><input id="reset-password" type="password" minlength="8" maxlength="128" autocomplete="new-password" required></label>
+          <label class="account-field"><span>Confirm new password</span><input id="reset-confirm-password" type="password" minlength="8" maxlength="128" autocomplete="new-password" required></label>
+          <button class="button button-dark account-submit" type="submit">Update password</button>
+        </form>
+      </section>
+
+      <section class="account-dashboard" id="account-dashboard" hidden aria-labelledby="account-dashboard-title">
+        <div class="account-dashboard-heading"><div><p class="eyebrow">YOUR LOCKD</p><h2 id="account-dashboard-title">Welcome back.</h2><p id="account-email-label"></p></div><button class="account-link" id="account-signout" type="button">Sign out</button></div>
+        <nav class="account-section-nav" aria-label="Account sections">
+          <button type="button" data-account-section="overview" aria-current="page">Overview</button>
+          <button type="button" data-account-section="saved">Saved rentals</button>
+          <button type="button" data-account-section="personal">Personal info</button>
+          <button type="button" data-account-section="security">Login &amp; security</button>
+          <button type="button" data-account-section="preferences">Preferences</button>
+        </nav>
+
+        <section class="account-section" data-account-panel="overview" aria-labelledby="overview-title">
+          <p class="eyebrow">YOUR ACCOUNT</p><h3 id="overview-title">Everything in its place.</h3>
+          <div class="account-overview-grid">
+            <a class="account-overview-card" href="rentals.html"><span class="account-card-index">01</span><h4>Explore rentals</h4><p>Pick up your next stay, drive or experience.</p><span class="account-card-link">Browse the catalogue</span></a>
+            <button class="account-overview-card" type="button" data-go-section="saved"><span class="account-card-index">02</span><h4>Saved rentals</h4><p id="saved-overview-count">Your saved listings appear here.</p><span class="account-card-link">View saved</span></button>
+            <article class="account-overview-card account-bookings-card"><span class="account-card-index">03</span><h4>Bookings &amp; trips</h4><p id="booking-history-note">Online reservations are not available yet, so there is no booking history to show.</p><span class="account-card-note">Not connected</span></article>
+          </div>
+          <p class="account-security-note">Your customer and owner tools use the same LOCKD sign-in. Owner listings remain managed in the <a href="owners.html">owner workspace</a>.</p>
+        </section>
+
+        <section class="account-section" data-account-panel="saved" hidden aria-labelledby="saved-title">
+          <div class="account-section-heading"><div><p class="eyebrow">KEPT CLOSE</p><h3 id="saved-title">Saved rentals.</h3></div><a class="text-button" href="rentals.html">Explore rentals</a></div>
+          <p class="account-section-intro">Listings currently published by LOCKD appear first. Saved items that are no longer listed remain here as a private reference.</p>
+          <div class="account-saved-grid" id="account-saved-grid" aria-live="polite"><p>Loading your saved rentals…</p></div>
+        </section>
+
+        <section class="account-section" data-account-panel="personal" hidden aria-labelledby="personal-title">
+          <p class="eyebrow">YOUR DETAILS</p><h3 id="personal-title">Personal information.</h3>
+          <p class="account-onboarding-note" id="profile-onboarding-note" role="status" hidden>Welcome to LOCKD. Add a display name so we can finish setting up your account.</p>
+          <form class="account-form account-profile-form" id="profile-form">
+            <label class="account-field"><span>Display name</span><input id="profile-name" name="display_name" type="text" maxlength="100" autocomplete="name"></label>
+            <label class="account-field"><span>Email address</span><input id="profile-email" type="email" readonly aria-describedby="email-readonly-note"></label>
+            <p class="account-field-note" id="email-readonly-note">Email changes are managed by Supabase account verification settings.</p>
+            <button class="button button-dark" type="submit">Save changes</button>
+          </form>
+        </section>
+
+        <section class="account-section" data-account-panel="security" hidden aria-labelledby="security-title">
+          <p class="eyebrow">ACCOUNT ACCESS</p><h3 id="security-title">Login &amp; security.</h3>
+          <form class="account-form account-profile-form" id="password-form">
+            <label class="account-field"><span>Current password</span><input id="current-password" type="password" autocomplete="current-password" required></label>
+            <label class="account-field"><span>New password</span><input id="new-password" type="password" minlength="8" maxlength="128" autocomplete="new-password" required></label>
+            <label class="account-field"><span>Confirm new password</span><input id="new-password-confirm" type="password" minlength="8" maxlength="128" autocomplete="new-password" required></label>
+            <button class="button button-dark" type="submit">Change password</button>
+          </form>
+          <div class="account-delete-request"><p class="eyebrow">DATA &amp; PRIVACY</p><h4>Request account deletion</h4><p>LOCKD records your request for review. It does not immediately delete your account or erase booking or financial records.</p>
+            <form class="account-form" id="delete-request-form"><label class="account-field"><span>Anything we should know? <small>Optional</small></span><textarea id="delete-reason" rows="3" maxlength="1000"></textarea></label><label class="account-consent"><input id="delete-confirm" type="checkbox" required><span>I understand this is a deletion request, not an instant deletion.</span></label><button class="button button-light" type="submit">Submit deletion request</button></form><p class="account-field-note" id="delete-request-state"></p>
+          </div>
+        </section>
+
+        <section class="account-section" data-account-panel="preferences" hidden aria-labelledby="preferences-title">
+          <p class="eyebrow">MAKE IT YOURS</p><h3 id="preferences-title">Preferences.</h3>
+          <p class="account-section-intro">These settings are saved to your LOCKD profile. A manually chosen discovery area is optional; LOCKD does not save precise location automatically.</p>
+          <form class="account-form account-profile-form" id="preferences-form">
+            <label class="account-field"><span>Preferred currency</span><select id="profile-currency"><option value="KES">Kenyan shilling (KES)</option><option value="USD">US dollar (USD)</option><option value="EUR">Euro (EUR)</option><option value="GBP">Pound sterling (GBP)</option></select></label>
+            <label class="account-field"><span>Language</span><select id="profile-language"><option value="en">English</option><option value="sw">Kiswahili</option></select></label>
+            <label class="account-field"><span>Discovery area <small>Optional, entered by you</small></span><input id="profile-location" type="text" maxlength="120" autocomplete="off" placeholder="City or neighbourhood"></label>
+            <button class="button button-dark" type="submit">Save preferences</button>
+          </form>
+        </section>
+      </section>
+
+      <p class="account-legal-line">By using an account, you agree to use LOCKD responsibly. Read the <a href="privacy.html">Privacy Notice</a>.</p>
+    </main>
+    <footer class="site-footer"><a class="brand brand-footer" href="index.html#top" aria-label="LOCKD home"><span class="brand-word">lockd<span class="brand-period">.</span></span></a><p class="footer-line">Your next move, locked in.</p><div class="footer-bottom"><span>© <span id="year">2026</span> LOCKD</span><span>Stay. Drive. Play. Explore.</span><a href="privacy.html">Privacy</a><a href="#top">Back to top</a></div></footer>
+  </body>
+</html>

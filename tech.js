@@ -1,5 +1,4 @@
 (() => {
-  const savedKey = "lockd:tech:saved:v1";
   const recentKey = "lockd:tech:recent:v1";
   const compareKey = "lockd:tech:compare:v1";
   const savedSearchKey = "lockd:tech:searches:v1";
@@ -44,7 +43,6 @@
   let loadedListings = [];
   let controller = null;
   let searchTimer = null;
-  let saved = readStringList(savedKey);
   let recent = readStringList(recentKey);
   let compared = readStringList(compareKey).slice(0, 3);
   let savedSearches = readSavedSearches();
@@ -168,18 +166,6 @@
     }
   }
 
-  function toggleSaved(listing, button) {
-    saved = saved.includes(listing.slug) ? saved.filter((slug) => slug !== listing.slug) : [listing.slug, ...saved].slice(0, 40);
-    writeList(savedKey, saved);
-    if (button) {
-      const isSaved = saved.includes(listing.slug);
-      button.setAttribute("aria-pressed", String(isSaved));
-      button.setAttribute("aria-label", `${isSaved ? "Remove" : "Save"} ${listing.title}`);
-      button.textContent = isSaved ? "♥" : "♡";
-    }
-    renderPersonal();
-  }
-
   function toggleCompare(listing, button) {
     if (compared.includes(listing.slug)) compared = compared.filter((slug) => slug !== listing.slug);
     else if (compared.length < 3) compared = [...compared, listing.slug];
@@ -231,14 +217,9 @@
       return card;
     }
 
-    const favorite = document.createElement("button");
-    favorite.className = "tech-favourite";
-    favorite.type = "button";
-    favorite.textContent = saved.includes(listing.slug) ? "♥" : "♡";
-    favorite.setAttribute("aria-pressed", String(saved.includes(listing.slug)));
-    favorite.setAttribute("aria-label", `${saved.includes(listing.slug) ? "Remove" : "Save"} ${listing.title}`);
-    favorite.addEventListener("click", () => toggleSaved(listing, favorite));
-    card.append(imageLink, favorite);
+    const favorite = window.LockdAccount?.createFavoriteButton(listing, { className: "tech-favourite" });
+    card.append(imageLink);
+    if (favorite) card.append(favorite);
 
     const topLine = document.createElement("div");
     topLine.className = "tech-card-topline";
@@ -404,20 +385,12 @@
   }
 
   async function renderPersonal() {
-    const savedPanel = document.querySelector("#saved-panel");
     const recentPanel = document.querySelector("#recent-panel");
-    const savedGrid = document.querySelector("#saved-grid");
     const recentGrid = document.querySelector("#recent-grid");
     renderSavedSearches();
-    savedPanel.hidden = saved.length === 0;
     recentPanel.hidden = recent.length === 0;
-    const [savedRows, recentRows] = await Promise.all([
-      Promise.all(saved.slice(0, 4).map(fetchListingBySlug)),
-      Promise.all(recent.slice(0, 4).map(fetchListingBySlug)),
-    ]);
-    savedGrid.replaceChildren(...savedRows.filter(Boolean).map((listing, index) => makeCard(listing, index, true)));
+    const recentRows = await Promise.all(recent.slice(0, 4).map(fetchListingBySlug));
     recentGrid.replaceChildren(...recentRows.filter(Boolean).map((listing, index) => makeCard(listing, index, true)));
-    if (!savedRows.filter(Boolean).length) savedPanel.hidden = true;
     if (!recentRows.filter(Boolean).length) recentPanel.hidden = true;
   }
 

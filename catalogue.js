@@ -193,6 +193,8 @@
       imageLink.append(placeholder);
     }
     article.append(imageLink);
+    const saveButton = window.LockdAccount?.createFavoriteButton(listing, { className: "listing-save" });
+    if (saveButton) article.append(saveButton);
 
     const meta = document.createElement("div");
     meta.className = "listing-card-meta";

@@ -2,5 +2,8 @@ User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /lockd2/
+Disallow: /account.html
+Disallow: /auth-callback.html
+Disallow: /privacy.html
 
 Sitemap: https://lockd2.vercel.app/sitemap.xml

@@ -215,6 +215,8 @@
       imageLink.append(fallback);
     }
     article.append(imageLink);
+    const saveButton = window.LockdAccount?.createFavoriteButton(item, { className: "listing-save" });
+    if (saveButton) article.append(saveButton);
     const copy = document.createElement("div");
     copy.className = "discovery-card-copy";
     const meta = document.createElement("p");

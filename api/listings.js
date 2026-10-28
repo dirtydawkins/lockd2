@@ -65,6 +65,17 @@ module.exports = async function handler(req, res) {
   if (!config) return send(res, 503, { error: "catalogue_not_configured", message: "The live rental catalogue is not configured." });
 
   const { category, q, slug, page: pageValue, sort, market, group } = req.query || {};
+  const idsValue = req.query?.ids;
+  let requestedIds = [];
+  if (idsValue !== undefined) {
+    if (typeof idsValue !== "string" || idsValue.length > 3699) return send(res, 400, { error: "invalid_listing_ids", message: "Choose valid saved listings." });
+    requestedIds = [...new Set(idsValue.split(",").filter(Boolean))];
+    if (!requestedIds.length || requestedIds.length > 100 || requestedIds.some((id) => !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id))) {
+      return send(res, 400, { error: "invalid_listing_ids", message: "Choose up to 100 valid saved listings." });
+    }
+    const otherFilters = Object.keys(req.query || {}).filter((key) => key !== "ids");
+    if (otherFilters.length) return send(res, 400, { error: "conflicting_listing_ids", message: "Load saved listings without catalogue search filters." });
+  }
   if (category && !categories.has(category)) {
     return send(res, 400, { error: "invalid_category", message: "Choose a supported rental category." });
   }
@@ -143,7 +154,7 @@ module.exports = async function handler(req, res) {
     if (!availabilityIds.length) return send(res, 200, { items: [], page: 0, hasMore: false });
   }
 
-  const limit = 24;
+  const limit = requestedIds.length || 24;
   const query = new URLSearchParams({
     select: "id,slug,title,category,market_category,summary,description,images,image_alt,location_label,price_amount,currency,price_unit,deposit_amount,deposit_currency,rental_durations,collection_available,delivery_available,attributes,requires_approval,checkout_enabled,listing_status,approval_status,created_at,published_at",
     listing_status: "eq.published",
@@ -159,6 +170,7 @@ module.exports = async function handler(req, res) {
   else if (group) andFilters.push(`or(market_category.eq.${group},category.in.(${groups[group].join(",")}))`);
   else if (market === "tech") query.set("category", `in.(${technologyCategories.join(",")})`);
   if (slug) query.set("slug", `eq.${slug}`);
+  if (requestedIds.length) query.set("id", `in.(${requestedIds.join(",")})`);
   if (brand) query.set("attributes->>brand", `ilike.*${brand}*`);
   if (productType) query.set("attributes->>product_type", `eq.${productType}`);
   if (condition) query.set("attributes->>condition", `eq.${condition}`);
@@ -280,7 +292,7 @@ module.exports = async function handler(req, res) {
     }
     if (!response.ok) return send(res, 502, { error: "catalogue_unavailable", message: "The rental catalogue is temporarily unavailable." });
     const rows = await response.json();
-    const hasMore = rankedIds ? (page + 1) * limit < rankedTotal : rows.length > limit;
+    const hasMore = requestedIds.length ? false : rankedIds ? (page + 1) * limit < rankedTotal : rows.length > limit;
     const orderedRows = rankedIds
       ? rankedIds.map((id) => rows.find((row) => row.id === id)).filter(Boolean)
       : rows.slice(0, limit);

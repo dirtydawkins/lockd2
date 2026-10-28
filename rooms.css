@@ -18,7 +18,7 @@
 .room-results-status { margin: 0 0 1rem; color: #716861; font-size: .78rem; line-height: 1.6; }
 .room-results-status[data-kind="error"] { padding: 1rem; border-left: 2px solid var(--burgundy); background: #eee8e1; color: var(--oxblood); }
 .room-results-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.4rem 1rem; }
-.room-result-card { min-width: 0; padding-bottom: 1rem; border-bottom: 1px solid var(--line); }
+.room-result-card { position: relative; min-width: 0; padding-bottom: 1rem; border-bottom: 1px solid var(--line); }
 .room-result-image { position: relative; display: block; aspect-ratio: 1.3; overflow: hidden; background: var(--stone); }
 .room-result-image img { width: 100%; height: 100%; object-fit: cover; transition: transform var(--motion-image) var(--motion-ease); }
 .room-result-image:hover img, .room-result-card:focus-within img { transform: scale(1.025); }
