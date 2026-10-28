@@ -7,6 +7,7 @@
   const status = document.querySelector("#availability-status");
   const storageKey = "lockd:bundle:v3";
   let listing = null;
+  let galleryRequest = 0;
 
   const categoryLabels = {
     stay: "Stay", drive: "Drive", play: "Play", technology: "Technology", experience: "Experiences",
@@ -49,8 +50,26 @@
 
   function setMessage(message, kind = "info") {
     if (!status) return;
+    const changed = status.textContent !== message;
     status.textContent = message;
     status.dataset.kind = kind;
+    if (changed && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      status.classList.remove("is-updating");
+      void status.offsetWidth;
+      status.classList.add("is-updating");
+      window.setTimeout(() => status.classList.remove("is-updating"), 260);
+    }
+  }
+
+  function setEstimate(output, message) {
+    if (!output || output.textContent === message) return;
+    output.textContent = message;
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      output.classList.remove("is-updating");
+      void output.offsetWidth;
+      output.classList.add("is-updating");
+      window.setTimeout(() => output.classList.remove("is-updating"), 260);
+    }
   }
 
   function renderEstimate() {
@@ -61,11 +80,11 @@
     const units = Number(document.querySelector("#quantity")?.value || 1);
     const rate = Number(listing.price_amount);
     if (!startDate || !endDate) {
-      output.textContent = "Choose dates to estimate the rental subtotal. Fees and refundable deposits are separate.";
+      setEstimate(output, "Choose dates to estimate the rental subtotal. Fees and refundable deposits are separate.");
       return;
     }
     if (endDate <= startDate || !Number.isInteger(units) || units < 1 || units > 20 || !Number.isFinite(rate) || rate <= 0) {
-      output.textContent = "A rental subtotal cannot be estimated from these dates, quantity or listing rate.";
+      setEstimate(output, "A rental subtotal cannot be estimated from these dates, quantity or listing rate.");
       return;
     }
     const estimate = window.LockdRentalPricing?.estimateRentalSubtotal({
@@ -77,12 +96,12 @@
       endDate,
     });
     if (!estimate) {
-      output.textContent = listing.price_unit === "week" || listing.price_unit === "month"
+      setEstimate(output, listing.price_unit === "week" || listing.price_unit === "month"
         ? `This ${listing.price_unit} rate needs a whole ${listing.price_unit} period for a reliable estimate. Confirm partial periods with the owner.`
-        : "The listing rate cannot be calculated from the selected dates. Confirm the total with the owner.";
+        : "The listing rate cannot be calculated from the selected dates. Confirm the total with the owner.");
       return;
     }
-    output.textContent = `Rental subtotal estimate: ${priceText(estimate.amount, estimate.currency, "")} (${estimate.period} × ${estimate.quantity}). Fees and refundable deposit are separate. This estimate does not reserve the rental.`;
+    setEstimate(output, `Rental subtotal estimate: ${priceText(estimate.amount, estimate.currency, "")} (${estimate.period} × ${estimate.quantity}). Fees and refundable deposit are separate. This estimate does not reserve the rental.`);
   }
 
   function addToBundle() {
@@ -98,27 +117,42 @@
     });
     try { localStorage.setItem(storageKey, JSON.stringify(bundle)); } catch { /* Storage can be disabled. */ }
     const button = document.querySelector("#add-to-bundle");
-    if (button) button.textContent = "Added to bundle";
+    if (button) {
+      button.textContent = "Added to bundle";
+      button.classList.remove("is-feedback");
+      void button.offsetWidth;
+      button.classList.add("is-feedback");
+      window.setTimeout(() => button.classList.remove("is-feedback"), 260);
+    }
   }
 
-  function renderGallery(images) {
+  function renderGallery(images, record) {
     const cover = document.querySelector("#rental-cover");
     const thumbs = document.querySelector("#rental-thumbnails");
     const validImages = Array.isArray(images) ? images.map(safeImageUrl).filter(Boolean) : [];
     if (!validImages.length) {
-      cover.removeAttribute("src");
-      cover.alt = "No listing photograph has been provided";
-      const placeholder = document.createElement("span");
-      placeholder.className = "listing-image-placeholder rental-placeholder";
-      placeholder.setAttribute("aria-hidden", "true");
-      placeholder.textContent = (listing?.title || "L").slice(0, 1).toUpperCase();
-      cover.replaceWith(placeholder);
-      document.querySelector("#rental-image-caption").textContent = "No listing photograph provided";
+      const photo = window.LockdPhotoFallbacks?.forListing(record);
+      if (photo) {
+        cover.src = photo.src;
+        cover.alt = photo.alt;
+        document.querySelector("#rental-image-caption").textContent = photo.note;
+      } else {
+        cover.removeAttribute("src");
+        cover.alt = "No listing photograph has been provided";
+        const placeholder = document.createElement("span");
+        placeholder.className = "listing-image-placeholder rental-placeholder";
+        placeholder.setAttribute("aria-hidden", "true");
+        placeholder.textContent = (record?.title || "L").slice(0, 1).toUpperCase();
+        cover.replaceWith(placeholder);
+        document.querySelector("#rental-image-caption").textContent = "No listing photograph provided";
+      }
+      thumbs.hidden = true;
       return;
     }
     cover.src = validImages[0];
     cover.alt = typeof listing.image_alt === "string" ? listing.image_alt : listing.title;
     document.querySelector("#rental-image-caption").textContent = `${validImages.length} ${validImages.length === 1 ? "photograph" : "photographs"}`;
+    thumbs.replaceChildren();
     validImages.forEach((url, index) => {
       const button = document.createElement("button");
       button.type = "button";
@@ -129,10 +163,30 @@
       image.alt = "";
       image.loading = "lazy";
       button.append(image);
-      button.addEventListener("click", () => {
+      button.addEventListener("click", async () => {
+        if (button.getAttribute("aria-current") === "true") return;
+        const requestId = ++galleryRequest;
+        const preload = new Image();
+        preload.decoding = "async";
+        try {
+          if (preload.decode) {
+            preload.src = url;
+            await preload.decode();
+          } else {
+            await new Promise((resolve, reject) => {
+              preload.onload = resolve;
+              preload.onerror = reject;
+              preload.src = url;
+            });
+          }
+        } catch { return; }
+        if (requestId !== galleryRequest) return;
         cover.src = url;
         cover.alt = typeof listing.image_alt === "string" ? listing.image_alt : listing.title;
         thumbs.querySelectorAll("button").forEach((thumb) => thumb.setAttribute("aria-current", String(thumb === button)));
+        if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          cover.animate?.([{ opacity: .72 }, { opacity: 1 }], { duration: 180, easing: "ease-out" });
+        }
       });
       thumbs.append(button);
     });
@@ -151,6 +205,7 @@
       const url = new URL("rental.html", window.location.href);
       url.searchParams.set("slug", record.slug);
       url.searchParams.set("from", record.category || "technology");
+      url.searchParams.set("returnTo", `${window.location.pathname}${window.location.search}#related-tech-rentals`);
       link.href = url.href;
       const rawImage = Array.isArray(record.images) ? record.images[0] : "";
       let imageUrl = "";
@@ -255,9 +310,30 @@
         localStorage.setItem(key, JSON.stringify([record.slug, ...list.filter((entry) => entry !== record.slug)].slice(0, 12)));
       } catch { /* Browsing history is optional and stored on this device only. */ }
     }
-    renderGallery(record.images);
-    detail.hidden = false;
-    state.hidden = true;
+    renderGallery(record.images, record);
+    const transitionPlaceholder = document.querySelector("#rental-transition-placeholder");
+    const showDetail = () => {
+      detail.hidden = false;
+      state.hidden = true;
+      if (transitionPlaceholder) transitionPlaceholder.hidden = true;
+    };
+    const placeholderImage = transitionPlaceholder?.querySelector("img");
+    const rentalCoverImage = document.querySelector("#rental-cover");
+    if (transitionPlaceholder && !transitionPlaceholder.hidden && placeholderImage?.src && rentalCoverImage?.src && typeof document.startViewTransition === "function" && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      rentalCoverImage.style.viewTransitionName = "lockd-rental-photo";
+      try {
+        const transition = document.startViewTransition(showDetail);
+        transition.finished.then(
+          () => { rentalCoverImage.style.viewTransitionName = ""; },
+          () => { rentalCoverImage.style.viewTransitionName = ""; },
+        );
+      } catch {
+        rentalCoverImage.style.viewTransitionName = "";
+        showDetail();
+      }
+    } else {
+      showDetail();
+    }
     renderEstimate();
     loadRelated(record);
   }
@@ -287,6 +363,8 @@
       } catch { /* The listing remains readable if optional public contact config is unavailable. */ }
       renderListing(data.item, config);
     } catch (error) {
+      const transitionPlaceholder = document.querySelector("#rental-transition-placeholder");
+      if (transitionPlaceholder) transitionPlaceholder.hidden = true;
       state.dataset.kind = "error";
       state.textContent = error.message || "This rental is temporarily unavailable.";
     }
@@ -301,14 +379,28 @@
 
   const start = document.querySelector("#start-date");
   const end = document.querySelector("#end-date");
+  const quantityInput = document.querySelector("#quantity");
+  function syncFieldState(input) {
+    input?.closest("label")?.classList.toggle("has-value", Boolean(input.value));
+  }
   if (start && end) {
     start.min = localToday();
     end.min = localToday();
+    const requestedStart = params.get("startDate");
+    const requestedEnd = params.get("endDate");
+    if (/^\d{4}-\d{2}-\d{2}$/.test(requestedStart || "")) start.value = requestedStart;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(requestedEnd || "")) end.value = requestedEnd;
+    if (start.value) end.min = start.value;
+    const requestedQuantity = Number(params.get("quantity"));
+    if (Number.isInteger(requestedQuantity) && requestedQuantity >= 1 && requestedQuantity <= 20) {
+      quantityInput.value = String(requestedQuantity);
+    }
+    [start, end, quantityInput].forEach(syncFieldState);
     start.addEventListener("change", () => { end.min = start.value || localToday(); });
-    start.addEventListener("input", renderEstimate);
-    end.addEventListener("input", renderEstimate);
+    start.addEventListener("input", () => { syncFieldState(start); renderEstimate(); });
+    end.addEventListener("input", () => { syncFieldState(end); renderEstimate(); });
   }
-  document.querySelector("#quantity")?.addEventListener("input", renderEstimate);
+  quantityInput?.addEventListener("input", () => { syncFieldState(quantityInput); renderEstimate(); });
 
   form?.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -352,6 +444,18 @@
   document.querySelector("#add-to-bundle")?.addEventListener("click", addToBundle);
   const from = params.get("from");
   const backLink = document.querySelector("#back-to-category");
-  if (from && categoryLabels[from]) backLink.href = `rentals.html?category=${encodeURIComponent(from)}`;
+  const returnTo = params.get("returnTo");
+  let hasValidReturnTarget = false;
+  if (returnTo && backLink) {
+    try {
+      const destination = new URL(returnTo, window.location.origin);
+      const allowedPaths = new Set(["/rentals.html", "/tech.html"]);
+      if (destination.origin === window.location.origin && allowedPaths.has(destination.pathname)) {
+        backLink.href = destination.href;
+        hasValidReturnTarget = true;
+      }
+    } catch { /* Fall back to the category link when the saved return location is invalid. */ }
+  }
+  if (!hasValidReturnTarget && from && categoryLabels[from] && backLink) backLink.href = `rentals.html?category=${encodeURIComponent(from)}`;
   loadListing();
 })();

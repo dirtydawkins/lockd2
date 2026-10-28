@@ -10,7 +10,7 @@
     creator: "Cameras & creator gear", audio: "Audio & events", work: "Work & productivity",
   };
   const requestedGroup = params.get("group") || "all";
-  const initialGroup = Object.hasOwn(groupLabels, requestedGroup) ? requestedGroup : "all";
+  let initialGroup = Object.hasOwn(groupLabels, requestedGroup) ? requestedGroup : "all";
   const typeLabels = {
     gaming: "Gaming", phone: "Phones", computer: "Computers", tablet: "Tablets", camera: "Cameras",
     lens: "Lenses", audio: "Audio", creator: "Creator gear", projector: "Projectors",
@@ -22,6 +22,8 @@
     mobile_productivity: "Travel and mobile productivity", streaming: "Streaming and podcast recording",
   };
   const form = document.querySelector("#tech-filter-form");
+  const filterToggle = document.querySelector("#tech-filter-toggle");
+  const filterDrawer = document.querySelector("#tech-filter-drawer");
   const grid = document.querySelector("#tech-listing-grid");
   const status = document.querySelector("#tech-status");
   const loadMore = document.querySelector("#tech-load-more");
@@ -48,7 +50,7 @@
   let savedSearches = readSavedSearches();
   let benchmarks = [];
   let showAllBenchmarks = false;
-  const selectedUseCase = params.get("useCase") || "";
+  let selectedUseCase = params.get("useCase") || "";
 
   function readStringList(key) {
     try {
@@ -94,6 +96,11 @@
     const url = new URL("rental.html", window.location.href);
     url.searchParams.set("slug", listing.slug);
     url.searchParams.set("from", "technology");
+    const current = new URL(window.location.href);
+    url.searchParams.set("returnTo", `${current.pathname}${current.search}#published-rentals`);
+    if (filterFields.startDate.value) url.searchParams.set("startDate", filterFields.startDate.value);
+    if (filterFields.endDate.value) url.searchParams.set("endDate", filterFields.endDate.value);
+    if (Number(filterFields.quantity.value) > 1) url.searchParams.set("quantity", filterFields.quantity.value);
     return url.href;
   }
 
@@ -108,6 +115,15 @@
     const raw = Array.isArray(listing.images) ? listing.images[0] : "";
     const url = validImage(raw || listing.cover_image);
     if (!url) {
+      const photo = window.LockdPhotoFallbacks?.forListing(listing);
+      if (photo) {
+        const image = document.createElement("img");
+        image.src = photo.src;
+        image.alt = cover ? photo.alt : "";
+        image.loading = "lazy";
+        image.decoding = "async";
+        return image;
+      }
       const placeholder = document.createElement("span");
       placeholder.className = "tech-placeholder";
       placeholder.setAttribute("aria-hidden", "true");
@@ -145,6 +161,12 @@
     if (button) {
       button.textContent = "Added to bundle";
       button.setAttribute("aria-pressed", "true");
+      button.classList.add("is-feedback");
+      window.clearTimeout(Number(button.dataset.feedbackTimer));
+      button.dataset.feedbackTimer = String(window.setTimeout(() => {
+        button.classList.remove("is-feedback");
+        button.textContent = "In your bundle";
+      }, 240));
     }
   }
 
@@ -177,7 +199,7 @@
   function makeCard(listing, index, compact = false) {
     const card = document.createElement("article");
     card.className = "tech-card";
-    card.style.animationDelay = `${Math.min(index, 8) * 25}ms`;
+    card.style.setProperty("--motion-delay", `${Math.min(index % 6, 5) * 32}ms`);
     if (compact) card.classList.add("tech-mini-card");
     const url = listingUrl(listing);
     const imageLink = document.createElement("a");
@@ -185,6 +207,14 @@
     imageLink.href = url;
     imageLink.setAttribute("aria-label", `View ${listing.title}`);
     imageLink.append(imageFor(listing, true));
+    const hasListingPhoto = Boolean(validImage(Array.isArray(listing.images) ? listing.images[0] : listing.cover_image));
+    const fallbackPhoto = hasListingPhoto ? null : window.LockdPhotoFallbacks?.forListing(listing);
+    if (fallbackPhoto && !compact) {
+      const note = document.createElement("span");
+      note.className = "listing-image-note";
+      note.textContent = fallbackPhoto.note;
+      imageLink.append(note);
+    }
     imageLink.addEventListener("click", () => updateRecent(listing.slug));
     if (!compact) card.append(imageLink);
 
@@ -557,9 +587,18 @@
 
   async function loadBenchmarks() {
     try {
-      const response = await fetch("/api/benchmarks", { headers: { Accept: "application/json" }, cache: "no-store" });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok || !Array.isArray(data.records)) throw new Error(data.message || "Research references are temporarily unavailable.");
+      let data;
+      try {
+        const response = await fetch("/api/benchmarks", { headers: { Accept: "application/json" }, cache: "no-store" });
+        const apiData = await response.json().catch(() => ({}));
+        if (response.ok && Array.isArray(apiData.records)) data = apiData;
+      } catch { /* Static previews can read the same non-bookable snapshot directly. */ }
+      if (!data) {
+        const response = await fetch("./data/tech-market-benchmarks.json", { headers: { Accept: "application/json" }, cache: "no-store" });
+        const snapshot = await response.json().catch(() => ({}));
+        if (!response.ok || !Array.isArray(snapshot.records)) throw new Error("Research references are temporarily unavailable.");
+        data = { ...snapshot, source: "snapshot", notice: "Local preview uses the checked-in, source-linked research snapshot. These are not LOCKD prices." };
+      }
       benchmarks = data.records;
       if (data.source === "snapshot") {
         document.querySelector("#benchmark-footnote").textContent = `${data.notice || "Curated research snapshot shown."} ${data.researchNotes?.join(" ") || ""}`;
@@ -579,12 +618,41 @@
     url.search = "";
     if (filters.group) url.searchParams.set("group", filters.group);
     for (const [key, value] of Object.entries(filters)) {
-      if (key !== "group" && key !== "sort") url.searchParams.set(key, value);
+      if (key !== "group" && key !== "sort" && !(key === "quantity" && value === "1")) url.searchParams.set(key, value);
     }
+    if (filters.sort && filters.sort !== "newest") url.searchParams.set("sort", filters.sort);
     window.history.replaceState({}, "", url);
+    updateFilterToggle();
   }
 
-  const group = initialGroup;
+  function updateFilterToggle() {
+    Object.values(filterFields).forEach((field) => field?.closest("label")?.classList.toggle("has-value", Boolean(field.value)));
+    if (!filterToggle) return;
+    const selected = Object.entries(activeParams()).filter(([key, value]) => key !== "sort" && !(key === "quantity" && value === "1"));
+    filterToggle.textContent = selected.length ? `Filters (${selected.length})` : "Filters";
+  }
+
+  function setFilterDrawerOpen(open) {
+    if (!form || !filterToggle || !filterDrawer) return;
+    if (!open && form.contains(document.activeElement)) filterToggle.focus();
+    filterDrawer.classList.toggle("is-open", open);
+    filterToggle.setAttribute("aria-expanded", String(open));
+    form.inert = !open;
+    form.setAttribute("aria-hidden", String(!open));
+  }
+
+  const mobileFilters = window.matchMedia("(max-width: 760px)");
+  function syncFilterDrawer() {
+    if (!filterToggle || !filterDrawer) return;
+    const mobile = mobileFilters.matches;
+    filterToggle.hidden = !mobile;
+    filterDrawer.classList.toggle("is-collapsible", mobile);
+    const hasActiveSelection = Object.entries(activeParams()).some(([key, value]) => key !== "sort" && !(key === "quantity" && value === "1"));
+    setFilterDrawerOpen(!mobile || hasActiveSelection);
+    updateFilterToggle();
+  }
+
+  let group = initialGroup;
   document.querySelectorAll("[data-group]").forEach((link) => {
     if (link.dataset.group === group) link.setAttribute("aria-current", "page");
   });
@@ -610,6 +678,13 @@
   filterFields.startDate.addEventListener("change", () => { filterFields.endDate.min = filterFields.startDate.value || localDate; });
   if (group !== "all") document.querySelector(".tech-hero-copy .eyebrow").textContent = `LOCKD / THE TECH EDIT · ${groupLabels[group].toUpperCase()}`;
 
+  filterToggle?.addEventListener("click", () => {
+    const open = filterToggle.getAttribute("aria-expanded") !== "true";
+    setFilterDrawerOpen(open);
+  });
+  syncFilterDrawer();
+  mobileFilters.addEventListener("change", syncFilterDrawer);
+
   form.addEventListener("submit", (event) => { event.preventDefault(); setUrlFromFilters(); loadListings(); });
   form.addEventListener("change", (event) => {
     if (event.target.name !== "q" && event.target.name !== "brand" && event.target.name !== "location") {
@@ -624,9 +699,14 @@
     });
   });
   form.addEventListener("reset", () => window.setTimeout(() => {
+    initialGroup = "all";
+    group = "all";
+    selectedUseCase = "";
     document.querySelectorAll("[data-group]").forEach((link) => link.setAttribute("aria-current", String(link.dataset.group === "all")));
-    window.history.replaceState({}, "", "tech.html");
-    window.location.reload();
+    document.querySelector(".tech-hero-copy .eyebrow").textContent = "LOCKD / THE TECH EDIT";
+    setUrlFromFilters();
+    syncFilterDrawer();
+    loadListings();
   }, 0));
   loadMore.addEventListener("click", () => loadListings({ append: true }));
   document.querySelector("#benchmark-category").addEventListener("change", () => { showAllBenchmarks = false; renderBenchmarks(); });

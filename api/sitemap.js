@@ -15,7 +15,7 @@ module.exports = async function handler(req, res) {
 
   res.setHeader("Content-Type", "application/xml; charset=utf-8");
   res.setHeader("Cache-Control", "public, max-age=300, stale-while-revalidate=600");
-  const paths = ["/", "/rentals.html", "/tech.html", "/owners.html"];
+  const paths = ["/", "/rentals.html", "/destinations.html", "/tech.html", "/owners.html"];
   const config = supabaseConfig();
 
   if (config) {

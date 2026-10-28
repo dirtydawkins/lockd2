@@ -17,7 +17,9 @@
     <link rel="icon" href="./favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="./styles.css">
     <link rel="stylesheet" href="./catalogue.css">
+    <script src="./motion.js" defer></script>
     <script src="./app.js" defer></script>
+    <script src="./photo-fallbacks.js" defer></script>
     <script src="./rental-pricing.js" defer></script>
     <script src="./rental.js" defer></script>
   </head>
@@ -44,6 +46,10 @@
         <a href="index.html">Home</a><span aria-hidden="true">/</span><a href="rentals.html">Rentals</a><span aria-hidden="true">/</span><span id="breadcrumb-title">Rental details</span>
       </nav>
       <div class="rental-state" id="rental-state" role="status" aria-live="polite">Loading listing…</div>
+      <figure class="rental-transition-placeholder" id="rental-transition-placeholder" hidden>
+        <img alt="" aria-hidden="true" src="">
+        <figcaption>Opening rental details</figcaption>
+      </figure>
       <article class="rental-detail" id="rental-detail" hidden>
         <div class="rental-gallery">
           <figure class="rental-cover"><img id="rental-cover" alt="" src=""><figcaption id="rental-image-caption"></figcaption></figure>

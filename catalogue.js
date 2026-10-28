@@ -15,6 +15,7 @@
   const params = new URLSearchParams(window.location.search);
   const category = params.get("category") || "";
   const query = params.get("q") || "";
+  const locationQuery = params.get("location") || "";
   const bundleMode = params.get("bundle") === "1";
   const grid = document.querySelector("#listing-grid");
   const status = document.querySelector("#catalogue-status");
@@ -22,6 +23,7 @@
   const loadMoreButton = document.querySelector("#load-more");
   const searchForm = document.querySelector("#catalogue-search-form");
   const searchInput = document.querySelector("#catalogue-search");
+  const locationInput = document.querySelector("#catalogue-location");
   const sortSelect = document.querySelector("#catalogue-sort");
   const pageSize = 24;
   let page = 0;
@@ -147,19 +149,26 @@
     const article = document.createElement("article");
     article.className = "listing-card";
     article.dataset.listingId = listing.id;
-    article.style.animationDelay = `${Math.min(index, 8) * 35}ms`;
+    article.style.setProperty("--motion-delay", `${Math.min(index % 6, 5) * 32}ms`);
     const detailsUrl = linkToListing(listing);
     const imageLink = document.createElement("a");
     imageLink.className = "listing-card-image";
     imageLink.href = detailsUrl;
     imageLink.setAttribute("aria-label", `View ${listing.title}`);
     const imageUrl = safeImageUrl(Array.isArray(listing.images) ? listing.images[0] : listing.cover_image);
-    if (imageUrl) {
+    const fallback = !imageUrl ? window.LockdPhotoFallbacks?.forListing(listing) : null;
+    if (imageUrl || fallback) {
       const image = document.createElement("img");
-      image.src = imageUrl;
-      image.alt = typeof listing.image_alt === "string" ? listing.image_alt : listing.title;
+      image.src = imageUrl || fallback.src;
+      image.alt = imageUrl ? (typeof listing.image_alt === "string" ? listing.image_alt : listing.title) : fallback.alt;
       image.loading = "lazy";
       imageLink.append(image);
+      if (!imageUrl && fallback.note) {
+        const note = document.createElement("span");
+        note.className = "listing-image-note";
+        note.textContent = fallback.note;
+        imageLink.append(note);
+      }
     } else {
       const placeholder = document.createElement("span");
       placeholder.className = "listing-image-placeholder";
@@ -243,13 +252,21 @@
     if (button) {
       button.textContent = "In your bundle";
       button.setAttribute("aria-pressed", "true");
+      button.classList.add("is-feedback");
+      window.setTimeout(() => button.classList.remove("is-feedback"), 260);
     }
   }
 
   function renderBundle() {
     const lines = document.querySelector("#bundle-lines");
     if (!panel || !lines) return;
+    const wasHidden = panel.hidden;
     panel.hidden = !bundleMode && bundle.items.length === 0;
+    if (wasHidden && !panel.hidden) {
+      panel.classList.remove("is-entering");
+      requestAnimationFrame(() => panel.classList.add("is-entering"));
+      window.setTimeout(() => panel.classList.remove("is-entering"), 280);
+    }
     lines.replaceChildren();
     if (!bundle.items.length) {
       const empty = document.createElement("p");
@@ -379,6 +396,7 @@
     const apiUrl = new URL("/api/listings", window.location.origin);
     if (category) apiUrl.searchParams.set("category", category);
     if (query) apiUrl.searchParams.set("q", query);
+    if (locationQuery) apiUrl.searchParams.set("location", locationQuery);
     apiUrl.searchParams.set("page", String(nextPage));
     apiUrl.searchParams.set("sort", sortSelect?.value || "newest");
     try {
@@ -404,9 +422,11 @@
       if (resultCount) resultCount.textContent = `${items.length}${hasMore ? "+" : ""} published ${items.length === 1 ? "rental" : "rentals"}`;
       if (items.length === 0) {
         status.dataset.kind = "empty";
-        status.textContent = query
-          ? "No published rentals match that search yet. Try a different term or browse all categories."
-          : `There are no published ${category && categories[category] ? categories[category].toLowerCase() : "rentals"} to show yet.`;
+        status.textContent = locationQuery
+          ? `No published rentals are listed for ${locationQuery} yet. Try another location or browse all rentals.`
+          : query
+            ? "No published rentals match that search yet. Try a different term or browse all categories."
+            : `There are no published ${category && categories[category] ? categories[category].toLowerCase() : "rentals"} to show yet.`;
       } else {
         status.dataset.kind = "loaded";
         status.textContent = "Only published, approved rentals appear here.";
@@ -432,6 +452,21 @@
     document.querySelector('[data-filter="all"]')?.setAttribute("aria-current", "page");
   }
   if (query && searchInput) searchInput.value = query;
+  if (locationQuery && locationInput) locationInput.value = locationQuery;
+  const destinationNote = document.querySelector("#destination-filter-note");
+  if (locationQuery && destinationNote) {
+    destinationNote.hidden = false;
+    destinationNote.textContent = `Showing published LOCKD rentals near ${locationQuery}. Destination photos are editorial references, not bookable listings.`;
+  }
+  const vehicleGuide = document.querySelector("#vehicle-photo-guide");
+  if (vehicleGuide) vehicleGuide.hidden = category !== "drive";
+  document.querySelectorAll("[data-filter]").forEach((link) => {
+    const nextUrl = new URL(link.href, window.location.href);
+    if (query) nextUrl.searchParams.set("q", query);
+    if (locationQuery) nextUrl.searchParams.set("location", locationQuery);
+    if (bundleMode) nextUrl.searchParams.set("bundle", "1");
+    link.href = nextUrl.href;
+  });
   if (searchForm && searchInput) {
     searchForm.addEventListener("submit", (event) => {
       event.preventDefault();
@@ -439,6 +474,8 @@
       const nextQuery = searchInput.value.trim();
       if (category) url.searchParams.set("category", category);
       if (nextQuery) url.searchParams.set("q", nextQuery);
+      const nextLocation = locationInput?.value.trim() || "";
+      if (nextLocation) url.searchParams.set("location", nextLocation);
       if (bundleMode) url.searchParams.set("bundle", "1");
       window.location.assign(url.href);
     });

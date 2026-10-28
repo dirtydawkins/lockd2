@@ -19,7 +19,9 @@
     <link rel="stylesheet" href="./styles.css">
     <link rel="stylesheet" href="./catalogue.css">
     <link rel="stylesheet" href="./tech.css">
+    <script src="./motion.js" defer></script>
     <script src="./app.js" defer></script>
+    <script src="./photo-fallbacks.js" defer></script>
     <script src="./tech.js" defer></script>
   </head>
   <body>
@@ -78,6 +80,9 @@
           <p class="tech-section-copy">Only approved LOCKD listings appear here. A published listing’s own terms and date calendar determine its price and availability.</p>
         </div>
 
+        <button class="text-button tech-filter-toggle" id="tech-filter-toggle" type="button" aria-controls="tech-filter-drawer" aria-expanded="true" hidden>Filters</button>
+        <div class="tech-filter-drawer" id="tech-filter-drawer">
+          <div class="tech-filter-drawer-inner">
         <form class="tech-filters" id="tech-filter-form" aria-label="Filter published technology rentals">
           <label class="tech-search-field">Search<input type="search" name="q" id="tech-search" placeholder="Model, feature or use" autocomplete="off"></label>
           <label>Brand<input type="search" name="brand" id="tech-brand" list="tech-brands" placeholder="Any brand" autocomplete="off"><datalist id="tech-brands"></datalist></label>
@@ -97,6 +102,8 @@
           <button class="text-button tech-clear-filters" type="reset" id="clear-tech-filters">Clear filters</button>
           <button class="text-button tech-save-search" type="button" id="save-tech-search">Save this search</button>
         </form>
+          </div>
+        </div>
 
         <div class="tech-results-head">
           <p id="tech-result-count" aria-live="polite"></p>
@@ -121,6 +128,40 @@
           <div class="tech-personal-heading"><div><p class="eyebrow">Your browsing history</p><h2>Recently<br><em>viewed.</em></h2></div><span class="local-data-note">Saved on this device</span></div>
           <div class="tech-mini-grid" id="recent-grid"></div>
         </div>
+      </section>
+
+      <section class="tech-photo-guide" aria-labelledby="tech-photo-guide-title">
+        <div class="tech-section-heading">
+          <div><p class="eyebrow">Photo-identified gear · visual reference only</p><h2 id="tech-photo-guide-title">Gear in<br><em>your photos.</em></h2></div>
+          <p class="tech-section-copy">Product-family matches and visible details are identified from the images you supplied. Exact model, internal specifications, accessories and availability need owner confirmation.</p>
+        </div>
+        <div class="tech-photo-grid">
+          <article class="tech-photo-card">
+            <img src="./assets/photos/playstation5-setup.jpeg" alt="PlayStation 5-family console and white DualSense controller beside a television" width="736" height="1104" loading="lazy">
+            <div><p class="eyebrow">GAMING CONSOLE · FAMILY MATCH</p><h3>PlayStation 5 console</h3><p>White curved side panels · black center spine · DualSense-style wireless controller pictured. Slim/standard edition, storage, included games and controller count are unverified.</p><p class="tech-photo-price">Market reference: PS5 Slim listed at KSh 5,500 / day by Flexi Gear.</p><a href="https://flexigear.co.ke/" target="_blank" rel="noopener noreferrer">View provider catalogue</a></div>
+          </article>
+          <article class="tech-photo-card">
+            <img src="./assets/photos/iphone-pro-burgundy.jpeg" alt="Burgundy iPhone-style phone with three rear camera lenses" width="736" height="1104" loading="lazy">
+            <div><p class="eyebrow">SMARTPHONE · VISUAL MATCH</p><h3>Burgundy iPhone Pro</h3><p>Three rear camera lenses · Apple logo · dark burgundy finish. Exact generation, storage, condition and included accessories are not identifiable from these photos.</p><p class="tech-photo-price">No comparable Kenyan short-term phone hire rate was verified. No price is estimated.</p></div>
+          </article>
+          <article class="tech-photo-card">
+            <img src="./assets/photos/gaming-pc-purple-rgb.jpeg" alt="Custom gaming PC tower with purple RGB fans and a glass side panel" width="736" height="1104" loading="lazy">
+            <div><p class="eyebrow">COMPUTER · VISIBLE CONFIGURATION</p><h3>Purple RGB gaming PC</h3><p>Glass-sided tower · multiple purple RGB fans. CPU, graphics card, memory, storage, cooling and performance cannot be read from the photo.</p><p class="tech-photo-price">No comparable Kenyan gaming-PC hire rate was verified.</p></div>
+          </article>
+          <article class="tech-photo-card">
+            <img src="./assets/photos/gaming-pc-white-liquid-cooled.jpeg" alt="White custom PC tower with RGB lighting and visible liquid-cooling components" width="736" height="1104" loading="lazy">
+            <div><p class="eyebrow">COMPUTER · VISIBLE CONFIGURATION</p><h3>White liquid-cooled PC</h3><p>White case · RGB lighting · liquid-cooling parts visible. The photo does not identify the CPU, GPU, memory, storage or cooling model.</p><p class="tech-photo-price">No comparable Kenyan gaming-PC hire rate was verified.</p></div>
+          </article>
+          <article class="tech-photo-card">
+            <img src="./assets/photos/gaming-pc-black-rgb.jpeg" alt="Black custom gaming PC tower with RGB lighting" width="736" height="1104" loading="lazy">
+            <div><p class="eyebrow">COMPUTER · VISIBLE CONFIGURATION</p><h3>Black RGB gaming PC</h3><p>Black tower · illuminated RGB components. Internal part names and performance are not visible, so no processor or graphics specification is inferred.</p><p class="tech-photo-price">No comparable Kenyan gaming-PC hire rate was verified.</p></div>
+          </article>
+          <article class="tech-photo-card">
+            <img src="./assets/photos/dual-monitor-gaming-setup.jpeg" alt="Gaming desk setup with two monitors, keyboard, mouse and a desktop tower" width="736" height="1104" loading="lazy">
+            <div><p class="eyebrow">GAMING SETUP · VISIBLE COMPONENTS</p><h3>Dual-monitor setup</h3><p>Two displays · gaming keyboard and mouse pictured. Screen size, resolution, refresh rate and computer specifications are unverified.</p><p class="tech-photo-price">No complete setup rental rate was verified. Components must be priced separately by an owner.</p></div>
+          </article>
+        </div>
+        <p class="tech-photo-disclaimer">These image references are not LOCKD stock and cannot be added to a bundle. Live booking rates and specifications are shown only after an owner publishes an approved listing.</p>
       </section>
 
       <section class="tech-usecases" id="use-case-section" aria-labelledby="use-case-title" hidden>

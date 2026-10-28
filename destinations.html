@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f7f4ef">
+    <meta name="description" content="Explore destinations recognized from LOCKD's travel photo collection, from Kenya's safari country to iconic world landmarks.">
+    <link rel="canonical" href="https://lockd2.vercel.app/destinations.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="LOCKD">
+    <meta property="og:title" content="Destinations — LOCKD">
+    <meta property="og:description" content="Explore travel destinations recognized from LOCKD's photo collection.">
+    <meta property="og:url" content="https://lockd2.vercel.app/destinations.html">
+    <meta property="og:image" content="https://lockd2.vercel.app/assets/photos/kenya-maasai-mara-river-crossing.jpeg">
+    <meta property="og:image:alt" content="Wildlife crossing a river in a safari landscape">
+    <meta name="twitter:card" content="summary_large_image">
+    <title>Destinations — LOCKD</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./destinations.css">
+    <script src="./motion.js" defer></script>
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header" id="top">
+      <a class="brand" href="index.html#top" aria-label="LOCKD home">
+        <svg class="brand-mark" viewBox="0 0 34 34" aria-hidden="true"><path d="M7 5.5h15.5L28 11v17.5H7z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M22.5 5.5V11H28M12 16.5v7h10v-7z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+        <span class="brand-word">lockd<span class="brand-period">.</span></span>
+      </a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu"><span></span><span></span></button>
+      <nav class="primary-nav" id="primary-nav" aria-label="Main navigation">
+        <a href="index.html#categories">Explore</a>
+        <a href="destinations.html" aria-current="page">Destinations</a>
+        <a href="tech.html">Tech &amp; Gadgets</a>
+        <a href="index.html#how-it-works">How it works</a>
+        <a href="index.html#about">About LOCKD</a>
+        <a class="owner-nav-link" href="owners.html">List your asset</a>
+      </nav>
+      <a class="header-cta" href="rentals.html">Explore Rentals</a>
+    </header>
+
+    <main id="main" class="destination-shell">
+      <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span aria-hidden="true">/</span><span>Destinations</span></nav>
+      <section class="destination-hero" aria-labelledby="destination-title">
+        <div>
+          <p class="eyebrow"><span class="eyebrow-rule"></span> PHOTO-IDENTIFIED PLACES</p>
+          <h1 id="destination-title">Places that<br><em>pull you in.</em></h1>
+          <p class="destination-lede">The travel images you shared point to Kenyan safari country and well-known destinations around the world. Choose a place to look for published LOCKD experiences.</p>
+        </div>
+        <figure class="destination-hero-image">
+          <img src="./assets/photos/kenya-amboseli-elephants-kilimanjaro.jpeg" alt="Elephants on open grassland with Mount Kilimanjaro behind them" width="736" height="1104" fetchpriority="high">
+          <figcaption>Amboseli / Kilimanjaro area · likely visual match</figcaption>
+        </figure>
+      </section>
+
+      <section class="destination-list" aria-labelledby="destination-list-title">
+        <div class="destination-list-heading">
+          <div><p class="eyebrow">Recognized from your photos</p><h2 id="destination-list-title">Start with<br><em>a place.</em></h2></div>
+          <p>Photo recognition can suggest a landmark or landscape; it cannot prove the precise location, current travel conditions or the availability of an experience. LOCKD only shows real experiences after an owner publishes them.</p>
+        </div>
+
+        <div class="destination-grid">
+          <article class="destination-card" id="maasai-mara">
+            <img src="./assets/photos/kenya-maasai-mara-river-crossing.jpeg" alt="Wildebeest and zebra crossing a crocodile-filled river, a scene associated with the Maasai Mara migration" width="736" height="1104" loading="lazy">
+            <div class="destination-card-copy"><p class="eyebrow">KENYA · LIKELY PHOTO MATCH</p><h3>Maasai Mara</h3><p>Wildebeest, zebra and a river crossing suggest the Mara migration landscape. The exact river and location are not verifiable from the image alone.</p><p class="destination-price"><strong>Experience reference:</strong> a 2026 Mara balloon flight is listed from US$532 per adult by a local safari operator. Inclusions and seasonal rates vary. <a href="https://www.porini.com/portfolio/balloon-safari-tours/" target="_blank" rel="noopener noreferrer">View source</a></p><a class="text-button" href="rentals.html?category=experience&amp;location=Maasai%20Mara">See Mara experiences</a></div>
+          </article>
+          <article class="destination-card" id="amboseli">
+            <img src="./assets/photos/kenya-amboseli-elephants-kilimanjaro.jpeg" alt="Elephants on savannah with Mount Kilimanjaro in the distance" width="736" height="1104" loading="lazy">
+            <div class="destination-card-copy"><p class="eyebrow">KENYA · LIKELY PHOTO MATCH</p><h3>Amboseli</h3><p>Elephants with Kilimanjaro behind them point to the Amboseli area. The viewing location in this particular image is not confirmed.</p><p class="destination-price"><strong>Trip pricing:</strong> no single rate applies; transport, dates, park fees and accommodation change the total.</p><a class="text-button" href="rentals.html?category=experience&amp;location=Amboseli">See Amboseli experiences</a></div>
+          </article>
+          <article class="destination-card" id="santorini">
+            <img src="./assets/photos/greece-santorini.jpeg" alt="White buildings and blue domes above the sea at sunset in Santorini" width="736" height="1104" loading="lazy">
+            <div class="destination-card-copy"><p class="eyebrow">GREECE · HIGH-CONFIDENCE LANDMARK MATCH</p><h3>Santorini</h3><p>Whitewashed Cycladic buildings and blue domes above the Aegean identify a Santorini-style island scene.</p><p class="destination-price"><strong>Trip pricing:</strong> flights, season, island transport and accommodation determine the budget.</p><a class="text-button" href="rentals.html?category=experience&amp;location=Santorini">See Santorini experiences</a></div>
+          </article>
+          <article class="destination-card" id="giza">
+            <img src="./assets/photos/egypt-giza-pyramids.jpeg" alt="The pyramids of Giza with visitors and camels in the foreground" width="736" height="1104" loading="lazy">
+            <div class="destination-card-copy"><p class="eyebrow">EGYPT · HIGH-CONFIDENCE LANDMARK MATCH</p><h3>Giza</h3><p>The pyramids in the photograph identify the Giza plateau outside Cairo.</p><p class="destination-price"><strong>Trip pricing:</strong> transport, guide, admission and accommodation are separate variables.</p><a class="text-button" href="rentals.html?category=experience&amp;location=Giza">See Giza experiences</a></div>
+          </article>
+          <article class="destination-card" id="paris">
+            <img src="./assets/photos/france-paris-eiffel-tower.jpeg" alt="The Eiffel Tower illuminated at night in Paris" width="736" height="1104" loading="lazy">
+            <div class="destination-card-copy"><p class="eyebrow">FRANCE · HIGH-CONFIDENCE LANDMARK MATCH</p><h3>Paris</h3><p>The illuminated Eiffel Tower identifies the French capital.</p><p class="destination-price"><strong>Trip pricing:</strong> dates, travel, accommodation and chosen attractions determine the budget.</p><a class="text-button" href="rentals.html?category=experience&amp;location=Paris">See Paris experiences</a></div>
+          </article>
+          <article class="destination-card" id="mount-fuji">
+            <img src="./assets/photos/japan-mount-fuji.jpeg" alt="Mount Fuji behind a pagoda and cherry blossoms in Japan" width="736" height="1104" loading="lazy">
+            <div class="destination-card-copy"><p class="eyebrow">JAPAN · HIGH-CONFIDENCE LANDMARK MATCH</p><h3>Mount Fuji</h3><p>Mount Fuji with a red pagoda and cherry blossoms suggests the Chureito Pagoda viewpoint in Fujiyoshida.</p><p class="destination-price"><strong>Trip pricing:</strong> the season, route and accommodation change the total.</p><a class="text-button" href="rentals.html?category=experience&amp;location=Mount%20Fuji">See Mount Fuji experiences</a></div>
+          </article>
+          <article class="destination-card" id="new-york">
+            <img src="./assets/photos/usa-new-york-times-square.jpeg" alt="Bright billboards and yellow taxis at Times Square in New York City" width="736" height="1104" loading="lazy">
+            <div class="destination-card-copy"><p class="eyebrow">UNITED STATES · HIGH-CONFIDENCE LANDMARK MATCH</p><h3>New York City</h3><p>The screens and street layout identify Times Square in Manhattan.</p><p class="destination-price"><strong>Trip pricing:</strong> travel dates, accommodation and activities determine the budget.</p><a class="text-button" href="rentals.html?category=experience&amp;location=New%20York">See New York experiences</a></div>
+          </article>
+          <article class="destination-card" id="limestone-coast">
+            <img src="./assets/photos/coastal-limestone-lagoon.jpeg" alt="Turquoise water beneath steep tropical limestone cliffs" width="736" height="1104" loading="lazy">
+            <div class="destination-card-copy"><p class="eyebrow">TROPICAL COAST · PLACE UNCONFIRMED</p><h3>Limestone lagoons</h3><p>The cliffs and long-tail boats suggest a Southeast Asian limestone coast, but the exact island or bay cannot be identified reliably from this photograph.</p><p class="destination-price"><strong>Trip pricing:</strong> no location-specific price shown while the place remains unverified.</p><a class="text-button" href="rentals.html?category=experience">See published experiences</a></div>
+          </article>
+        </div>
+        <p class="destination-disclaimer">These are travel-photo identifications and price references, not live LOCKD trips. Third-party rates are not LOCKD owner rates, do not confirm availability, and may exclude fees or services. Check the named provider for current terms.</p>
+      </section>
+    </main>
+
+    <footer class="destination-footer"><a class="brand" href="index.html#top" aria-label="LOCKD home"><span class="brand-word">lockd<span class="brand-period">.</span></span></a><span>Your next move, locked in.</span><a href="index.html#categories">Back to discovery</a></footer>
+  </body>
+</html>
