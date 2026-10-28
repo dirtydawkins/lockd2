@@ -4,7 +4,16 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#f7f4ef">
-    <meta name="description" content="Explore rentals with LOCKD. Choose a stay, drive, gaming setup, technology or experience, then build a bundle around your plans.">
+    <meta name="description" content="Explore published stays, vehicles, gaming and technology rentals with LOCKD.">
+    <link rel="canonical" href="https://lockd2.vercel.app/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="LOCKD">
+    <meta property="og:title" content="LOCKD — Your world. Your way.">
+    <meta property="og:description" content="Explore published stays, vehicles, gaming and technology rentals with LOCKD.">
+    <meta property="og:url" content="https://lockd2.vercel.app/">
+    <meta property="og:image" content="https://lockd2.vercel.app/WhatsApp%20Image%202026-10-27%20at%2023.36.06.jpeg">
+    <meta property="og:image:alt" content="A pale luxury SUV beneath palm trees">
+    <meta name="twitter:card" content="summary_large_image">
     <title>LOCKD — Your world. Your way.</title>
     <link rel="icon" href="./favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="./styles.css">
@@ -66,16 +75,15 @@
             <p class="eyebrow">Start where you are</p>
             <h2 id="discovery-title">What are you<br><em>in the mood for?</em></h2>
           </div>
-          <p class="section-intro">Tell us the idea, or browse by category. Then build a bundle around the items you have in mind.</p>
+          <p class="section-intro">Search published rentals or start with a category. Add verified listings to a bundle as you explore.</p>
         </div>
         <form class="idea-search" id="idea-search-form" role="search">
           <label class="visually-hidden" for="idea-search">Describe what you are looking for</label>
           <span class="search-mark" aria-hidden="true">⌕</span>
           <input id="idea-search" name="idea" type="search" placeholder="Try “a place to stay by the coast”" autocomplete="off">
-          <button class="button button-burgundy" type="submit">Find a starting point</button>
+          <button class="button button-burgundy" type="submit">Search rentals</button>
         </form>
-        <p class="search-note" id="search-note">This matches category names only. Live inventory and pricing are not connected.</p>
-        <div class="search-results" id="search-results" aria-live="polite" hidden></div>
+        <p class="search-note" id="search-note">Searches published rental listings. Availability is checked for your dates on each listing.</p>
       </section>
 
       <section class="categories section-shell" id="categories" aria-labelledby="categories-title">
@@ -88,41 +96,41 @@
         </div>
 
         <div class="category-grid">
-          <button class="category-card category-stay" type="button" data-category="stay" aria-label="Choose a stay">
+          <a class="category-card category-stay" href="rentals.html?category=stay" aria-label="Explore stays">
             <img src="./WhatsApp%20Image%202026-10-27%20at%2023.34.59.jpeg" alt="Warm, compact apartment with a mezzanine bedroom and living area" width="736" height="1312" loading="lazy">
             <span class="card-shade"></span>
             <span class="category-meta"><span>01</span><span>Stay</span></span>
             <span class="category-title">Somewhere<br>to settle in.</span>
-            <span class="category-link">Choose a stay</span>
-          </button>
-          <button class="category-card category-drive" type="button" data-category="drive" aria-label="Choose a car">
+            <span class="category-link">Explore stays</span>
+          </a>
+          <a class="category-card category-drive" href="rentals.html?category=drive" aria-label="Explore vehicles">
             <img src="./WhatsApp%20Image%202026-10-27%20at%2023.35.55.jpeg" alt="Silver luxury sedan photographed in a dark studio" width="736" height="980" loading="lazy">
             <span class="card-shade"></span>
             <span class="category-meta"><span>02</span><span>Drive</span></span>
             <span class="category-title">Take the<br>long way.</span>
-            <span class="category-link">Choose a car</span>
-          </button>
-          <button class="category-card category-play" type="button" data-category="play" aria-label="Choose gaming">
+            <span class="category-link">Explore vehicles</span>
+          </a>
+          <a class="category-card category-play" href="rentals.html?category=play" aria-label="Explore gaming rentals">
             <img src="./WhatsApp%20Image%202026-10-27%20at%2023.34.41.jpeg" alt="PlayStation console and controller beside a television" width="736" height="1104" loading="lazy">
             <span class="card-shade"></span>
             <span class="category-meta"><span>03</span><span>Play</span></span>
             <span class="category-title">Make space<br>for game night.</span>
-            <span class="category-link">Choose gaming</span>
-          </button>
-          <button class="category-card category-tech" type="button" data-category="tech" aria-label="Choose technology">
+            <span class="category-link">Explore gaming</span>
+          </a>
+          <a class="category-card category-tech" href="rentals.html?category=technology" aria-label="Explore technology rentals">
             <img src="./WhatsApp%20Image%202026-10-27%20at%2023.35.00.jpeg" alt="Burgundy smartphone held in one hand" width="736" height="981" loading="lazy">
             <span class="card-shade"></span>
             <span class="category-meta"><span>04</span><span>Technology</span></span>
             <span class="category-title">The right tool<br>for the moment.</span>
-            <span class="category-link">Choose technology</span>
-          </button>
-          <button class="category-card category-explore" type="button" data-category="explore" aria-label="Choose an experience">
+            <span class="category-link">Explore technology</span>
+          </a>
+          <a class="category-card category-explore" href="rentals.html?category=experience" aria-label="Explore experiences">
             <img src="./WhatsApp%20Image%202026-10-27%20at%2023.34.52.jpeg" alt="Clear turquoise water beneath steep, green coastal cliffs" width="736" height="1108" loading="lazy">
             <span class="card-shade"></span>
             <span class="category-meta"><span>05</span><span>Explore</span></span>
             <span class="category-title">Go a little<br>further out.</span>
-            <span class="category-link">Choose an experience</span>
-          </button>
+            <span class="category-link">Explore experiences</span>
+          </a>
         </div>
         <p class="image-disclaimer">The photography shows the kind of things that inspire LOCKD. It does not confirm that a pictured item, property or experience is available to rent.</p>
       </section>
@@ -136,11 +144,11 @@
           <p class="eyebrow eyebrow-light"><span class="eyebrow-rule"></span> More than one way to get there</p>
           <h2 id="package-title">One plan.<br><em>Your kind of</em><br>everything.</h2>
           <p>Pair a stay with a drive. Add the console for the quiet night in. Put the pieces together around what you actually want to do.</p>
-          <button class="button button-paper" type="button" data-open-bundle>Build Your Bundle</button>
+          <a class="button button-paper" href="rentals.html?bundle=1">Build Your Bundle</a>
           <div class="package-steps" aria-label="How to build a bundle">
             <span><b>01</b> Choose your items</span>
             <span><b>02</b> Set dates and delivery</span>
-            <span><b>03</b> Review the price status</span>
+            <span><b>03</b> Check listing availability</span>
           </div>
         </div>
       </section>
@@ -153,15 +161,15 @@
         <div class="how-list">
           <article class="how-step">
             <span class="step-number">01</span>
-            <div><h3>Choose what you need.</h3><p>Add one rental or several. Describe the items, set quantities and dates, and note any accessories.</p></div>
+            <div><h3>Choose what you need.</h3><p>Browse published rentals and add the items you want to bring together.</p></div>
           </article>
           <article class="how-step">
             <span class="step-number">02</span>
-            <div><h3>Choose the practical details.</h3><p>Set delivery or collection, location, and any extras you want considered with each item.</p></div>
+            <div><h3>Choose the practical details.</h3><p>Set dates and quantities, then review the options configured for each listing.</p></div>
           </article>
           <article class="how-step">
             <span class="step-number">03</span>
-            <div><h3>Review the price status.</h3><p>Live inventory, confirmed rates and checkout are not connected yet, so no booking or total is promised here.</p></div>
+            <div><h3>Check availability.</h3><p>Availability and pricing come from each published listing. A date check does not reserve the item.</p></div>
           </article>
         </div>
       </section>
@@ -202,80 +210,5 @@
         <a href="#top">Back to top</a>
       </div>
     </footer>
-
-    <dialog class="bundle-dialog" id="bundle-dialog" aria-labelledby="bundle-title">
-      <div class="dialog-topline">
-        <a class="brand" href="#top" aria-label="LOCKD home">
-          <svg class="brand-mark" viewBox="0 0 34 34" aria-hidden="true"><path d="M7 5.5h15.5L28 11v17.5H7z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M22.5 5.5V11H28M12 16.5v7h10v-7z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
-          <span class="brand-word">lockd<span class="brand-period">.</span></span>
-        </a>
-        <button class="dialog-close" type="button" data-close-bundle aria-label="Close bundle builder">×</button>
-      </div>
-      <div class="dialog-content">
-        <p class="eyebrow">Stay. Drive. Play. Explore.</p>
-        <h2 id="bundle-title">Build your<br><em>bundle.</em></h2>
-        <p class="dialog-intro">Add the rentals you have in mind, then set dates, quantities and delivery or collection. Your bundle stays on this device. Live inventory, rates and checkout are not connected.</p>
-
-        <form id="bundle-form">
-          <fieldset class="category-picker">
-            <legend>Add items by category</legend>
-            <div class="picker-options">
-              <button type="button" class="picker-chip" data-add-item="stay">Stay</button>
-              <button type="button" class="picker-chip" data-add-item="drive">Drive</button>
-              <button type="button" class="picker-chip" data-add-item="play">Play</button>
-              <button type="button" class="picker-chip" data-add-item="tech">Technology</button>
-              <button type="button" class="picker-chip" data-add-item="explore">Experience</button>
-            </div>
-          </fieldset>
-
-          <div class="bundle-items" id="bundle-items" aria-live="polite"></div>
-
-          <div class="form-row">
-            <label>Start date <input name="start" type="date"></label>
-            <label>End date <input name="end" type="date"></label>
-          </div>
-          <label class="field-label">Delivery or collection
-            <select name="delivery">
-              <option value="">Choose later</option>
-              <option value="Delivery">Delivery</option>
-              <option value="Collection">Collection</option>
-              <option value="Decide later">Decide later</option>
-            </select>
-          </label>
-          <label class="field-label">Where are you planning to be?
-            <input name="location" type="text" placeholder="City, area or destination">
-          </label>
-          <label class="field-label">Anything else to include?
-            <textarea name="notes" rows="3" placeholder="The idea, what you need, or any details to confirm"></textarea>
-          </label>
-          <section class="price-summary" aria-labelledby="price-summary-title">
-            <div class="price-summary-heading"><h3 id="price-summary-title">Price summary</h3><span>Price status</span></div>
-            <dl>
-              <div><dt>Bundle items</dt><dd id="summary-items-count">0</dd></div>
-              <div><dt>Total quantity</dt><dd id="summary-units-count">0</dd></div>
-              <div><dt>Rental period</dt><dd id="summary-period">Dates not selected</dd></div>
-              <div class="price-total"><dt>Total</dt><dd id="summary-price">Awaiting confirmed rates</dd></div>
-            </dl>
-            <p>Live inventory and verified rates are not connected, so no price estimate is available.</p>
-          </section>
-          <div class="bundle-notice"><span aria-hidden="true">i</span><p>This bundle is a local draft. Item availability, accessory inclusion, delivery, terms and final pricing are not checked or confirmed.</p></div>
-          <div class="dialog-actions">
-            <button class="button button-burgundy" type="submit">Save Bundle</button>
-            <button class="clear-draft" type="button" id="clear-draft">Clear bundle</button>
-          </div>
-        </form>
-        <section class="draft-result" id="draft-result" aria-live="polite" hidden>
-          <p class="eyebrow">Bundle draft saved</p>
-          <pre id="draft-summary"></pre>
-          <div class="draft-actions">
-            <button class="button button-dark" type="button" id="copy-draft">Copy bundle</button>
-            <button class="text-button" type="button" id="edit-draft">Edit bundle</button>
-          </div>
-          <p class="draft-disclaimer" id="draft-status">Not sent. No booking or reservation has been made.</p>
-        </section>
-      </div>
-    </dialog>
-
-    <div class="toast" id="toast" role="status" aria-live="polite"></div>
   </body>
 </html>

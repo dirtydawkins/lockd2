@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f7f4ef">
+    <meta name="description" content="Browse published LOCKD rentals and check dates against live availability.">
+    <link rel="canonical" href="https://lockd2.vercel.app/rentals.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="LOCKD">
+    <meta property="og:title" content="Explore Rentals — LOCKD">
+    <meta property="og:description" content="Browse published LOCKD rentals and check dates against live availability.">
+    <meta property="og:url" content="https://lockd2.vercel.app/rentals.html">
+    <meta name="twitter:card" content="summary">
+    <title>Explore Rentals — LOCKD</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./catalogue.css">
+    <script src="./app.js" defer></script>
+    <script src="./catalogue.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header" id="top">
+      <a class="brand" href="index.html#top" aria-label="LOCKD home">
+        <svg class="brand-mark" viewBox="0 0 34 34" aria-hidden="true"><path d="M7 5.5h15.5L28 11v17.5H7z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M22.5 5.5V11H28M12 16.5v7h10v-7z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+        <span class="brand-word">lockd<span class="brand-period">.</span></span>
+      </a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu"><span></span><span></span></button>
+      <nav class="primary-nav" id="primary-nav" aria-label="Main navigation">
+        <a href="rentals.html">Explore Rentals</a>
+        <a href="index.html#how-it-works">How it works</a>
+        <a href="index.html#about">About LOCKD</a>
+        <a class="owner-nav-link" href="owners.html">List your asset</a>
+      </nav>
+      <a class="header-cta" href="rentals.html?bundle=1">Build Your Bundle</a>
+    </header>
+
+    <main id="main" class="catalogue-shell">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="index.html">Home</a><span aria-hidden="true">/</span><span>Rentals</span>
+      </nav>
+
+      <section class="catalogue-intro" aria-labelledby="catalogue-title">
+        <p class="eyebrow"><span class="eyebrow-rule"></span> Stay. Drive. Play. Explore.</p>
+        <div class="catalogue-heading-row">
+          <div>
+            <h1 id="catalogue-title">Find your<br><em>next rental.</em></h1>
+            <p class="catalogue-lede" id="catalogue-description">Browse approved rentals from the live LOCKD catalogue.</p>
+          </div>
+          <p class="catalogue-count" id="result-count" aria-live="polite"></p>
+        </div>
+      </section>
+
+      <section class="catalogue-controls" aria-label="Search and filter rentals">
+        <form class="catalogue-search" id="catalogue-search-form" role="search">
+          <label class="visually-hidden" for="catalogue-search">Search listings</label>
+          <input id="catalogue-search" type="search" name="q" placeholder="Search listings" autocomplete="off">
+          <button type="submit" class="button button-dark">Search</button>
+        </form>
+        <label class="sort-control" for="catalogue-sort">Sort
+          <select id="catalogue-sort" name="sort">
+            <option value="newest">Recently added</option>
+            <option value="price-low">Price: low to high</option>
+            <option value="price-high">Price: high to low</option>
+          </select>
+        </label>
+      </section>
+
+      <nav class="catalogue-categories" aria-label="Rental categories" id="catalogue-categories">
+        <a href="rentals.html" data-filter="all">All rentals</a>
+        <a href="rentals.html?category=stay" data-filter="stay">Stay</a>
+        <a href="rentals.html?category=drive" data-filter="drive">Drive</a>
+        <a href="rentals.html?category=play" data-filter="play">Play</a>
+        <a href="rentals.html?category=technology" data-filter="technology">Technology</a>
+        <a href="rentals.html?category=experience" data-filter="experience">Experiences</a>
+        <a href="rentals.html?category=camera" data-filter="camera">Cameras</a>
+        <a href="rentals.html?category=audio" data-filter="audio">Audio</a>
+      </nav>
+
+      <div class="catalogue-layout">
+        <section class="catalogue-results" aria-label="Rental listings">
+          <div class="catalogue-status" id="catalogue-status" role="status" aria-live="polite">Loading published rentals…</div>
+          <div class="listing-grid" id="listing-grid"></div>
+          <button class="load-more button button-paper" type="button" id="load-more" hidden>Load more</button>
+        </section>
+
+        <aside class="bundle-panel" id="bundle-panel" aria-labelledby="bundle-panel-title" hidden>
+          <div class="bundle-panel-heading">
+            <p class="eyebrow">A plan in progress</p>
+            <h2 id="bundle-panel-title">Your bundle</h2>
+          </div>
+          <div id="bundle-lines" class="bundle-lines"></div>
+          <div class="bundle-fields">
+            <label>Start date<input type="date" id="bundle-start"></label>
+            <label>End date<input type="date" id="bundle-end"></label>
+            <label>Delivery preference
+              <select id="bundle-delivery"><option value="">Choose later</option><option value="delivery">Delivery</option><option value="collection">Collection</option></select>
+            </label>
+            <label>Accessories or extras<textarea id="bundle-extras" rows="2" placeholder="Optional"></textarea></label>
+          </div>
+          <dl class="bundle-summary">
+            <div><dt>Selected rentals</dt><dd id="bundle-count">0</dd></div>
+            <div class="bundle-total"><dt>Price summary</dt><dd id="bundle-price">Rates vary by listing</dd></div>
+          </dl>
+          <p class="bundle-footnote">Only verified listing rates are included. Availability is checked separately for each rental. This bundle does not reserve anything.</p>
+          <button class="text-button" type="button" id="clear-bundle">Clear bundle</button>
+        </aside>
+      </div>
+    </main>
+
+    <footer class="catalogue-footer">
+      <a class="brand" href="index.html#top" aria-label="LOCKD home"><span class="brand-word">lockd<span class="brand-period">.</span></span></a>
+      <a href="index.html#categories">Back to discovery</a>
+    </footer>
+  </body>
+</html>

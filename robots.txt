@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /lockd2/
+
+Sitemap: https://lockd2.vercel.app/sitemap.xml

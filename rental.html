@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f7f4ef">
+    <meta name="description" content="View verified rental details and check dates with LOCKD.">
+    <link rel="canonical" href="https://lockd2.vercel.app/rental.html">
+    <meta name="robots" content="noindex,follow">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="LOCKD">
+    <meta property="og:title" content="Rental Details — LOCKD">
+    <meta property="og:description" content="View verified rental details and check dates with LOCKD.">
+    <meta property="og:url" content="https://lockd2.vercel.app/rental.html">
+    <meta name="twitter:card" content="summary">
+    <title>Rental Details — LOCKD</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./catalogue.css">
+    <script src="./app.js" defer></script>
+    <script src="./rental.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header" id="top">
+      <a class="brand" href="index.html#top" aria-label="LOCKD home">
+        <svg class="brand-mark" viewBox="0 0 34 34" aria-hidden="true"><path d="M7 5.5h15.5L28 11v17.5H7z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M22.5 5.5V11H28M12 16.5v7h10v-7z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+        <span class="brand-word">lockd<span class="brand-period">.</span></span>
+      </a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu"><span></span><span></span></button>
+      <nav class="primary-nav" id="primary-nav" aria-label="Main navigation">
+        <a href="rentals.html">Explore Rentals</a>
+        <a href="index.html#how-it-works">How it works</a>
+        <a href="index.html#about">About LOCKD</a>
+        <a class="owner-nav-link" href="owners.html">List your asset</a>
+      </nav>
+      <a class="header-cta" href="rentals.html?bundle=1">Build Your Bundle</a>
+    </header>
+
+    <main id="main" class="rental-shell">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="index.html">Home</a><span aria-hidden="true">/</span><a href="rentals.html">Rentals</a><span aria-hidden="true">/</span><span id="breadcrumb-title">Rental details</span>
+      </nav>
+      <div class="rental-state" id="rental-state" role="status" aria-live="polite">Loading listing…</div>
+      <article class="rental-detail" id="rental-detail" hidden>
+        <div class="rental-gallery">
+          <figure class="rental-cover"><img id="rental-cover" alt="" src=""><figcaption id="rental-image-caption"></figcaption></figure>
+          <div class="rental-thumbnails" id="rental-thumbnails" aria-label="Listing photographs"></div>
+        </div>
+        <div class="rental-copy">
+          <p class="eyebrow" id="rental-category"></p>
+          <h1 id="rental-title"></h1>
+          <p class="rental-location" id="rental-location"></p>
+          <p class="rental-price" id="rental-price"></p>
+          <div class="rental-description" id="rental-description"></div>
+          <dl class="rental-facts" id="rental-facts"></dl>
+
+          <section class="availability-box" aria-labelledby="availability-title">
+            <p class="eyebrow">Plan your dates</p>
+            <h2 id="availability-title">Check availability</h2>
+            <form id="availability-form" class="availability-form">
+              <label>Start date<input type="date" id="start-date" name="startDate" required></label>
+              <label>End date<input type="date" id="end-date" name="endDate" required></label>
+              <label>Quantity<input type="number" id="quantity" name="quantity" value="1" min="1" step="1" required></label>
+              <button class="button button-burgundy" type="submit">Check Availability</button>
+            </form>
+            <p class="availability-status" id="availability-status" role="status" aria-live="polite"></p>
+            <p class="availability-note">A date check does not hold or reserve the rental. Final confirmation depends on the listing’s stated booking process.</p>
+          <p class="availability-note approval-note" id="approval-note" hidden></p>
+          </section>
+          <a class="button button-dark manual-enquiry" id="manual-enquiry" href="#" hidden>Enquire About This Rental</a>
+          <button class="text-button add-to-bundle" id="add-to-bundle" type="button">Add to bundle</button>
+        </div>
+      </article>
+    </main>
+
+    <footer class="catalogue-footer">
+      <a class="brand" href="index.html#top" aria-label="LOCKD home"><span class="brand-word">lockd<span class="brand-period">.</span></span></a>
+      <a id="back-to-category" href="rentals.html">Back to rentals</a>
+    </footer>
+  </body>
+</html>
