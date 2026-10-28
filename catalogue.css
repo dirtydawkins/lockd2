@@ -1,4 +1,5 @@
 .catalogue-shell, .rental-shell { width: min(100%, 1600px); margin-inline: auto; padding: 1.4rem var(--page-gutter) 6rem; }
+[hidden] { display: none !important; }
 .breadcrumbs { display: flex; align-items: center; gap: .65rem; color: #817972; font-size: .7rem; }
 .breadcrumbs a:hover, .catalogue-footer a:hover { color: var(--burgundy); }
 .catalogue-intro { padding: clamp(3.5rem, 7vw, 6.5rem) 0 2.2rem; }
