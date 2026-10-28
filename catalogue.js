@@ -252,14 +252,46 @@
     if (button) {
       button.textContent = "In your bundle";
       button.setAttribute("aria-pressed", "true");
-      button.classList.add("is-feedback");
-      window.setTimeout(() => button.classList.remove("is-feedback"), 260);
+      animateClass(button, "is-feedback", 260);
     }
+  }
+
+  function animateClass(element, className, duration = 240) {
+    if (!element) return;
+    element.classList.remove(className);
+    requestAnimationFrame(() => element.classList.add(className));
+    window.setTimeout(() => element.classList.remove(className), duration);
+  }
+
+  function removeBundleItem(itemId, row) {
+    const remove = () => {
+      bundle.items = bundle.items.filter((item) => item.id !== itemId);
+      saveBundle();
+    };
+    if (!row || window.matchMedia("(prefers-reduced-motion: reduce)").matches || row.classList.contains("is-removing")) {
+      remove();
+      return;
+    }
+    row.classList.add("is-removing");
+    row.setAttribute("aria-busy", "true");
+    let removed = false;
+    const finish = () => {
+      if (removed) return;
+      removed = true;
+      remove();
+    };
+    row.addEventListener("transitionend", finish, { once: true });
+    window.setTimeout(finish, 240);
   }
 
   function renderBundle() {
     const lines = document.querySelector("#bundle-lines");
     if (!panel || !lines) return;
+    const previousRows = new Map([...lines.querySelectorAll(".bundle-line")].map((row) => [row.dataset.itemId, Number(row.dataset.quantity || 1)]));
+    const summaryCount = document.querySelector("#bundle-count");
+    const summaryPrice = document.querySelector("#bundle-price");
+    const previousCount = summaryCount?.textContent || "";
+    const previousPrice = summaryPrice?.textContent || "";
     const wasHidden = panel.hidden;
     panel.hidden = !bundleMode && bundle.items.length === 0;
     if (wasHidden && !panel.hidden) {
@@ -277,6 +309,11 @@
     bundle.items.forEach((item) => {
       const row = document.createElement("div");
       row.className = "bundle-line";
+      row.dataset.itemId = item.id;
+      row.dataset.quantity = String(Number(item.quantity || 1));
+      const priorQuantity = previousRows.get(item.id);
+      if (priorQuantity === undefined) row.dataset.motion = "added";
+      else if (priorQuantity !== Number(item.quantity || 1)) row.dataset.motion = "changed";
       const name = document.createElement("div");
       name.className = "bundle-line-name";
       name.textContent = item.title;
@@ -298,8 +335,11 @@
       decrease.textContent = "−";
       decrease.setAttribute("aria-label", `Reduce ${item.title} quantity`);
       decrease.addEventListener("click", () => {
-        item.quantity -= 1;
-        if (item.quantity < 1) bundle.items = bundle.items.filter((entry) => entry.id !== item.id);
+        if (Number(item.quantity || 1) <= 1) {
+          removeBundleItem(item.id, row);
+          return;
+        }
+        item.quantity = Number(item.quantity) - 1;
         saveBundle();
       });
       const quantity = document.createElement("output");
@@ -317,16 +357,13 @@
       remove.type = "button";
       remove.className = "bundle-remove";
       remove.textContent = "Remove";
-      remove.addEventListener("click", () => {
-        bundle.items = bundle.items.filter((entry) => entry.id !== item.id);
-        saveBundle();
-      });
+      remove.addEventListener("click", () => removeBundleItem(item.id, row));
       row.append(name, controls, price, availability, remove);
       lines.append(row);
     });
 
-    const count = document.querySelector("#bundle-count");
-    const price = document.querySelector("#bundle-price");
+    const count = summaryCount;
+    const price = summaryPrice;
     if (count) count.textContent = String(bundle.items.reduce((sum, item) => sum + Number(item.quantity || 1), 0));
     if (price) {
       const datesValid = /^\d{4}-\d{2}-\d{2}$/.test(bundle.startDate) && /^\d{4}-\d{2}-\d{2}$/.test(bundle.endDate) && bundle.endDate > bundle.startDate;
@@ -345,6 +382,8 @@
         price.textContent = [summary, unpricedLabel].filter(Boolean).join(" · ") || "Rates need confirmation";
       }
     }
+    if (count && previousCount !== count.textContent) animateClass(count, "is-updating");
+    if (price && previousPrice !== price.textContent) animateClass(price, "is-updating");
     grid?.querySelectorAll(".bundle-add").forEach((button) => {
       const listingId = button.closest(".listing-card")?.dataset.listingId;
       const selected = bundle.items.some((item) => item.id === listingId);
