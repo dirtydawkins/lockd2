@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="./styles.css">
     <link rel="stylesheet" href="./catalogue.css">
     <script src="./app.js" defer></script>
+    <script src="./rental-pricing.js" defer></script>
     <script src="./rental.js" defer></script>
   </head>
   <body>
@@ -30,6 +31,7 @@
       <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu"><span></span><span></span></button>
       <nav class="primary-nav" id="primary-nav" aria-label="Main navigation">
         <a href="rentals.html">Explore Rentals</a>
+        <a href="tech.html">Tech &amp; Gadgets</a>
         <a href="index.html#how-it-works">How it works</a>
         <a href="index.html#about">About LOCKD</a>
         <a class="owner-nav-link" href="owners.html">List your asset</a>
@@ -61,9 +63,10 @@
             <form id="availability-form" class="availability-form">
               <label>Start date<input type="date" id="start-date" name="startDate" required></label>
               <label>End date<input type="date" id="end-date" name="endDate" required></label>
-              <label>Quantity<input type="number" id="quantity" name="quantity" value="1" min="1" step="1" required></label>
+              <label>Quantity<input type="number" id="quantity" name="quantity" value="1" min="1" max="20" step="1" required></label>
               <button class="button button-burgundy" type="submit">Check Availability</button>
             </form>
+            <output class="rental-estimate" id="rental-total-estimate" aria-live="polite">Choose dates to estimate the rental subtotal. Fees and refundable deposits are separate.</output>
             <p class="availability-status" id="availability-status" role="status" aria-live="polite"></p>
             <p class="availability-note">A date check does not hold or reserve the rental. Final confirmation depends on the listing’s stated booking process.</p>
           <p class="availability-note approval-note" id="approval-note" hidden></p>
@@ -72,6 +75,10 @@
           <button class="text-button add-to-bundle" id="add-to-bundle" type="button">Add to bundle</button>
         </div>
       </article>
+      <section class="related-rentals" id="related-tech-rentals" aria-labelledby="related-tech-title" hidden>
+        <div class="related-rentals-heading"><div><p class="eyebrow">More from this category</p><h2 id="related-tech-title">Keep<br><em>looking.</em></h2></div><p>Other published LOCKD rentals in this category.</p></div>
+        <div class="related-rentals-grid" id="related-tech-grid"></div>
+      </section>
     </main>
 
     <footer class="catalogue-footer">

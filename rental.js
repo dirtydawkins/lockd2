@@ -32,10 +32,57 @@
     return `${formatted}${units[unit] ? ` / ${units[unit]}` : ""}`;
   }
 
+  function factLabel(value) {
+    return String(value).replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+  }
+
+  function addFact(facts, label, value) {
+    if (value === null || value === undefined || value === "") return;
+    const row = document.createElement("div");
+    const term = document.createElement("dt");
+    term.textContent = label;
+    const definition = document.createElement("dd");
+    definition.textContent = Array.isArray(value) ? value.map(String).join(", ") : String(value);
+    row.append(term, definition);
+    facts.append(row);
+  }
+
   function setMessage(message, kind = "info") {
     if (!status) return;
     status.textContent = message;
     status.dataset.kind = kind;
+  }
+
+  function renderEstimate() {
+    const output = document.querySelector("#rental-total-estimate");
+    if (!output || !listing) return;
+    const startDate = start?.value;
+    const endDate = end?.value;
+    const units = Number(document.querySelector("#quantity")?.value || 1);
+    const rate = Number(listing.price_amount);
+    if (!startDate || !endDate) {
+      output.textContent = "Choose dates to estimate the rental subtotal. Fees and refundable deposits are separate.";
+      return;
+    }
+    if (endDate <= startDate || !Number.isInteger(units) || units < 1 || units > 20 || !Number.isFinite(rate) || rate <= 0) {
+      output.textContent = "A rental subtotal cannot be estimated from these dates, quantity or listing rate.";
+      return;
+    }
+    const estimate = window.LockdRentalPricing?.estimateRentalSubtotal({
+      amount: rate,
+      currency: listing.currency,
+      unit: listing.price_unit,
+      quantity: units,
+      startDate,
+      endDate,
+    });
+    if (!estimate) {
+      output.textContent = listing.price_unit === "week" || listing.price_unit === "month"
+        ? `This ${listing.price_unit} rate needs a whole ${listing.price_unit} period for a reliable estimate. Confirm partial periods with the owner.`
+        : "The listing rate cannot be calculated from the selected dates. Confirm the total with the owner.";
+      return;
+    }
+    output.textContent = `Rental subtotal estimate: ${priceText(estimate.amount, estimate.currency, "")} (${estimate.period} × ${estimate.quantity}). Fees and refundable deposit are separate. This estimate does not reserve the rental.`;
   }
 
   function addToBundle() {
@@ -91,6 +138,61 @@
     });
   }
 
+  function renderRelated(listings) {
+    const section = document.querySelector("#related-tech-rentals");
+    const grid = document.querySelector("#related-tech-grid");
+    if (!section || !grid || !listing) return;
+    const rows = listings.filter((record) => record.slug !== listing.slug).slice(0, 4);
+    section.hidden = rows.length === 0;
+    grid.replaceChildren(...rows.map((record) => {
+      const card = document.createElement("article");
+      card.className = "related-rental-card";
+      const link = document.createElement("a");
+      const url = new URL("rental.html", window.location.href);
+      url.searchParams.set("slug", record.slug);
+      url.searchParams.set("from", record.category || "technology");
+      link.href = url.href;
+      const rawImage = Array.isArray(record.images) ? record.images[0] : "";
+      let imageUrl = "";
+      try {
+        const parsed = new URL(rawImage, window.location.origin);
+        if (parsed.protocol === "https:" || parsed.origin === window.location.origin) imageUrl = parsed.href;
+      } catch { /* No external or invalid image URLs. */ }
+      if (imageUrl) {
+        const image = document.createElement("img");
+        image.src = imageUrl;
+        image.alt = typeof record.image_alt === "string" ? record.image_alt : record.title;
+        image.loading = "lazy";
+        image.decoding = "async";
+        link.append(image);
+      } else {
+        const placeholder = document.createElement("span");
+        placeholder.className = "related-rental-placeholder";
+        placeholder.setAttribute("aria-hidden", "true");
+        placeholder.textContent = (record.title || "L").slice(0, 1).toUpperCase();
+        link.append(placeholder);
+      }
+      const title = document.createElement("h3");
+      title.textContent = record.title;
+      const price = document.createElement("p");
+      price.textContent = priceText(record.price_amount, record.currency, record.price_unit);
+      card.append(link, title, price);
+      return card;
+    }));
+  }
+
+  async function loadRelated(record) {
+    if (!["technology", "play", "camera", "phone", "laptop", "audio", "creative"].includes(record.category) && !record.market_category) return;
+    try {
+      const url = new URL("/api/listings", window.location.origin);
+      url.searchParams.set("category", record.category);
+      url.searchParams.set("sort", "newest");
+      const response = await fetch(url, { headers: { Accept: "application/json" }, cache: "no-store" });
+      const data = await response.json().catch(() => ({}));
+      if (response.ok && Array.isArray(data.items)) renderRelated(data.items);
+    } catch { /* Related inventory is optional; the listing stays readable. */ }
+  }
+
   function renderListing(record, config = {}) {
     listing = record;
     document.title = `${record.title} — LOCKD`;
@@ -131,22 +233,33 @@
       description.textContent = "A description has not been provided for this listing yet.";
     }
     const facts = document.querySelector("#rental-facts");
-    const fields = record.attributes && typeof record.attributes === "object" ? Object.entries(record.attributes) : [];
-    if (record.price_unit) fields.unshift(["Pricing unit", record.price_unit]);
-    if (record.requires_approval) fields.push(["Booking process", "Owner confirmation required"]);
-    fields.slice(0, 8).forEach(([label, value]) => {
-      if (value === null || value === undefined || value === "" || typeof value === "object") return;
-      const row = document.createElement("div");
-      const term = document.createElement("dt");
-      term.textContent = String(label).replaceAll("_", " ");
-      const definition = document.createElement("dd");
-      definition.textContent = String(value);
-      row.append(term, definition);
-      facts.append(row);
+    facts.replaceChildren();
+    const attributes = record.attributes && typeof record.attributes === "object" ? record.attributes : {};
+    ["brand", "model", "configuration", "generation", "storage", "memory", "condition", "included_accessories", "specifications", "mandatory_fees"].forEach((key) => {
+      addFact(facts, factLabel(key), attributes[key]);
     });
+    if (record.rental_durations?.length) addFact(facts, "Available durations", record.rental_durations);
+    if (record.deposit_amount !== null && record.deposit_amount !== undefined) {
+      addFact(facts, "Refundable deposit", priceText(record.deposit_amount, record.deposit_currency || record.currency, ""));
+    }
+    if (record.collection_available !== null && record.collection_available !== undefined) addFact(facts, "Collection", record.collection_available ? "Available" : "Not available");
+    if (record.delivery_available !== null && record.delivery_available !== undefined) addFact(facts, "Delivery", record.delivery_available ? "Available" : "Not available");
+    if (record.requires_approval) addFact(facts, "Booking process", "Owner confirmation required");
+    else if (record.checkout_enabled) addFact(facts, "Booking process", "This listing is marked checkout-enabled, but LOCKD checkout is not live yet");
+    else addFact(facts, "Booking process", "Availability check only; no online checkout is configured");
+    if (["technology", "play", "camera", "phone", "laptop", "audio", "creative"].includes(record.category) || record.market_category) {
+      try {
+        const key = "lockd:tech:recent:v1";
+        const slugs = JSON.parse(localStorage.getItem(key) || "[]");
+        const list = Array.isArray(slugs) ? slugs.filter((entry) => typeof entry === "string") : [];
+        localStorage.setItem(key, JSON.stringify([record.slug, ...list.filter((entry) => entry !== record.slug)].slice(0, 12)));
+      } catch { /* Browsing history is optional and stored on this device only. */ }
+    }
     renderGallery(record.images);
     detail.hidden = false;
     state.hidden = true;
+    renderEstimate();
+    loadRelated(record);
   }
 
   async function loadListing() {
@@ -192,7 +305,10 @@
     start.min = localToday();
     end.min = localToday();
     start.addEventListener("change", () => { end.min = start.value || localToday(); });
+    start.addEventListener("input", renderEstimate);
+    end.addEventListener("input", renderEstimate);
   }
+  document.querySelector("#quantity")?.addEventListener("input", renderEstimate);
 
   form?.addEventListener("submit", async (event) => {
     event.preventDefault();

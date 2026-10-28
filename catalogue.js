@@ -27,6 +27,8 @@
   let page = 0;
   let hasMore = false;
   let items = [];
+  let availabilityResults = {};
+  let availabilityRun = 0;
 
   function readBundle() {
     try {
@@ -46,6 +48,10 @@
   let bundle = readBundle();
 
   function saveBundle() {
+    availabilityRun += 1;
+    availabilityResults = {};
+    const checkButton = document.querySelector("#check-bundle-availability");
+    if (checkButton) checkButton.disabled = false;
     try { localStorage.setItem(storageKey, JSON.stringify(bundle)); } catch { /* Storage can be disabled. */ }
     renderBundle();
   }
@@ -63,6 +69,63 @@
     const unitLabels = { hour: "hour", day: "day", night: "night", week: "week", month: "month", trip: "trip" };
     const suffix = unitLabels[unit] ? ` / ${unitLabels[unit]}` : "";
     return `${formatted}${suffix}`;
+  }
+
+  function subtotalFor(item, startDate, endDate) {
+    return window.LockdRentalPricing?.estimateRentalSubtotal({
+      amount: item.priceAmount,
+      currency: item.currency,
+      unit: item.priceUnit,
+      quantity: Number(item.quantity || 1),
+      startDate,
+      endDate,
+    }) || null;
+  }
+
+  async function checkBundleAvailability() {
+    const button = document.querySelector("#check-bundle-availability");
+    const output = document.querySelector("#bundle-availability-status");
+    const startDate = document.querySelector("#bundle-start")?.value || "";
+    const endDate = document.querySelector("#bundle-end")?.value || "";
+    if (!bundle.items.length) {
+      output.textContent = "Add at least one published rental to check availability.";
+      return;
+    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate) || !/^\d{4}-\d{2}-\d{2}$/.test(endDate) || endDate <= startDate) {
+      output.textContent = "Choose a valid start and end date before checking the bundle.";
+      return;
+    }
+
+    const run = ++availabilityRun;
+    button.disabled = true;
+    output.textContent = "Checking the availability calendar for each rental…";
+    availabilityResults = Object.fromEntries(bundle.items.map((item) => [item.id, "Checking…"]));
+    renderBundle();
+    const checked = await Promise.all(bundle.items.map(async (item) => {
+      try {
+        const response = await fetch("/api/availability", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({ listingId: item.id, startDate, endDate, quantity: Number(item.quantity || 1) }),
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) return { id: item.id, result: "Could not confirm" };
+        return { id: item.id, result: result.available === true ? "Available for selected dates" : "Not available for selected dates" };
+      } catch {
+        return { id: item.id, result: "Could not confirm" };
+      }
+    }));
+    if (run !== availabilityRun) return;
+    availabilityResults = Object.fromEntries(checked.map(({ id, result }) => [id, result]));
+    const available = checked.filter(({ result }) => result === "Available for selected dates").length;
+    const failed = checked.filter(({ result }) => result === "Could not confirm").length;
+    output.textContent = failed
+      ? `Availability could not be confirmed for ${failed} ${failed === 1 ? "rental" : "rentals"}. Nothing has been reserved.`
+      : available === checked.length
+        ? "The calendar shows every selected rental as available. Nothing has been reserved."
+        : `${checked.length - available} ${checked.length - available === 1 ? "rental is" : "rentals are"} unavailable for these dates. Nothing has been reserved.`;
+    button.disabled = false;
+    renderBundle();
   }
 
   function safeImageUrl(value) {
@@ -164,7 +227,17 @@
         priceAmount: listing.price_amount,
         currency: listing.currency,
         priceUnit: listing.price_unit,
+        deliveryAvailable: listing.delivery_available,
+        collectionAvailable: listing.collection_available,
       });
+    }
+    const selected = bundle.items.find((item) => item.id === listing.id);
+    if (selected) {
+      selected.priceAmount = listing.price_amount;
+      selected.currency = listing.currency;
+      selected.priceUnit = listing.price_unit;
+      selected.deliveryAvailable = listing.delivery_available;
+      selected.collectionAvailable = listing.collection_available;
     }
     saveBundle();
     if (button) {
@@ -192,7 +265,15 @@
       name.textContent = item.title;
       const price = document.createElement("div");
       price.className = "bundle-line-price";
-      price.textContent = priceText(item.priceAmount, item.currency, item.priceUnit);
+      const estimate = bundle.startDate && bundle.endDate && bundle.endDate > bundle.startDate
+        ? subtotalFor(item, bundle.startDate, bundle.endDate)
+        : null;
+      price.textContent = estimate
+        ? `${priceText(item.priceAmount, item.currency, item.priceUnit)} · ${priceText(estimate.amount, estimate.currency, "")} estimated`
+        : priceText(item.priceAmount, item.currency, item.priceUnit);
+      const availability = document.createElement("p");
+      availability.className = "bundle-line-availability";
+      availability.textContent = availabilityResults[item.id] || "Availability not checked";
       const controls = document.createElement("div");
       controls.className = "bundle-line-controls";
       const decrease = document.createElement("button");
@@ -223,14 +304,30 @@
         bundle.items = bundle.items.filter((entry) => entry.id !== item.id);
         saveBundle();
       });
-      row.append(name, controls, price, remove);
+      row.append(name, controls, price, availability, remove);
       lines.append(row);
     });
 
     const count = document.querySelector("#bundle-count");
     const price = document.querySelector("#bundle-price");
     if (count) count.textContent = String(bundle.items.reduce((sum, item) => sum + Number(item.quantity || 1), 0));
-    if (price) price.textContent = bundle.items.length ? "Rates shown per rental" : "No rentals selected";
+    if (price) {
+      const datesValid = /^\d{4}-\d{2}-\d{2}$/.test(bundle.startDate) && /^\d{4}-\d{2}-\d{2}$/.test(bundle.endDate) && bundle.endDate > bundle.startDate;
+      if (!bundle.items.length) price.textContent = "No rentals selected";
+      else if (!datesValid) price.textContent = "Choose dates for an estimate";
+      else {
+        const totals = new Map();
+        let unpriced = 0;
+        bundle.items.forEach((item) => {
+          const estimate = subtotalFor(item, bundle.startDate, bundle.endDate);
+          if (!estimate) { unpriced += 1; return; }
+          totals.set(estimate.currency, (totals.get(estimate.currency) || 0) + estimate.amount);
+        });
+        const summary = [...totals].map(([currency, amount]) => `${priceText(amount, currency, "")} estimated`).join(" + ");
+        const unpricedLabel = unpriced ? `${unpriced} ${unpriced === 1 ? "rental needs" : "rentals need"} owner pricing/term confirmation` : "";
+        price.textContent = [summary, unpricedLabel].filter(Boolean).join(" · ") || "Rates need confirmation";
+      }
+    }
     grid?.querySelectorAll(".bundle-add").forEach((button) => {
       const listingId = button.closest(".listing-card")?.dataset.listingId;
       const selected = bundle.items.some((item) => item.id === listingId);
@@ -247,9 +344,31 @@
       const field = document.querySelector(selector);
       if (field) {
         field.value = bundle[key] || "";
-        field.onchange = () => { bundle[key] = field.value; saveBundle(); };
+        field.value = bundle[key] || "";
+        field.oninput = () => { bundle[key] = field.value; saveBundle(); };
       }
     });
+    const start = document.querySelector("#bundle-start");
+    const end = document.querySelector("#bundle-end");
+    if (start && end) {
+      const today = new Date();
+      const localToday = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+      start.min = localToday;
+      end.min = start.value || localToday;
+      start.oninput = () => { end.min = start.value || localToday; bundle.startDate = start.value; saveBundle(); };
+      end.oninput = () => { bundle.endDate = end.value; saveBundle(); };
+    }
+    const delivery = document.querySelector("#bundle-delivery")?.value;
+    const deliveryStatus = document.querySelector("#bundle-delivery-note");
+    if (delivery && bundle.items.some((item) => item[delivery === "delivery" ? "deliveryAvailable" : "collectionAvailable"] === false)) {
+      deliveryStatus.textContent = `One or more rentals do not offer ${delivery}. Choose another option or confirm with the owner.`;
+    } else if (delivery && bundle.items.some((item) => item[delivery === "delivery" ? "deliveryAvailable" : "collectionAvailable"] !== true)) {
+      deliveryStatus.textContent = `Confirm ${delivery} with the owner for any rental without a published service setting.`;
+    } else {
+      deliveryStatus.textContent = "";
+    }
+    const availabilityStatus = document.querySelector("#bundle-availability-status");
+    if (!bundle.items.some((item) => availabilityResults[item.id])) availabilityStatus.textContent = "";
   }
 
   async function loadListings({ append = false } = {}) {
@@ -328,12 +447,15 @@
   if (loadMoreButton) loadMoreButton.addEventListener("click", () => loadListings({ append: true }));
   document.querySelector("#clear-bundle")?.addEventListener("click", () => {
     bundle = { items: [], startDate: "", endDate: "", delivery: "", extras: "" };
+    document.querySelector("#bundle-availability-status").textContent = "";
     saveBundle();
     grid.querySelectorAll(".bundle-add").forEach((button) => {
       button.textContent = "Add to bundle";
       button.setAttribute("aria-pressed", "false");
     });
   });
+
+  document.querySelector("#check-bundle-availability")?.addEventListener("click", checkBundleAvailability);
 
   renderBundle();
   loadListings();

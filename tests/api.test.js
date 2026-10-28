@@ -5,6 +5,7 @@ const listings = require("../api/listings.js");
 const availability = require("../api/availability.js");
 const config = require("../api/config.js");
 const sitemap = require("../api/sitemap.js");
+const benchmarks = require("../api/benchmarks.js");
 
 function mockResponse() {
   return {
@@ -127,6 +128,98 @@ test("catalogue query returns only explicitly selected public listing fields", a
   assert.equal(requestedUrl.searchParams.get("or").includes("select="), false);
 });
 
+test("technology catalogue filters use published records and validated listing fields", async (t) => {
+  configure(t);
+  let requestedUrl;
+  mockFetch(t, async (url) => {
+    requestedUrl = new URL(url);
+    return httpResponse(200, [{
+      id: "listing-2", slug: "camera-two", title: "Camera two", category: "camera", market_category: "creator",
+      price_amount: 5000, currency: "KES", price_unit: "day", attributes: { brand: "Sony", model: "A7" },
+      listing_status: "published", approval_status: "approved", owner_id: "must-not-leak",
+    }]);
+  });
+  const res = await invoke(listings, { query: {
+    market: "tech", group: "creator", brand: "Sony", type: "camera", condition: "good", duration: "day", accessory: "Sony lens",
+    location: "Nairobi", minPrice: "500", maxPrice: "5000", delivery: "yes",
+    collection: "yes", useCase: "content_creation", q: "camera", sort: "price-low",
+  } });
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.items[0].market_category, "creator");
+  assert.equal("owner_id" in res.body.items[0], false);
+  assert.equal(requestedUrl.searchParams.get("listing_status"), "eq.published");
+  assert.equal(requestedUrl.searchParams.get("approval_status"), "eq.approved");
+  assert.equal(requestedUrl.searchParams.get("market_category"), null);
+  assert.equal(requestedUrl.searchParams.get("and"), "(or(market_category.eq.creator,category.in.(camera,creative)),price_amount.gte.500,price_amount.lte.5000)");
+  assert.equal(requestedUrl.searchParams.get("attributes->>brand"), "ilike.*Sony*");
+  assert.equal(requestedUrl.searchParams.get("attributes->>product_type"), "eq.camera");
+  assert.equal(requestedUrl.searchParams.get("attributes->>condition"), "eq.good");
+  assert.equal(requestedUrl.searchParams.get("rental_durations"), "cs.{day}");
+  assert.equal(requestedUrl.searchParams.get("attributes->included_accessories"), 'cs.["Sony lens"]');
+  assert.equal(requestedUrl.searchParams.get("location_label"), "ilike.*Nairobi*");
+  assert.equal(requestedUrl.searchParams.get("price_amount"), null);
+  assert.equal(requestedUrl.searchParams.get("delivery_available"), "eq.true");
+  assert.equal(requestedUrl.searchParams.get("collection_available"), "eq.true");
+  assert.equal(requestedUrl.searchParams.get("attributes->use_cases"), 'cs.["content_creation"]');
+  assert.match(requestedUrl.searchParams.get("or"), /title\.ilike/);
+});
+
+test("technology filters reject unsafe values and invalid price ranges before database access", async (t) => {
+  configure(t);
+  mockFetch(t, async () => { throw new Error("fetch should not run for invalid requests"); });
+  const unsafe = await invoke(listings, { query: { market: "tech", brand: "Sony,select=*" } });
+  assert.equal(unsafe.statusCode, 400);
+  const reversed = await invoke(listings, { query: { market: "tech", minPrice: "5000", maxPrice: "10" } });
+  assert.equal(reversed.statusCode, 400);
+  assert.equal(reversed.body.error, "invalid_price_range");
+  const duration = await invoke(listings, { query: { market: "tech", duration: "forever" } });
+  assert.equal(duration.statusCode, 400);
+  assert.equal(duration.body.error, "invalid_duration");
+});
+
+test("date-filtered technology catalogue calls the approved-listing availability search", async (t) => {
+  configure(t);
+  const id = "b97f0876-a29a-4b6a-b8ca-a11111111111";
+  const start = new Date();
+  start.setUTCDate(start.getUTCDate() + 2);
+  const end = new Date(start);
+  end.setUTCDate(end.getUTCDate() + 2);
+  const format = (date) => date.toISOString().slice(0, 10);
+  const seen = [];
+  mockFetch(t, async (url, options) => {
+    const parsed = new URL(url);
+    seen.push({ parsed, options });
+    if (parsed.pathname.endsWith("/rpc/search_lockd_available_listings")) return httpResponse(200, [{ listing_id: id }]);
+    return httpResponse(200, [{ id, slug: "available-camera", title: "Available camera", category: "camera", price_amount: 2000, currency: "KES", price_unit: "day" }]);
+  });
+  const res = await invoke(listings, { query: { market: "tech", group: "creator", startDate: format(start), endDate: format(end), quantity: "2" } });
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.items.length, 1);
+  assert.match(seen[0].parsed.pathname, /rpc\/search_lockd_available_listings$/);
+  assert.equal(JSON.parse(seen[0].options.body).p_quantity, 2);
+  assert.equal(seen[1].parsed.searchParams.get("id"), `in.(${id})`);
+  assert.equal(seen[1].parsed.searchParams.get("listing_status"), "eq.published");
+});
+
+test("market reference endpoint provides source-dated references without turning them into listings", async (t) => {
+  const oldUrl = process.env.SUPABASE_URL;
+  const oldKey = process.env.SUPABASE_ANON_KEY;
+  delete process.env.SUPABASE_URL;
+  delete process.env.SUPABASE_ANON_KEY;
+  t.after(() => {
+    if (oldUrl === undefined) delete process.env.SUPABASE_URL;
+    else process.env.SUPABASE_URL = oldUrl;
+    if (oldKey === undefined) delete process.env.SUPABASE_ANON_KEY;
+    else process.env.SUPABASE_ANON_KEY = oldKey;
+  });
+  const res = await invoke(benchmarks);
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.source, "snapshot");
+  assert.ok(res.body.records.length >= 20);
+  assert.ok(res.body.records.every((record) => record.sourceUrl.startsWith("https://") && record.researchedOn));
+  assert.ok(res.body.records.every((record) => !("listingId" in record) && !("bookingUrl" in record)));
+});
+
 test("availability rejects invalid, reversed and past date ranges without calling Supabase", async (t) => {
   configure(t);
   mockFetch(t, async () => { throw new Error("fetch should not run for invalid requests"); });
@@ -190,5 +283,6 @@ test("sitemap emits only public shell pages when Supabase is unavailable", async
   assert.equal(res.statusCode, 200);
   assert.match(res.headers["content-type"], /application\/xml/);
   assert.match(res.body, /https:\/\/lockd2\.vercel\.app\/rentals\.html/);
+  assert.match(res.body, /https:\/\/lockd2\.vercel\.app\/tech\.html/);
   assert.doesNotMatch(res.body, /rental\.html\?slug=/);
 });

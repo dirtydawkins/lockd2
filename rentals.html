@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="./styles.css">
     <link rel="stylesheet" href="./catalogue.css">
     <script src="./app.js" defer></script>
+    <script src="./rental-pricing.js" defer></script>
     <script src="./catalogue.js" defer></script>
   </head>
   <body>
@@ -29,6 +30,7 @@
       <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu"><span></span><span></span></button>
       <nav class="primary-nav" id="primary-nav" aria-label="Main navigation">
         <a href="rentals.html">Explore Rentals</a>
+        <a href="tech.html">Tech &amp; Gadgets</a>
         <a href="index.html#how-it-works">How it works</a>
         <a href="index.html#about">About LOCKD</a>
         <a class="owner-nav-link" href="owners.html">List your asset</a>
@@ -73,6 +75,7 @@
         <a href="rentals.html?category=drive" data-filter="drive">Drive</a>
         <a href="rentals.html?category=play" data-filter="play">Play</a>
         <a href="rentals.html?category=technology" data-filter="technology">Technology</a>
+        <a href="tech.html">Tech &amp; Gadgets</a>
         <a href="rentals.html?category=experience" data-filter="experience">Experiences</a>
         <a href="rentals.html?category=camera" data-filter="camera">Cameras</a>
         <a href="rentals.html?category=audio" data-filter="audio">Audio</a>
@@ -103,7 +106,10 @@
             <div><dt>Selected rentals</dt><dd id="bundle-count">0</dd></div>
             <div class="bundle-total"><dt>Price summary</dt><dd id="bundle-price">Rates vary by listing</dd></div>
           </dl>
-          <p class="bundle-footnote">Only verified listing rates are included. Availability is checked separately for each rental. This bundle does not reserve anything.</p>
+          <p class="bundle-footnote">Subtotal estimates use each published rate and selected dates. Deposits, mandatory fees and unpriced extras are separate. Availability must be checked for every item; this bundle does not reserve anything.</p>
+          <button class="text-button" type="button" id="check-bundle-availability">Check all availability</button>
+          <p class="bundle-availability-status" id="bundle-availability-status" role="status" aria-live="polite"></p>
+          <p class="bundle-availability-status" id="bundle-delivery-note"></p>
           <button class="text-button" type="button" id="clear-bundle">Clear bundle</button>
         </aside>
       </div>

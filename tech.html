@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f7f4ef">
+    <meta name="description" content="Browse technology, gaming, camera and audio rentals on LOCKD. See actual published rental listings and separately sourced Kenyan market references.">
+    <link rel="canonical" href="https://lockd2.vercel.app/tech.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="LOCKD">
+    <meta property="og:title" content="The Tech Edit — LOCKD">
+    <meta property="og:description" content="The technology you want. Only for as long as you need it.">
+    <meta property="og:url" content="https://lockd2.vercel.app/tech.html">
+    <meta property="og:image" content="https://lockd2.vercel.app/WhatsApp%20Image%202026-10-27%20at%2023.34.41.jpeg">
+    <meta property="og:image:alt" content="PlayStation console and controller beside a television, an editorial category illustration">
+    <meta name="twitter:card" content="summary_large_image">
+    <title>The Tech Edit — LOCKD</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./catalogue.css">
+    <link rel="stylesheet" href="./tech.css">
+    <script src="./app.js" defer></script>
+    <script src="./tech.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header" id="top">
+      <a class="brand" href="index.html#top" aria-label="LOCKD home">
+        <svg class="brand-mark" viewBox="0 0 34 34" aria-hidden="true"><path d="M7 5.5h15.5L28 11v17.5H7z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M22.5 5.5V11H28M12 16.5v7h10v-7z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+        <span class="brand-word">lockd<span class="brand-period">.</span></span>
+      </a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu"><span></span><span></span></button>
+      <nav class="primary-nav" id="primary-nav" aria-label="Main navigation">
+        <a href="rentals.html">Explore Rentals</a>
+        <a href="tech.html" aria-current="page">Tech &amp; Gadgets</a>
+        <a href="index.html#how-it-works">How it works</a>
+        <a href="index.html#about">About LOCKD</a>
+        <a class="owner-nav-link" href="owners.html">List your asset</a>
+      </nav>
+      <a class="header-cta" href="rentals.html">Explore Rentals</a>
+    </header>
+
+    <main id="main" class="tech-shell">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="index.html">Home</a><span aria-hidden="true">/</span><span>Tech &amp; Gadgets</span>
+      </nav>
+
+      <section class="tech-hero" aria-labelledby="tech-title">
+        <div class="tech-hero-copy">
+          <p class="eyebrow"><span class="eyebrow-rule"></span> LOCKD / THE TECH EDIT</p>
+          <h1 id="tech-title">Good tech.<br><em>For right now.</em></h1>
+          <p class="tech-hero-lede">The technology you want. Only for as long as you need it.</p>
+          <a class="text-button" href="#published-rentals">Explore published rentals <span aria-hidden="true">↘</span></a>
+        </div>
+        <figure class="tech-hero-image">
+          <img src="./WhatsApp%20Image%202026-10-27%20at%2023.34.41.jpeg" alt="PlayStation console and controller beside a television, shown as an editorial category illustration" width="736" height="1104" fetchpriority="high">
+          <figcaption>Editorial image · not a LOCKD listing</figcaption>
+        </figure>
+        <div class="tech-hero-side" aria-hidden="true"><span>TECHNOLOGY</span><span>01 / 06</span></div>
+      </section>
+
+      <nav class="tech-categories" aria-label="Browse technology categories" id="tech-categories">
+        <a href="tech.html" data-group="all">All technology</a>
+        <a href="tech.html?group=gaming" data-group="gaming">Gaming</a>
+        <a href="tech.html?group=phones" data-group="phones">Phones</a>
+        <a href="tech.html?group=computers" data-group="computers">Computers &amp; tablets</a>
+        <a href="tech.html?group=creator" data-group="creator">Cameras &amp; creator gear</a>
+        <a href="tech.html?group=audio" data-group="audio">Audio &amp; events</a>
+        <a href="tech.html?group=work" data-group="work">Work &amp; productivity</a>
+      </nav>
+
+      <section class="tech-catalogue" id="published-rentals" aria-labelledby="published-title">
+        <div class="tech-section-heading">
+          <div>
+            <p class="eyebrow">Real items, listed on LOCKD</p>
+            <h2 id="published-title">Published<br><em>rentals.</em></h2>
+          </div>
+          <p class="tech-section-copy">Only approved LOCKD listings appear here. A published listing’s own terms and date calendar determine its price and availability.</p>
+        </div>
+
+        <form class="tech-filters" id="tech-filter-form" aria-label="Filter published technology rentals">
+          <label class="tech-search-field">Search<input type="search" name="q" id="tech-search" placeholder="Model, feature or use" autocomplete="off"></label>
+          <label>Brand<input type="search" name="brand" id="tech-brand" list="tech-brands" placeholder="Any brand" autocomplete="off"><datalist id="tech-brands"></datalist></label>
+          <label>Type<select name="type" id="tech-type"><option value="">All types</option><option value="gaming">Gaming</option><option value="phone">Phones</option><option value="computer">Computers</option><option value="tablet">Tablets</option><option value="camera">Cameras</option><option value="lens">Lenses</option><option value="audio">Audio</option><option value="creator">Creator gear</option><option value="projector">Projectors</option></select></label>
+          <label>Condition<select name="condition" id="tech-condition"><option value="">Any condition</option><option value="new">New</option><option value="excellent">Excellent</option><option value="good">Good</option><option value="fair">Fair</option><option value="refurbished">Refurbished</option></select></label>
+          <label>Duration<select name="duration" id="tech-duration"><option value="">Any duration</option><option value="hour">Hourly</option><option value="day">Daily</option><option value="week">Weekly</option><option value="month">Monthly</option><option value="trip">Per trip</option></select></label>
+          <label>Included accessory<input type="search" name="accessory" id="tech-accessory" placeholder="e.g. controller" autocomplete="off"></label>
+          <label>Location<input type="search" name="location" id="tech-location" placeholder="City or area" autocomplete="off"></label>
+          <label>From KSh<input type="number" name="minPrice" id="tech-min-price" min="0" step="100" inputmode="numeric" placeholder="Any"></label>
+          <label>To KSh<input type="number" name="maxPrice" id="tech-max-price" min="0" step="100" inputmode="numeric" placeholder="Any"></label>
+          <label>Available from<input type="date" name="startDate" id="tech-start-date"></label>
+          <label>Return by<input type="date" name="endDate" id="tech-end-date"></label>
+          <label>Quantity<input type="number" name="quantity" id="tech-quantity" min="1" max="20" value="1"></label>
+          <label>Collection<select name="collection" id="tech-collection"><option value="">Any option</option><option value="yes">Collection available</option></select></label>
+          <label>Delivery<select name="delivery" id="tech-delivery"><option value="">Any option</option><option value="yes">Delivery available</option></select></label>
+          <label>Sort<select name="sort" id="tech-sort"><option value="newest">Recently added</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option></select></label>
+          <button class="text-button tech-clear-filters" type="reset" id="clear-tech-filters">Clear filters</button>
+          <button class="text-button tech-save-search" type="button" id="save-tech-search">Save this search</button>
+        </form>
+
+        <div class="tech-results-head">
+          <p id="tech-result-count" aria-live="polite"></p>
+          <p id="tech-active-filters" class="tech-active-filters"></p>
+        </div>
+        <section class="saved-searches" id="saved-searches" aria-label="Saved searches on this device" hidden>
+          <div><p>Saved searches · this device</p><div class="saved-search-links" id="saved-search-links"></div></div>
+          <button class="text-button" id="clear-saved-searches" type="button">Clear saved searches</button>
+        </section>
+        <p class="catalogue-status tech-status" id="tech-status" role="status" aria-live="polite">Loading published technology rentals…</p>
+        <div class="tech-listing-grid" id="tech-listing-grid"></div>
+        <button class="button button-paper tech-load-more" id="tech-load-more" type="button" hidden>Load more</button>
+        <p class="tech-date-note">Date filters use the LOCKD availability calendar when connected. A date check is not a reservation.</p>
+      </section>
+
+      <section class="tech-personal" aria-label="Your saved items and history">
+        <div class="tech-personal-panel" id="saved-panel" hidden>
+          <div class="tech-personal-heading"><div><p class="eyebrow">Saved on this device</p><h2>Things to<br><em>come back to.</em></h2></div><a class="text-button" href="#published-rentals">Browse rentals</a></div>
+          <div class="tech-mini-grid" id="saved-grid"></div>
+        </div>
+        <div class="tech-personal-panel" id="recent-panel" hidden>
+          <div class="tech-personal-heading"><div><p class="eyebrow">Your browsing history</p><h2>Recently<br><em>viewed.</em></h2></div><span class="local-data-note">Saved on this device</span></div>
+          <div class="tech-mini-grid" id="recent-grid"></div>
+        </div>
+      </section>
+
+      <section class="tech-usecases" id="use-case-section" aria-labelledby="use-case-title" hidden>
+        <div class="tech-section-heading">
+          <div><p class="eyebrow">Made for the plan</p><h2 id="use-case-title">Browse by<br><em>what you’re doing.</em></h2></div>
+          <p class="tech-section-copy">These use cases are based on details owners have added to published listings.</p>
+        </div>
+        <div class="use-case-links" id="use-case-links"></div>
+      </section>
+
+      <section class="market-reference" id="market-references" aria-labelledby="market-reference-title">
+        <div class="market-reference-top">
+          <div><p class="eyebrow">Independent Kenyan provider rates</p><h2 id="market-reference-title">A useful point<br><em>of reference.</em></h2></div>
+          <p class="market-reference-intro">These are published prices observed on other providers’ websites. They are not LOCKD inventory, do not represent owner-configured LOCKD prices, and cannot be booked here.</p>
+        </div>
+        <div class="market-reference-toolbar">
+          <label for="benchmark-category">Show references
+            <select id="benchmark-category"><option value="all">All researched categories</option><option value="gaming">Gaming</option><option value="phone">Phones</option><option value="computer">Computers</option><option value="camera_creator">Cameras &amp; creator gear</option><option value="audio">Audio</option><option value="drone">Drones</option><option value="projector">Projectors</option></select>
+          </label>
+          <p id="benchmark-count" aria-live="polite"></p>
+        </div>
+        <div class="benchmark-grid" id="benchmark-grid"></div>
+        <button class="text-button benchmark-show-all" id="benchmark-show-all" type="button" hidden>Show all references</button>
+        <p class="benchmark-footnote" id="benchmark-footnote">Prices reflect the source page on the research date shown per record. Provider availability was not checked for your dates; fees, deposits, terms and stock can change. Confirm directly with the provider before relying on a reference.</p>
+        <p class="benchmark-error" id="benchmark-error" role="status" hidden></p>
+      </section>
+
+      <aside class="tech-compare" id="tech-compare" aria-live="polite" hidden>
+        <div class="tech-compare-heading"><div><p class="eyebrow">Compare published LOCKD rentals</p><h2>At a glance.</h2></div><button class="text-button" id="clear-compare" type="button">Clear</button></div>
+        <div class="tech-compare-table-wrap"><table class="tech-compare-table"><thead id="compare-head"></thead><tbody id="compare-body"></tbody></table></div>
+      </aside>
+    </main>
+
+    <footer class="catalogue-footer">
+      <a class="brand" href="index.html#top" aria-label="LOCKD home"><span class="brand-word">lockd<span class="brand-period">.</span></span></a>
+      <a href="index.html#categories">Back to discovery</a>
+    </footer>
+  </body>
+</html>

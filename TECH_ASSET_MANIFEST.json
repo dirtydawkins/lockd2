@@ -1,0 +1,23 @@
+{
+  "assets": [
+    {
+      "file": "WhatsApp Image 2026-10-27 at 23.34.41.jpeg",
+      "usedOn": ["index.html category card: Play", "tech.html hero"],
+      "visualSubject": "PlayStation console and controller in a home setup",
+      "purpose": "Editorial category illustration only; not an individual LOCKD rental photograph and not confirmation of model, package or availability.",
+      "source": "User-supplied image in this project",
+      "usage": "User supplied; presumed authorized for this LOCKD project. Rights ownership has not been independently verified.",
+      "altText": "PlayStation console and controller beside a television, shown as an editorial category illustration"
+    },
+    {
+      "file": "WhatsApp Image 2026-10-27 at 23.35.00.jpeg",
+      "usedOn": ["index.html category card: Technology"],
+      "visualSubject": "Burgundy smartphone held in one hand",
+      "purpose": "Editorial technology-category illustration only; exact phone model and configuration are not verified.",
+      "source": "User-supplied image in this project",
+      "usage": "User supplied; presumed authorized for this LOCKD project. Rights ownership has not been independently verified.",
+      "altText": "Burgundy smartphone held in one hand"
+    }
+  ],
+  "policy": "Market-reference records do not reuse competitor product photography. Real LOCKD listings must use photos supplied for that actual item, with image rights recorded at submission and review."
+}
