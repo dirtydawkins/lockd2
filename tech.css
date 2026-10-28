@@ -80,7 +80,7 @@
 .tech-photo-card { display: block; min-width: 0; border-top: 1px solid var(--line); color: inherit; text-decoration: none; }
 .tech-photo-card:hover, .tech-photo-card:focus-visible { color: inherit; }
 .tech-photo-card:focus-visible { outline: 2px solid var(--burgundy); outline-offset: 3px; }
-.tech-photo-card > img { width: 100%; aspect-ratio: 4/5; padding: clamp(.5rem, 1.8vw, 1rem); object-fit: contain; background: #eeeae5; transition: transform var(--motion-image) var(--motion-ease); }
+.tech-photo-card > img { display: block; width: 100%; height: auto; aspect-ratio: 4/5; padding: clamp(.5rem, 1.8vw, 1rem); object-fit: contain; background: #eeeae5; transition: transform var(--motion-image) var(--motion-ease); }
 .tech-photo-card:hover > img, .tech-photo-card:focus-visible > img { transform: scale(1.018); }
 .tech-photo-card > div { padding: .85rem .1rem 1rem; }
 .tech-photo-card .eyebrow { margin: 0 0 .5rem; font-size: .51rem; }
