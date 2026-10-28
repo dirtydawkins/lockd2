@@ -1,3 +1,5 @@
+const supabaseConfig = require("./supabase-config.js");
+
 function send(res, status, payload) {
   res.setHeader("Cache-Control", "no-store");
   res.status(status).json(payload);
@@ -15,16 +17,8 @@ module.exports = async function handler(req, res) {
     return send(res, 405, { error: "method_not_allowed", message: "Use POST to check rental dates." });
   }
 
-  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  let origin;
-  try {
-    const parsed = new URL(url);
-    if (parsed.protocol !== "https:" || !key) throw new Error("config");
-    origin = parsed.origin;
-  } catch {
-    return send(res, 503, { error: "catalogue_not_configured", message: "Live availability is not configured." });
-  }
+  const config = supabaseConfig();
+  if (!config) return send(res, 503, { error: "catalogue_not_configured", message: "Live availability is not configured." });
 
   const body = typeof req.body === "string" ? (() => { try { return JSON.parse(req.body); } catch { return {}; } })() : (req.body || {});
   const { listingId, startDate, endDate, quantity } = body;
@@ -38,11 +32,10 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const response = await fetch(`${origin}/rest/v1/rpc/check_lockd_listing_availability`, {
+    const response = await fetch(`${config.url}/rest/v1/rpc/check_lockd_listing_availability`, {
       method: "POST",
       headers: {
-        apikey: key,
-        Authorization: `Bearer ${key}`,
+        ...config.headers,
         "Content-Type": "application/json",
         Accept: "application/json",
       },

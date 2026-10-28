@@ -1,4 +1,5 @@
 const siteOrigin = "https://lockd2.vercel.app";
+const supabaseConfig = require("./supabase-config.js");
 
 function escapeXml(value) {
   return String(value).replace(/[<>&'\"]/g, (character) => ({
@@ -15,29 +16,25 @@ module.exports = async function handler(req, res) {
   res.setHeader("Content-Type", "application/xml; charset=utf-8");
   res.setHeader("Cache-Control", "public, max-age=300, stale-while-revalidate=600");
   const paths = ["/", "/rentals.html", "/tech.html", "/owners.html"];
-  const projectUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anonKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const config = supabaseConfig();
 
-  if (projectUrl && anonKey) {
+  if (config) {
     try {
-      const parsed = new URL(projectUrl);
-      if (parsed.protocol === "https:") {
-        const params = new URLSearchParams({
-          select: "slug",
-          listing_status: "eq.published",
-          approval_status: "eq.approved",
-          order: "created_at.desc",
-          limit: "1000",
-        });
-        const response = await fetch(`${parsed.origin}/rest/v1/lockd_listings?${params}`, {
-          headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}`, Accept: "application/json" },
-        });
-        if (response.ok) {
-          const rows = await response.json();
-          for (const row of rows) {
-            if (typeof row.slug === "string" && /^[a-z0-9][a-z0-9_-]{0,119}$/.test(row.slug)) {
-              paths.push(`/rental.html?slug=${encodeURIComponent(row.slug)}`);
-            }
+      const params = new URLSearchParams({
+        select: "slug",
+        listing_status: "eq.published",
+        approval_status: "eq.approved",
+        order: "created_at.desc",
+        limit: "1000",
+      });
+      const response = await fetch(`${config.url}/rest/v1/lockd_listings?${params}`, {
+        headers: { ...config.headers, Accept: "application/json" },
+      });
+      if (response.ok) {
+        const rows = await response.json();
+        for (const row of rows) {
+          if (typeof row.slug === "string" && /^[a-z0-9][a-z0-9_-]{0,119}$/.test(row.slug)) {
+            paths.push(`/rental.html?slug=${encodeURIComponent(row.slug)}`);
           }
         }
       }

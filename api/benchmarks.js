@@ -1,18 +1,9 @@
 const snapshot = require("../data/tech-market-benchmarks.json");
+const supabaseConfig = require("./supabase-config.js");
 
 function send(res, status, payload) {
   res.setHeader("Cache-Control", "public, max-age=900, stale-while-revalidate=1800");
   res.status(status).json(payload);
-}
-
-function config() {
-  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) return null;
-  try {
-    const parsed = new URL(url);
-    return parsed.protocol === "https:" ? { url: parsed.origin, key } : null;
-  } catch { return null; }
 }
 
 function snapshotResponse(notice = "Curated, source-linked research snapshot; this is not live LOCKD inventory.") {
@@ -25,14 +16,14 @@ module.exports = async function handler(req, res) {
     return send(res, 405, { error: "method_not_allowed", message: "Use GET to read market references." });
   }
 
-  const supabase = config();
+  const supabase = supabaseConfig();
   if (!supabase) return send(res, 200, snapshotResponse());
 
   try {
     const select = "id,product_category,product_name,provider_name,source_url,displayed_price,currency,billing_unit,research_date,service_area,included_equipment,mandatory_fees,availability_note,limitations,source_type";
     const query = new URLSearchParams({ select, status: "eq.published", order: "product_category.asc,research_date.desc,product_name.asc", limit: "500" });
     const response = await fetch(`${supabase.url}/rest/v1/lockd_market_price_benchmarks?${query}`, {
-      headers: { apikey: supabase.key, Authorization: `Bearer ${supabase.key}`, Accept: "application/json" },
+      headers: { ...supabase.headers, Accept: "application/json" },
     });
     if (!response.ok) return send(res, 200, snapshotResponse("Curated research snapshot shown because the benchmark table is not available. It remains separate from LOCKD inventory."));
     const rows = await response.json();

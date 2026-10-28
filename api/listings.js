@@ -1,6 +1,7 @@
 const categories = new Set([
   "stay", "drive", "play", "technology", "experience", "camera", "phone", "laptop", "audio", "creative", "other",
 ]);
+const supabaseConfig = require("./supabase-config.js");
 const technologyCategories = ["technology", "play", "camera", "phone", "laptop", "audio", "creative"];
 const groups = {
   gaming: ["play"], phones: ["phone"], computers: ["laptop"],
@@ -14,19 +15,6 @@ const billingUnits = new Set(["hour", "day", "night", "week", "month", "trip"]);
 function send(res, status, payload) {
   res.setHeader("Cache-Control", "no-store");
   res.status(status).json(payload);
-}
-
-function supabaseConfig() {
-  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) return null;
-  try {
-    const parsed = new URL(url);
-    if (parsed.protocol !== "https:") return null;
-    return { url: parsed.origin, key };
-  } catch {
-    return null;
-  }
 }
 
 function isDate(value) {
@@ -51,8 +39,7 @@ async function availableIds(config, startDate, endDate, quantity) {
   const response = await fetch(`${config.url}/rest/v1/rpc/search_lockd_available_listings`, {
     method: "POST",
     headers: {
-      apikey: config.key,
-      Authorization: `Bearer ${config.key}`,
+      ...config.headers,
       "Content-Type": "application/json",
       Accept: "application/json",
     },
@@ -153,8 +140,7 @@ module.exports = async function handler(req, res) {
   try {
     const response = await fetch(`${config.url}/rest/v1/lockd_listings?${query}`, {
       headers: {
-        apikey: config.key,
-        Authorization: `Bearer ${config.key}`,
+        ...config.headers,
         Accept: "application/json",
       },
     });

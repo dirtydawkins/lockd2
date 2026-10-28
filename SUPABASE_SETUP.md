@@ -10,6 +10,8 @@ The catalogue reads only approved, published rows from `public.lockd_listings`. 
 4. Add actual rental records only after the owner, listing details, images, price, currency, pricing unit, and publication approval have been verified. For technology listings, set `market_category` to the matching group and store actual brand, model, configuration, condition, included accessories and use cases in `attributes`.
 5. Add one availability row for each date that has confirmed capacity. A date without a row is treated as unavailable. Only confirmed bookings reduce that capacity.
 
+The two current migrations were applied to the connected Supabase project from the SQL Editor on 2026-10-28 and the tables, functions, seeded references and public column grants were checked afterward. Because they were run directly in the SQL Editor, they may not appear in the Supabase CLI migration history. Inspect the live schema before re-running them; establish a tracked migration baseline before adding future migrations.
+
 The migrations intentionally create no rental inventory records. Market-price benchmark rows are references to other providers and cannot enter LOCKD's booking flow. The included user-supplied photographs are editorial illustrations; their exact product model, availability and third-party rights have not been independently verified. See `TECH_ASSET_MANIFEST.json`.
 
 ## Technology benchmark editing
@@ -25,10 +27,11 @@ Add these variables to the Vercel project connected to this repository, then red
 | Variable | Purpose |
 | --- | --- |
 | `SUPABASE_URL` or `NEXT_PUBLIC_SUPABASE_URL` | The HTTPS URL for the Supabase project. |
-| `SUPABASE_ANON_KEY` or `NEXT_PUBLIC_SUPABASE_ANON_KEY` | The public anon key. RLS remains the access boundary. The serverless API accepts either naming convention. |
+| `SUPABASE_PUBLISHABLE_KEY` or `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Recommended Supabase publishable key (`sb_publishable_…`). RLS and grants remain the access boundary. |
+| `SUPABASE_ANON_KEY` or `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Legacy public anon key for existing Supabase projects. |
 | `LOCKD_SUPPORT_EMAIL` | Optional LOCKD contact email used to create contextual owner-approval enquiries. |
 
-The catalogue endpoints use only the anon key. Do not add a service-role key, database password, payment secret, or OAuth client secret to browser code or these variables.
+The catalogue endpoints accept only the publishable key or legacy anon key. They reject Supabase secret/service-role keys. Do not add a database password, payment secret, or OAuth client secret to browser code or these variables. After adding or changing Vercel environment variables, create a new production deployment for the function runtime to receive them.
 
 ## Current boundaries
 
