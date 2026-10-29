@@ -331,7 +331,7 @@
   }
 
   async function startOAuth(provider) {
-    if (!new Set(["google", "apple"]).has(provider)) throw new Error("Choose a supported sign-in provider.");
+    if (provider !== "google") throw new Error("Google is the only supported social sign-in provider.");
     await init();
     const random = new Uint8Array(48);
     crypto.getRandomValues(random);
@@ -371,7 +371,7 @@
       let pkce;
       try { pkce = JSON.parse(sessionStorage.getItem(pkceKey) || "null"); } catch { pkce = null; }
       const startedAt = Number(pkce?.createdAt);
-      if (!pkce?.verifier || !["google", "apple"].includes(pkce.provider)
+      if (!pkce?.verifier || pkce.provider !== "google"
         || !Number.isFinite(startedAt) || startedAt > Date.now() + 60_000 || Date.now() - startedAt > 10 * 60 * 1000) {
         try { sessionStorage.removeItem(pkceKey); } catch { /* Optional flow state. */ }
         return { type: "error", message: "This sign-in link expired or started in another browser. Start again from LOCKD." };

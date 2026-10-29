@@ -89,7 +89,7 @@ test("profile onboarding requests a name only when neither the saved profile nor
   assert.equal(account.profileNeedsDisplayName({ user_metadata: { name: "  " } }, { display_name: "   " }), true);
 });
 
-for (const provider of ["google", "apple"]) {
+for (const provider of ["google"]) {
   test(`${provider} sign-in starts a PKCE authorization and saves its verifier per tab`, async () => {
     const service = createService();
     await service.account.startOAuth(provider);
@@ -105,6 +105,12 @@ for (const provider of ["google", "apple"]) {
     assert.equal(pkce.provider, provider);
   });
 }
+
+test("Apple sign-in is not an available provider", async () => {
+  const service = createService();
+  await assert.rejects(service.account.startOAuth("apple"), /Google is the only supported social sign-in provider/);
+  assert.equal(service.assignedUrl, "");
+});
 
 test("OAuth callback exchanges its authorization code, stores the shared session and strips callback data", async () => {
   const requests = [];

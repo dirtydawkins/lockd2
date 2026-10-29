@@ -21,12 +21,11 @@
 .account-auth-tabs { display: flex; gap: 1.2rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--line); }
 .account-tab { padding: 0 0 .7rem; border: 0; border-bottom: 2px solid transparent; background: none; color: #68615c; cursor: pointer; font-size: .8rem; }
 .account-tab.is-active { border-bottom-color: var(--burgundy); color: var(--oxblood); font-weight: 650; }
-.account-social-actions { display: grid; grid-template-columns: 1fr 1fr; gap: .65rem; }
+.account-social-actions { display: grid; grid-template-columns: 1fr; gap: .65rem; }
 .account-social { min-height: 46px; display: flex; justify-content: center; align-items: center; gap: .55rem; padding: .55rem .65rem; border: 1px solid rgba(25,24,23,.22); background: var(--white); cursor: pointer; font-size: .72rem; font-weight: 600; transition: border-color var(--motion-control), transform var(--motion-control), background var(--motion-control); }
 .account-social:hover { border-color: var(--burgundy); transform: translateY(-1px); }
 .account-social:active { transform: translateY(1px); }
 .account-social svg { width: 18px; height: 18px; flex: 0 0 auto; }
-.account-social-apple svg { color: var(--ink); }
 .account-divider { display: flex; align-items: center; gap: .8rem; margin: 1rem 0; color: #817971; font-size: .68rem; }
 .account-divider::before, .account-divider::after { height: 1px; flex: 1; background: rgba(25,24,23,.12); content: ""; }
 .account-form { display: grid; gap: .9rem; }

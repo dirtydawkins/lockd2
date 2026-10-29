@@ -470,10 +470,10 @@
   $$('[data-provider]').forEach((button) => button.addEventListener("click", async () => {
     if (busy) return;
     setBusy(true, button);
-    setStatus(`Opening ${button.dataset.provider === "google" ? "Google" : "Apple"} sign-in…`);
+    setStatus("Opening Google sign-in…");
     try { await account.startOAuth(button.dataset.provider); }
     catch (error) {
-      setStatus(error.message || `${button.dataset.provider} sign-in could not be started. Check its Supabase provider settings.`, "error");
+      setStatus(error.message || "Google sign-in could not be started. Check its Supabase provider settings.", "error");
       setBusy(false, button);
     }
   }));
