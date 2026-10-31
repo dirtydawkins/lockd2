@@ -23,19 +23,18 @@ The discovery feed uses no third-party geocoder. Manual area selection filters t
 
 The account UI reuses the existing Supabase Auth project and the same `lockd:owner-session:v1` session as the owner workspace. Migration `20261028_0007_lockd_accounts.sql` is live. The database structure and user-scoped RLS were verified, but no live signup, profile persistence, or cross-account test has been completed. Booking history remains explicitly unavailable because LOCKD still has no customer reservation-creation flow or customer-scoped booking query.
 
-In Supabase Authentication → URL Configuration, set the Site URL to `https://lockd2.vercel.app` and allow these exact post-authentication redirects:
+In Supabase Authentication → URL Configuration, the production Site URL is `https://lockd2.vercel.app` and the current production post-authentication redirect allow list contains:
 
 - `https://lockd2.vercel.app/auth-callback.html`
-- `http://localhost:8765/auth-callback.html`
-- `http://127.0.0.1:8765/auth-callback.html`
+- `https://lockd2.vercel.app/auth-callback.html`
 
-Add an exact callback URL for any Vercel preview before testing there; avoid a broad redirect wildcard. This LOCKD callback is the destination after Supabase finishes its provider callback.
+Add exact local development redirect URLs or a Vercel preview URL before testing those environments; avoid a broad redirect wildcard. This LOCKD callback is the destination after Supabase finishes its provider callback.
 
-For Google, create a Web application OAuth client in Google Cloud. Add `https://lockd2.vercel.app` as an authorized JavaScript origin (and localhost origins only for development), and set its authorized redirect URI to `https://hqlrzbyhccoptjgyslhy.supabase.co/auth/v1/callback`. Enable Google in Supabase Authentication → Sign In / Providers and enter the client ID and client secret there. The consent configuration needs the `openid`, email and profile scopes.
+Google OAuth is configured in the existing Supabase project using the Google Cloud Web application client `LOCKD Web Production — Supabase Auth`; its authorized redirect URI is `https://hqlrzbyhccoptjgyslhy.supabase.co/auth/v1/callback`. The client ID and secret are stored in Supabase Auth → Sign In / Providers, not in this repository. Google sign-in completed successfully on the production LOCKD account page and the session restored after refresh on 2026-10-31. The Google consent screen remains External / Testing, so only configured test users can sign in until the app is verified/published. The consent configuration requests `openid`, email and profile scopes.
 
 Apple sign-in is intentionally not offered in LOCKD. The Apple provider remains disabled in Supabase; do not create Apple OAuth credentials for this application.
 
-Configure a verified custom SMTP sender in Supabase Auth before relying on account verification and password recovery in production. The UI returns an enumeration-safe recovery message, but email delivery has not been verified with a real signup/reset. Google OAuth has not been verified because its provider credentials are missing. The app uses Google OAuth PKCE; configure the Google client in Google Cloud and keep its secret in Supabase, never in this repository. Apple sign-in is intentionally omitted and its Supabase provider remains disabled.
+Configure a verified custom SMTP sender in Supabase Auth before relying on account verification and password recovery in production. The UI returns an enumeration-safe recovery message, but email delivery has not been verified with a real signup/reset. Google OAuth uses PKCE and has passed a live production sign-in and refresh/session-restoration check. Cross-account profile and saved-listing isolation tests remain outstanding. Apple sign-in is intentionally omitted and its Supabase provider remains disabled.
 
 The migrations intentionally create no rental inventory records. Internal market research is separate from owner-configured listing prices and cannot enter LOCKD's booking flow. The included user-supplied photographs are editorial illustrations; their availability and third-party rights have not been independently verified.
 
