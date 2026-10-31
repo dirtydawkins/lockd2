@@ -1,0 +1,90 @@
+.trust-main {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: clamp(32px, 6vw, 88px) 24px;
+}
+.trust-main h1 {
+  font-size: clamp(2.25rem, 5vw, 4rem);
+  line-height: 1.08;
+  max-width: 16ch;
+}
+.trust-main > p {
+  max-width: 66ch;
+}
+.trust-section {
+  padding: 32px 0;
+  border-top: 1px solid var(--line, #e8e2dc);
+  margin-top: 28px;
+}
+.trust-section article {
+  padding: 20px 0;
+  border-bottom: 1px solid var(--line, #e8e2dc);
+}
+.trust-section h2 {
+  font-size: 1.7rem;
+}
+.trust-section h3 {
+  margin-top: 24px;
+}
+.trust-section .account-form {
+  max-width: 680px;
+}
+.trust-section textarea,
+.trust-section input,
+.trust-section select {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.trust-section details {
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line, #e8e2dc);
+}
+.trust-section summary {
+  cursor: pointer;
+  font-weight: 600;
+  min-height: 32px;
+}
+.trust-section button {
+  transition:
+    transform 180ms ease,
+    background-color 180ms ease;
+}
+.trust-section button:active {
+  transform: translateY(1px);
+}
+.trust-section [role="alert"] {
+  color: #b73542;
+}
+.trust-section small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.trust-main :focus-visible {
+  outline: 2px solid #762432;
+  outline-offset: 4px;
+}
+.trust-main nav,
+.trust-section form label {
+  line-height: 1.6;
+}
+@media (prefers-reduced-motion: reduce) {
+  .trust-section button {
+    transition: none;
+    transform: none;
+  }
+}
+@media (max-width: 600px) {
+  .trust-main {
+    padding-inline: 20px;
+  }
+  .trust-main h1 {
+    max-width: 100%;
+  }
+  .trust-section {
+    padding-block: 24px;
+  }
+  .trust-section .button {
+    max-width: 100%;
+    white-space: normal;
+  }
+}

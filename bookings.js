@@ -46,23 +46,42 @@
         const ref = document.createElement("small");
         ref.textContent = `Reference ${b.id}`;
         card.append(h, p, price, ref);
+        if (b.trust_policy_id) {
+          const requirements = document.createElement('p');
+          requirements.textContent = `Verification policy v${b.trust_requirements?.version || ''} · Owner: ${b.owner_approval} · LOCKD: ${b.platform_approval}. Required checks are revalidated before payment and handover.`;
+          card.append(requirements);
+        }
+        if (b.booking_conditions) {
+          const conditions = document.createElement('p');
+          conditions.textContent = `Rental conditions: ${b.booking_conditions}`;
+          card.append(conditions);
+        }
         const available = [];
         if (
           ["pending_owner", "awaiting_payment"].includes(b.status) &&
           b.payment_status === "unpaid"
         )
           available.push(["cancel", "Cancel request"]);
-        if (owner && b.status === "pending_owner")
-          available.push(
-            ["accept", "Accept request"],
-            ["reject", "Reject request"],
-          );
+        if (owner && b.status === 'pending_owner') {
+          if (!b.owner_approval || b.owner_approval === 'pending') available.push(['accept','Accept request']);
+          available.push(['reject','Reject request']);
+        }
+        if (!owner && b.status === 'pending_owner') {
+          if (b.booking_conditions && !b.conditions_accepted_at) available.push(['accept_conditions','Accept rental conditions']);
+          available.push(['continue','Recheck requirements']);
+        }
         if (owner && b.status === "confirmed" && b.payment_status === "paid")
           available.push(["check_out", "Record handover"]);
+        if (owner && b.status === 'confirmed' && b.trust_policy_id && b.owner_approval === 'approved') available.push(['accept','Renew owner approval']);
         if (owner && b.status === "active")
           available.push(["check_in", "Record return"]);
-        if (["confirmed", "active", "completed"].includes(b.status))
-          available.push(["dispute", "Open dispute"]);
+        if (["pending_owner", "awaiting_payment", "confirmed", "active", "completed", "disputed"].includes(b.status)) {
+          const manage = document.createElement('a');
+          manage.href = `trust.html?booking=${encodeURIComponent(b.id)}`;
+          manage.className = 'text-button';
+          manage.textContent = 'Rental checks & support';
+          card.append(manage);
+        }
         for (const [action, label] of available) {
           const btn = document.createElement("button");
           btn.type = "button";
@@ -177,7 +196,7 @@
           };
           ({ item } = await request("POST", attempted));
         }
-        message.textContent = `Request recorded: ${item.id}. ${item.status === "pending_owner" ? "Awaiting owner acceptance." : "Awaiting payment setup; this is not a confirmed rental."} Hold ends ${new Date(item.expires_at).toLocaleString()}.`;
+        message.textContent = `Request recorded: ${item.id}. ${item.status === "pending_owner" ? "Awaiting the required verification and approvals. Manage this request in your account." : "Awaiting payment setup; this is not a confirmed rental."} Hold ends ${new Date(item.expires_at).toLocaleString()}.`;
         btn.textContent = "Request recorded";
         btn.dataset.sent = "true";
       } catch (e) {

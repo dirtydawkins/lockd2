@@ -8,6 +8,8 @@ const actions = new Set([
   "check_out",
   "check_in",
   "dispute",
+  "accept_conditions",
+  "continue",
 ]);
 const safeErrors = new Set([
   "Reservations are not enabled yet.",
@@ -23,6 +25,12 @@ const safeErrors = new Set([
   "Reservation not found.",
   "This reservation change is not permitted.",
   "This listing is no longer published.",
+  "Verification, conditions and both required approvals must be current.",
+  "This rental exceeds the verification policy duration limit.",
+  "The listing deposit does not meet the rental policy. Contact support.",
+  "Record both handover acknowledgements first.",
+  "Record both return acknowledgements first.",
+  "A dispute description is required.",
 ]);
 function date(s) {
   if (typeof s !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;

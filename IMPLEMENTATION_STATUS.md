@@ -1,5 +1,7 @@
 # LOCKD implementation register — 2026-10-31
 
+The 1 November trust increment is documented in `TRUST_IMPLEMENTATION.md`, including the explicit 36-item acceptance register, provider deferrals, current tests and release evidence. That register distinguishes tested code from missing payment, document and ML pipelines.
+
 ## Preserved
 
 Existing buildless HTML/JS, Vercel functions, Supabase identity, listing publication, category search, photography, favourites, Google PKCE sign-in and brand styling are retained. Apple remains intentionally removed under the owner's explicit instruction.

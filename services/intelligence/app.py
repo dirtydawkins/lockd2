@@ -11,6 +11,7 @@ from uuid import uuid4
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict
+import persona
 
 app = FastAPI(title="LOCKD intelligence", docs_url=None, redoc_url=None, openapi_url=None)
 logger = logging.getLogger("lockd.intelligence")
@@ -41,7 +42,8 @@ class BodyLimitMiddleware:
             nonlocal size
             message = await receive()
             size += len(message.get("body", b""))
-            if size > 8192:
+            limit = 262144 if scope.get('path') == '/webhooks/persona' else 8192
+            if size > limit:
                 raise BodyTooLarge()
             return message
         await self.app(scope, bounded_receive, send)
@@ -56,7 +58,8 @@ async def guard_and_log(request: Request, call_next):
             return JSONResponse({"detail": error.detail}, status_code=error.status_code,
                                 headers={"Cache-Control": "no-store", "X-Request-ID": correlation})
     length = request.headers.get("content-length", "0")
-    if not length.isdecimal() or int(length) > 8192:
+    limit = 262144 if request.url.path == '/webhooks/persona' else 8192
+    if not length.isdecimal() or int(length) > limit:
         return JSONResponse({"detail": "Request too large"}, status_code=413)
     try:
         await request.body()
@@ -86,7 +89,7 @@ async def guard_and_log(request: Request, call_next):
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "rules_version": VERSION, "trained_model": False}
+    return {"status": "ok", "rules_version": VERSION, "trained_model": False, "integration_contract_version": "trust-1"}
 
 @app.get("/ready")
 def ready():
@@ -129,3 +132,35 @@ def assess_eligibility(facts: EligibilityInput):
             "credit_check_performed": False, "booking_authorized": False}
 
 app.add_middleware(BodyLimitMiddleware)
+
+@app.post('/webhooks/persona')
+async def persona_webhook(request: Request):
+    if not persona.enabled():
+        return JSONResponse({'detail': 'Identity integration unavailable'}, status_code=503)
+    raw = await request.body()
+    secrets = [os.getenv('PERSONA_WEBHOOK_SECRET', ''), os.getenv('PERSONA_PREVIOUS_WEBHOOK_SECRET', '')]
+    if not persona.verify_signature(raw, request.headers.get('persona-signature', ''), secrets):
+        return JSONResponse({'detail': 'Invalid signature'}, status_code=401)
+    try:
+        metadata = persona.event_metadata(raw)
+        # Commit durable receipt before 2xx. No raw payload or provider status is persisted.
+        from starlette.concurrency import run_in_threadpool
+        await run_in_threadpool(persona.database_rpc, 'enqueue_lockd_identity_event', metadata)
+    except persona.InvalidProviderResult:
+        return JSONResponse({'detail': 'Invalid event'}, status_code=400)
+    except persona.IntegrationUnavailable:
+        return JSONResponse({'detail': 'Event storage unavailable'}, status_code=503)
+    return JSONResponse({'received': True}, status_code=202)
+
+@app.post('/v1/jobs/persona/reconcile', dependencies=[Depends(authorize)])
+def reconcile_persona():
+    try:
+        return persona.reconcile_one()
+    except (persona.IntegrationUnavailable, persona.InvalidProviderResult):
+        return JSONResponse({'detail': 'Identity reconciliation unavailable'}, status_code=503)
+
+@app.get('/v1/integrations', dependencies=[Depends(authorize)])
+def integration_capabilities():
+    return {'persona': {'configured': persona.enabled(), 'environment': 'sandbox', 'live_verified': False},
+            'credit': {'configured': False}, 'documents': {'uploads_enabled': False},
+            'training': {'trained_model': False}, 'payments': {'configured': False}}

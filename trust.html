@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>Rental checks & support — LOCKD</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="account.css" />
+    <link rel="stylesheet" href="trust.css" />
+    <script src="account-service.js" defer></script>
+    <script src="trust.js" defer></script>
+  </head>
+  <body class="account-page">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <a class="brand" href="index.html"
+        ><span class="brand-word"
+          >lockd<span class="brand-period">.</span></span
+        ></a
+      >
+      <nav aria-label="Account navigation">
+        <a href="account.html">Your account</a> ·
+        <a href="rentals.html">Explore rentals</a>
+      </nav>
+    </header>
+    <main id="main" class="trust-main">
+      <p class="eyebrow">YOUR RENTAL, CLEARLY RECORDED</p>
+      <h1>Checks, handover & support.</h1>
+      <p>
+        Complete only the checks required for your rental. A verification result
+        or approval does not confirm payment or a booking.
+      </p>
+      <p id="trust-status" role="status" aria-live="polite">
+        Checking your account…
+      </p>
+      <div id="trust-content" hidden>
+        <section class="trust-section" aria-labelledby="passport-heading">
+          <h2 id="passport-heading">Your verification</h2>
+          <div id="passport-results"></div>
+          <p class="account-field-note">
+            Verification is rechecked against each rental’s policy and expiry.
+            Identity-provider setup is pending; no identity documents or
+            financial statements are collected on this page.
+          </p>
+          <button type="button" class="text-button" id="refresh-passport">
+            Refresh checks
+          </button>
+        </section>
+        <section class="trust-section" aria-labelledby="notification-heading">
+          <h2 id="notification-heading">Updates</h2>
+          <div id="trust-notifications"></div>
+          <button type="button" class="text-button" id="refresh-notifications">
+            Refresh updates
+          </button>
+        </section>
+        <section
+          class="trust-section"
+          id="booking-checks"
+          hidden
+          aria-labelledby="booking-checks-heading"
+        >
+          <h2 id="booking-checks-heading">Your rental checks</h2>
+          <div id="booking-check-results"></div>
+        </section>
+        <section
+          class="trust-section"
+          id="handover-section"
+          hidden
+          aria-labelledby="handover-heading"
+        >
+          <h2 id="handover-heading">Condition record</h2>
+          <p id="handover-reference"></p>
+          <div id="condition-history"></div>
+          <p>
+            The owner records the item’s condition. Review it together before
+            acknowledging. A revised summary requires a new customer
+            acknowledgement.
+          </p>
+          <form id="handover-form" class="account-form">
+            <label class="account-field"
+              >Stage<select name="phase">
+                <option value="out">Pickup / handover</option>
+                <option value="return">Return</option>
+              </select></label
+            >
+            <div id="handover-current"></div>
+            <label class="account-field"
+              >Condition summary<textarea
+                name="summary"
+                rows="4"
+                minlength="5"
+                maxlength="2000"
+                required
+              ></textarea>
+            </label>
+            <label class="account-consent"
+              ><input name="agree" type="checkbox" required /><span
+                >I reviewed this summary and agree that it records the item’s
+                condition at this stage.</span
+              ></label
+            >
+            <button class="button button-dark" type="submit">
+              Acknowledge condition
+            </button>
+            <p role="status"></p>
+          </form>
+          <h3>Need a review?</h3>
+          <p>
+            Describe what happened without adding passwords, identity documents
+            or payment-card details. A recorded dispute is not an automatic
+            refund.
+          </p>
+          <form id="dispute-form" class="account-form">
+            <label class="account-field"
+              >What happened?<textarea
+                name="description"
+                rows="4"
+                minlength="10"
+                maxlength="2000"
+                required
+              ></textarea></label
+            ><button class="button button-light" type="submit">
+              Open dispute
+            </button>
+            <p role="status"></p>
+          </form>
+        </section>
+        <section class="trust-section" aria-labelledby="disputes-heading">
+          <h2 id="disputes-heading">Your disputes</h2>
+          <div id="trust-disputes"></div>
+          <button type="button" class="text-button" id="refresh-disputes">
+            Refresh disputes
+          </button>
+          <details>
+            <summary>Ask for a decision to be reviewed</summary>
+            <p>
+              You may appeal a closed case once through this form. A reviewer
+              will consider the reason; no financial action is automatic.
+            </p>
+            <form id="appeal-form" class="account-form">
+              <label class="account-field"
+                >Case reference<input name="disputeId" required /></label
+              ><label class="account-field"
+                >Appeal reason<textarea
+                  name="reason"
+                  minlength="10"
+                  maxlength="2000"
+                  required
+                ></textarea></label
+              ><button class="button button-light" type="submit">
+                Request review
+              </button>
+              <p role="status"></p>
+            </form>
+          </details>
+        </section>
+        <section
+          class="trust-section"
+          id="trust-admin"
+          hidden
+          aria-labelledby="admin-heading"
+        >
+          <p class="eyebrow">LOCKD OPERATIONS</p>
+          <h2 id="admin-heading">Verification control centre</h2>
+          <p>
+            For authorized reviewers. Policy changes create a new version and
+            invalidate earlier approval gates when applicable. Review evidence
+            through the authorized evidence system; never paste documents or
+            secrets here.
+          </p>
+          <div id="admin-results"></div>
+          <div id="operations-results"></div>
+          <button class="text-button" type="button" id="refresh-admin">
+            Refresh review queue
+          </button>
+          <details>
+            <summary>Create a policy version</summary>
+            <form id="policy-form" class="account-form">
+              <label class="account-field"
+                >Category<select name="category" required>
+                  <option value="stay">Stays</option>
+                  <option value="drive">Cars & Mobility</option>
+                  <option value="play">Gaming</option>
+                  <option value="technology">Technology</option>
+                  <option value="experience">Experiences</option>
+                  <option value="camera">Cameras</option>
+                  <option value="phone">Phones</option>
+                  <option value="laptop">Laptops</option>
+                  <option value="audio">Audio</option>
+                  <option value="creative">Creative equipment</option>
+                  <option value="other">Other</option>
+                </select></label
+              >
+              <label
+                ><input type="checkbox" name="enabled" checked /> Enable this
+                policy version</label
+              >
+              <label class="account-field"
+                >Replacement-value threshold (KES, optional)<input
+                  name="replacement_value_threshold"
+                  type="number"
+                  min="0"
+                  step="0.01"
+              /></label>
+              <label class="account-field"
+                >Rental-duration threshold (days, optional)<input
+                  name="rental_duration_threshold"
+                  type="number"
+                  min="1"
+                  max="366"
+              /></label>
+              <p class="account-field-note">
+                Either threshold can activate the policy. An unknown replacement
+                value requires checks when a value threshold is set. With both
+                thresholds blank, the policy covers every rental in the
+                category.
+              </p>
+              <label
+                ><input type="checkbox" name="identity_required" /> Identity
+                verification</label
+              ><label
+                ><input type="checkbox" name="address_required" /> Address
+                verification</label
+              >
+              <label
+                ><input
+                  type="checkbox"
+                  name="owner_approval_required"
+                  checked
+                />
+                Owner approval</label
+              ><label
+                ><input
+                  type="checkbox"
+                  name="platform_approval_required"
+                  checked
+                />
+                LOCKD approval</label
+              ><label
+                ><input type="checkbox" name="manual_review_required" checked />
+                Human review</label
+              ><label
+                ><input type="checkbox" name="handover_required" checked />
+                Handover safeguards</label
+              >
+              <label class="account-field"
+                >Minimum deposit (KES)<input
+                  name="minimum_deposit"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value="0"
+                  required
+              /></label>
+              <p class="account-field-note">
+                Listings below this deposit cannot accept new requests. This
+                does not change an owner’s price or charge a customer
+                automatically.
+              </p>
+              <label class="account-field"
+                >Maximum rental duration (days, optional)<input
+                  name="maximum_duration"
+                  type="number"
+                  min="1"
+                  max="366"
+              /></label>
+              <label class="account-field"
+                >Maximum verification age (days)<input
+                  name="verification_max_age_days"
+                  type="number"
+                  min="1"
+                  max="1095"
+                  value="365"
+                  required
+              /></label>
+              <label class="account-field"
+                >Approval validity (hours)<input
+                  name="approval_valid_hours"
+                  type="number"
+                  min="1"
+                  max="72"
+                  value="24"
+                  required
+              /></label>
+              <label class="account-field"
+                >Customer rental conditions<textarea
+                  name="conditions"
+                  maxlength="2000"
+                  rows="3"
+                ></textarea>
+              </label>
+              <label class="account-consent"
+                ><input type="checkbox" required /><span
+                  >I reviewed these rules and their effects on new and pending
+                  reservations.</span
+                ></label
+              ><button class="button button-dark" type="submit">
+                Save policy version
+              </button>
+              <p role="status"></p>
+            </form>
+          </details>
+          <details>
+            <summary>Record a reviewed replacement value</summary>
+            <form id="value-form" class="account-form">
+              <label class="account-field"
+                >Listing reference<input name="listingId" required /></label
+              ><label class="account-field"
+                >Replacement value (KES)<input
+                  name="value"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  required /></label
+              ><button class="button button-dark" type="submit">
+                Record value
+              </button>
+              <p role="status"></p>
+            </form>
+          </details>
+          <details>
+            <summary>Record a human verification decision</summary>
+            <form id="verification-form" class="account-form">
+              <label class="account-field"
+                >Customer reference<input name="userId" required /></label
+              ><label class="account-field"
+                >Check<select name="kind">
+                  <option value="identity">Identity</option>
+                  <option value="address">Address</option>
+                </select></label
+              ><label class="account-field"
+                >Outcome<select name="outcome">
+                  <option value="review_required">Needs further review</option>
+                  <option value="verified">Verified</option>
+                  <option value="revoked">Revoke</option>
+                </select></label
+              ><label class="account-field"
+                >Private evidence-system reference<input
+                  name="reference"
+                  maxlength="200"
+                  required /></label
+              ><label class="account-field"
+                >Validity (days)<input
+                  name="validDays"
+                  type="number"
+                  min="1"
+                  max="365"
+                  value="30"
+                  required /></label
+              ><label class="account-field"
+                >Environment<select name="environment">
+                  <option value="sandbox">Sandbox — test evidence only</option>
+                  <option value="production">
+                    Production — reviewed genuine evidence
+                  </option>
+                </select></label
+              ><label class="account-consent"
+                ><input type="checkbox" required /><span
+                  >I am authorized to review this evidence and have verified its
+                  source. This is not self-verification.</span
+                ></label
+              ><button class="button button-dark" type="submit">
+                Record decision
+              </button>
+              <p role="status"></p>
+            </form>
+          </details>
+          <details>
+            <summary>Resolve a dispute</summary>
+            <form id="resolve-form" class="account-form">
+              <label class="account-field"
+                >Dispute reference<input name="disputeId" required /></label
+              ><label class="account-field"
+                >Decision<select name="resolution">
+                  <option value="resolved">Resolved</option>
+                  <option value="dismissed">Dismissed</option>
+                </select></label
+              ><label class="account-field"
+                >Reason<textarea
+                  name="reason"
+                  minlength="10"
+                  maxlength="2000"
+                  required
+                ></textarea>
+              </label>
+              <p class="account-field-note">
+                This records a case decision. It does not issue a refund,
+                release inventory, or mark an item returned.
+              </p>
+              <button class="button button-dark" type="submit">
+                Record resolution
+              </button>
+              <p role="status"></p>
+            </form>
+          </details>
+          <details>
+            <summary>Finalize a returned item after a dispute</summary>
+            <form id="finalize-form" class="account-form">
+              <label class="account-field"
+                >Reservation reference<input name="bookingId" required /></label
+              ><label class="account-field"
+                >Reviewed operational reason<textarea
+                  name="reason"
+                  minlength="10"
+                  maxlength="2000"
+                  required
+                ></textarea>
+              </label>
+              <p class="account-field-note">
+                Requires a resolved case and both return acknowledgements.
+                Payment and deposit states are preserved.
+              </p>
+              <button class="button button-dark" type="submit">
+                Finalize return
+              </button>
+              <p role="status"></p>
+            </form>
+          </details>
+        </section>
+      </div>
+    </main>
+    <footer class="site-footer">
+      <p>Your world. Your way. LOCKD in.</p>
+      <a href="privacy.html">Privacy notice</a>
+    </footer>
+  </body>
+</html>
