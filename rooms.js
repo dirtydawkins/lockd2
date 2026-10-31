@@ -75,6 +75,7 @@
       image.src = ownerImage || fallback.src;
       image.alt = ownerImage ? (listing.image_alt || listing.title) : fallback.alt;
       image.loading = "lazy";
+      window.LockdImages?.configure(image, listing);
       link.append(image);
       if (!ownerImage && fallback.note) {
         const note = document.createElement("span");

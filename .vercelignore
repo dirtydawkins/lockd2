@@ -10,3 +10,4 @@ infra/
 .env*
 render.yaml
 lib/
+scripts/

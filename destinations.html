@@ -18,6 +18,9 @@
     <link rel="icon" href="./favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="./styles.css">
     <link rel="stylesheet" href="./destinations.css">
+    <link rel="stylesheet" href="./image-presentation.css">
+    <script src="./image-assets.js" defer></script>
+    <script src="./image-presentation.js" defer></script>
     <script src="./motion.js" defer></script>
     <script src="./app.js" defer></script>
   </head>
@@ -52,7 +55,7 @@
           <p class="destination-lede">From Kenya’s open savannahs to the world’s most loved city and island escapes, start with a place. Browse published LOCKD stays and experiences when local hosts bring them to the catalogue.</p>
         </div>
         <figure class="destination-hero-image">
-          <img src="./assets/photos/kenya-amboseli-elephants-kilimanjaro.jpeg" alt="Elephants on open grassland with Mount Kilimanjaro behind them" width="736" height="1104" fetchpriority="high">
+          <img src="./assets/photos/kenya-amboseli-elephants-kilimanjaro.jpeg" alt="Elephants on open grassland with Mount Kilimanjaro behind them" fetchpriority="high" width="736" height="1318" srcset="./assets/responsive/3d0aad90a8af10a4-320.webp 320w, ./assets/responsive/3d0aad90a8af10a4-480.webp 480w, ./assets/responsive/3d0aad90a8af10a4-736.webp 736w" sizes="(max-width: 760px) 100vw, 60vw" decoding="async">
           <figcaption>Amboseli · Kenya</figcaption>
         </figure>
       </section>
@@ -65,35 +68,35 @@
 
         <div class="destination-grid">
           <article class="destination-card" id="maasai-mara">
-            <img src="./assets/photos/kenya-maasai-mara-river-crossing.jpeg" alt="Wildebeest and zebra crossing a crocodile-filled river, a scene associated with the Maasai Mara migration" width="736" height="1104" loading="lazy">
+            <img src="./assets/photos/kenya-maasai-mara-river-crossing.jpeg" alt="Wildebeest and zebra crossing a crocodile-filled river, a scene associated with the Maasai Mara migration" width="736" height="1318" srcset="./assets/responsive/c81be769479c309e-320.webp 320w, ./assets/responsive/c81be769479c309e-480.webp 480w, ./assets/responsive/c81be769479c309e-736.webp 736w" sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 33vw" decoding="async" loading="lazy">
             <div class="destination-card-copy"><p class="eyebrow">KENYA · WILDLIFE</p><h3>Maasai Mara</h3><p>Wide savannah, acacia trees and seasonal migration crossings make the Mara one of Kenya’s most celebrated wildlife destinations.</p><a class="text-button" href="rentals.html?category=experience&amp;location=Maasai%20Mara">Explore Mara experiences</a></div>
           </article>
           <article class="destination-card" id="amboseli">
-            <img src="./assets/photos/kenya-amboseli-elephants-kilimanjaro.jpeg" alt="Elephants on savannah with Mount Kilimanjaro in the distance" width="736" height="1104" loading="lazy">
+            <img src="./assets/photos/kenya-amboseli-elephants-kilimanjaro.jpeg" alt="Elephants on savannah with Mount Kilimanjaro in the distance" width="736" height="1318" srcset="./assets/responsive/3d0aad90a8af10a4-320.webp 320w, ./assets/responsive/3d0aad90a8af10a4-480.webp 480w, ./assets/responsive/3d0aad90a8af10a4-736.webp 736w" sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 33vw" decoding="async" loading="lazy">
             <div class="destination-card-copy"><p class="eyebrow">KENYA · MOUNTAIN VIEWS</p><h3>Amboseli</h3><p>Known for elephant herds and sweeping views toward Mount Kilimanjaro, Amboseli offers a striking contrast of wetland and open plain.</p><a class="text-button" href="rentals.html?category=experience&amp;location=Amboseli">Explore Amboseli experiences</a></div>
           </article>
           <article class="destination-card" id="santorini">
-            <img src="./assets/photos/greece-santorini.jpeg" alt="White buildings and blue domes above the sea at sunset in Santorini" width="736" height="1104" loading="lazy">
+            <img src="./assets/photos/greece-santorini.jpeg" alt="White buildings and blue domes above the sea at sunset in Santorini" width="736" height="1313" srcset="./assets/responsive/b7bfc05e089f5a60-320.webp 320w, ./assets/responsive/b7bfc05e089f5a60-480.webp 480w, ./assets/responsive/b7bfc05e089f5a60-736.webp 736w" sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 33vw" decoding="async" loading="lazy">
             <div class="destination-card-copy"><p class="eyebrow">GREECE · AEGEAN ISLANDS</p><h3>Santorini</h3><p>Whitewashed villages, blue-domed churches and volcanic caldera views set the scene for a slower island escape.</p><a class="text-button" href="rentals.html?category=experience&amp;location=Santorini">Explore Santorini experiences</a></div>
           </article>
           <article class="destination-card" id="giza">
-            <img src="./assets/photos/egypt-giza-pyramids.jpeg" alt="The pyramids of Giza with visitors and camels in the foreground" width="736" height="1104" loading="lazy">
+            <img src="./assets/photos/egypt-giza-pyramids.jpeg" alt="The pyramids of Giza with visitors and camels in the foreground" width="698" height="1279" srcset="./assets/responsive/ac626f0c10943e50-320.webp 320w, ./assets/responsive/ac626f0c10943e50-480.webp 480w, ./assets/responsive/ac626f0c10943e50-698.webp 698w" sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 33vw" decoding="async" loading="lazy">
             <div class="destination-card-copy"><p class="eyebrow">EGYPT · ANCIENT LANDMARKS</p><h3>Giza</h3><p>Stand before the Great Pyramids and Great Sphinx on the edge of Cairo, then discover the wider stories of Egypt’s capital.</p><a class="text-button" href="rentals.html?category=experience&amp;location=Giza">Explore Giza experiences</a></div>
           </article>
           <article class="destination-card" id="paris">
-            <img src="./assets/photos/france-paris-eiffel-tower.jpeg" alt="The Eiffel Tower illuminated at night in Paris" width="736" height="1104" loading="lazy">
+            <img src="./assets/photos/france-paris-eiffel-tower.jpeg" alt="The Eiffel Tower illuminated at night in Paris" width="736" height="1104" srcset="./assets/responsive/e228aba728761f82-320.webp 320w, ./assets/responsive/e228aba728761f82-480.webp 480w, ./assets/responsive/e228aba728761f82-736.webp 736w" sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 33vw" decoding="async" loading="lazy">
             <div class="destination-card-copy"><p class="eyebrow">FRANCE · CITY BREAK</p><h3>Paris</h3><p>From the Eiffel Tower and riverside walks to neighbourhood cafés, Paris rewards a few unhurried days.</p><a class="text-button" href="rentals.html?category=experience&amp;location=Paris">Explore Paris experiences</a></div>
           </article>
           <article class="destination-card" id="mount-fuji">
-            <img src="./assets/photos/japan-mount-fuji.jpeg" alt="Mount Fuji behind a pagoda and cherry blossoms in Japan" width="736" height="1104" loading="lazy">
+            <img src="./assets/photos/japan-mount-fuji.jpeg" alt="Mount Fuji behind a pagoda and cherry blossoms in Japan" width="736" height="1265" srcset="./assets/responsive/6fc0bb4d49d9d1ac-320.webp 320w, ./assets/responsive/6fc0bb4d49d9d1ac-480.webp 480w, ./assets/responsive/6fc0bb4d49d9d1ac-736.webp 736w" sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 33vw" decoding="async" loading="lazy">
             <div class="destination-card-copy"><p class="eyebrow">JAPAN · MOUNTAIN ESCAPES</p><h3>Mount Fuji</h3><p>Japan’s highest peak changes with the season, from spring blossoms at its foothills to clear winter views.</p><a class="text-button" href="rentals.html?category=experience&amp;location=Mount%20Fuji">Explore Mount Fuji experiences</a></div>
           </article>
           <article class="destination-card" id="new-york">
-            <img src="./assets/photos/usa-new-york-times-square.jpeg" alt="Bright billboards and yellow taxis at Times Square in New York City" width="736" height="1104" loading="lazy">
+            <img src="./assets/photos/usa-new-york-times-square.jpeg" alt="Bright billboards and yellow taxis at Times Square in New York City" width="736" height="1275" srcset="./assets/responsive/3a9f16b144ffb2b7-320.webp 320w, ./assets/responsive/3a9f16b144ffb2b7-480.webp 480w, ./assets/responsive/3a9f16b144ffb2b7-736.webp 736w" sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 33vw" decoding="async" loading="lazy">
             <div class="destination-card-copy"><p class="eyebrow">UNITED STATES · CITY ESCAPE</p><h3>New York City</h3><p>Find a different rhythm in Manhattan, from the bright lights of Times Square to the quieter paths of Central Park.</p><a class="text-button" href="rentals.html?category=experience&amp;location=New%20York">Explore New York experiences</a></div>
           </article>
           <article class="destination-card" id="limestone-coast">
-            <img src="./assets/photos/coastal-limestone-lagoon.jpeg" alt="Turquoise water beneath steep tropical limestone cliffs" width="736" height="1104" loading="lazy">
+            <img src="./assets/photos/coastal-limestone-lagoon.jpeg" alt="Turquoise water beneath steep tropical limestone cliffs" width="736" height="1108" srcset="./assets/responsive/b4550d4fd454f3b6-320.webp 320w, ./assets/responsive/b4550d4fd454f3b6-480.webp 480w, ./assets/responsive/b4550d4fd454f3b6-736.webp 736w" sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 33vw" decoding="async" loading="lazy">
             <div class="destination-card-copy"><p class="eyebrow">TROPICAL COAST · ISLANDS</p><h3>Limestone lagoons</h3><p>Turquoise water, long-tail boats and dramatic limestone cliffs make for a memorable day on the water.</p><a class="text-button" href="rentals.html?category=experience">Explore published experiences</a></div>
           </article>
         </div>

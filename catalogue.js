@@ -178,6 +178,7 @@
       image.src = imageUrl || fallback.src;
       image.alt = imageUrl ? (typeof listing.image_alt === "string" ? listing.image_alt : listing.title) : fallback.alt;
       image.loading = "lazy";
+      window.LockdImages?.configure(image, listing);
       imageLink.append(image);
       if (!imageUrl && fallback.note) {
         const note = document.createElement("span");

@@ -118,6 +118,7 @@
         image.alt = cover ? photo.alt : "";
         image.loading = "lazy";
         image.decoding = "async";
+        window.LockdImages?.configure(image, listing);
         return image;
       }
       const placeholder = document.createElement("span");
@@ -131,6 +132,7 @@
     image.alt = cover ? textOr(listing.image_alt, listing.title) : "";
     image.loading = "lazy";
     image.decoding = "async";
+    window.LockdImages?.configure(image, listing);
     return image;
   }
 

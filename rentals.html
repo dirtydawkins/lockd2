@@ -16,6 +16,9 @@
     <link rel="icon" href="./favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="./styles.css">
     <link rel="stylesheet" href="./catalogue.css">
+    <link rel="stylesheet" href="./image-presentation.css">
+    <script src="./image-assets.js" defer></script>
+    <script src="./image-presentation.js" defer></script>
     <script src="./motion.js" defer></script>
     <script src="./app.js" defer></script>
     <script src="./account-service.js" defer></script>
@@ -57,7 +60,7 @@
           <p class="catalogue-count" id="vehicle-result-count" aria-live="polite"></p>
         </div>
         <figure class="vehicle-hero-image">
-          <img src="./assets/photos/bmw-performance-coupe-red-front.jpeg" alt="Red BMW M4 coupe among trees" width="736" height="1104" fetchpriority="high">
+          <img src="./assets/photos/bmw-performance-coupe-red-front.jpeg" alt="Red BMW M4 coupe among trees" fetchpriority="high" width="736" height="920" srcset="./assets/responsive/d71054c633f579fc-320.webp 320w, ./assets/responsive/d71054c633f579fc-480.webp 480w, ./assets/responsive/d71054c633f579fc-736.webp 736w" sizes="(max-width: 760px) 100vw, 60vw" decoding="async">
           <figcaption>BMW M4 · a LOCKD drive edit</figcaption>
         </figure>
       </section>
@@ -169,13 +172,13 @@
           <p>These photographs set the mood. Current rates and date availability appear only on genuine owner-published listings above.</p>
         </div>
         <div class="vehicle-guide-grid">
-          <article class="vehicle-reference-card"><img src="./assets/photos/mercedes-g-class-sand.jpeg" alt="Light sand-coloured Mercedes-Benz G-Class SUV" width="736" height="1104" loading="eager" decoding="async"><div><p class="eyebrow">SUV · FOUR-WHEEL DRIVE</p><h3>Mercedes-Benz G-Class</h3></div></article>
-          <article class="vehicle-reference-card"><img src="./assets/photos/mercedes-maybach-sedan.jpeg" alt="Silver Mercedes-Maybach S-Class sedan" width="736" height="1104" loading="eager" decoding="async"><div><p class="eyebrow">LUXURY SEDAN</p><h3>Mercedes-Maybach S-Class</h3></div></article>
-          <article class="vehicle-reference-card"><img src="./assets/photos/mercedes-amg-gle.jpeg" alt="Burgundy Mercedes-AMG GLE SUV coupe" width="736" height="1104" loading="eager" decoding="async"><div><p class="eyebrow">PERFORMANCE SUV</p><h3>Mercedes-AMG GLE</h3></div></article>
-          <article class="vehicle-reference-card"><img src="./assets/photos/bmw-xm-black.jpeg" alt="Black BMW XM performance SUV" width="736" height="1104" loading="eager" decoding="async"><div><p class="eyebrow">PERFORMANCE SUV</p><h3>BMW XM</h3></div></article>
-          <article class="vehicle-reference-card"><img src="./assets/photos/bmw-x7-black.jpeg" alt="Black BMW X7 SUV shown from front and rear" width="736" height="1104" loading="eager" decoding="async"><div><p class="eyebrow">LARGE SUV</p><h3>BMW X7</h3></div></article>
-          <article class="vehicle-reference-card"><div class="vehicle-reference-gallery"><img src="./assets/photos/bmw-performance-coupe-red-front.jpeg" alt="Red BMW M4 coupe from the front in a wooded setting" width="736" height="1104" loading="eager" decoding="async"><img src="./assets/photos/bmw-performance-coupe-red-rear.jpeg" alt="The same red BMW M4 coupe from the rear" width="736" height="1104" loading="eager" decoding="async"></div><div><p class="eyebrow">PERFORMANCE COUPE</p><h3>BMW M4</h3></div></article>
-          <article class="vehicle-reference-card"><img src="./assets/photos/tesla-electric-sedan.jpeg" alt="Dark Tesla Model S electric sedan at a show" width="736" height="1104" loading="eager" decoding="async"><div><p class="eyebrow">ELECTRIC SEDAN</p><h3>Tesla Model S</h3></div></article>
+          <article class="vehicle-reference-card"><img src="./assets/photos/mercedes-g-class-sand.jpeg" alt="Light sand-coloured Mercedes-Benz G-Class SUV" width="736" height="981" srcset="./assets/responsive/c3c5b6fbec407316-320.webp 320w, ./assets/responsive/c3c5b6fbec407316-480.webp 480w, ./assets/responsive/c3c5b6fbec407316-736.webp 736w" sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 33vw" decoding="async" loading="lazy"><div><p class="eyebrow">SUV · FOUR-WHEEL DRIVE</p><h3>Mercedes-Benz G-Class</h3></div></article>
+          <article class="vehicle-reference-card"><img src="./assets/photos/mercedes-maybach-sedan.jpeg" alt="Silver Mercedes-Maybach S-Class sedan" width="736" height="980" srcset="./assets/responsive/b7a961e7b4c7df32-320.webp 320w, ./assets/responsive/b7a961e7b4c7df32-480.webp 480w, ./assets/responsive/b7a961e7b4c7df32-736.webp 736w" sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 33vw" decoding="async" loading="lazy"><div><p class="eyebrow">LUXURY SEDAN</p><h3>Mercedes-Maybach S-Class</h3></div></article>
+          <article class="vehicle-reference-card"><img src="./assets/photos/mercedes-amg-gle.jpeg" alt="Burgundy Mercedes-AMG GLE SUV coupe" width="736" height="981" srcset="./assets/responsive/533d6e06f4edcea4-320.webp 320w, ./assets/responsive/533d6e06f4edcea4-480.webp 480w, ./assets/responsive/533d6e06f4edcea4-736.webp 736w" sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 33vw" decoding="async" loading="lazy"><div><p class="eyebrow">PERFORMANCE SUV</p><h3>Mercedes-AMG GLE</h3></div></article>
+          <article class="vehicle-reference-card"><img src="./assets/photos/bmw-xm-black.jpeg" alt="Black BMW XM performance SUV" width="736" height="981" srcset="./assets/responsive/77053574bab417d0-320.webp 320w, ./assets/responsive/77053574bab417d0-480.webp 480w, ./assets/responsive/77053574bab417d0-736.webp 736w" sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 33vw" decoding="async" loading="lazy"><div><p class="eyebrow">PERFORMANCE SUV</p><h3>BMW XM</h3></div></article>
+          <article class="vehicle-reference-card"><img src="./assets/photos/bmw-x7-black.jpeg" alt="Black BMW X7 SUV shown from front and rear" width="736" height="919" srcset="./assets/responsive/9d6cd26c7c7e46a5-320.webp 320w, ./assets/responsive/9d6cd26c7c7e46a5-480.webp 480w, ./assets/responsive/9d6cd26c7c7e46a5-736.webp 736w" sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 33vw" decoding="async" loading="lazy"><div><p class="eyebrow">LARGE SUV</p><h3>BMW X7</h3></div></article>
+          <article class="vehicle-reference-card"><div class="vehicle-reference-gallery"><img src="./assets/photos/bmw-performance-coupe-red-front.jpeg" alt="Red BMW M4 coupe from the front in a wooded setting" width="736" height="920" srcset="./assets/responsive/d71054c633f579fc-320.webp 320w, ./assets/responsive/d71054c633f579fc-480.webp 480w, ./assets/responsive/d71054c633f579fc-736.webp 736w" sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 33vw" decoding="async" loading="lazy"><img src="./assets/photos/bmw-performance-coupe-red-rear.jpeg" alt="The same red BMW M4 coupe from the rear" width="736" height="920" srcset="./assets/responsive/216cdcec8d18be2b-320.webp 320w, ./assets/responsive/216cdcec8d18be2b-480.webp 480w, ./assets/responsive/216cdcec8d18be2b-736.webp 736w" sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 33vw" decoding="async" loading="lazy"></div><div><p class="eyebrow">PERFORMANCE COUPE</p><h3>BMW M4</h3></div></article>
+          <article class="vehicle-reference-card"><img src="./assets/photos/tesla-electric-sedan.jpeg" alt="Dark Tesla Model S electric sedan at a show" width="564" height="555" srcset="./assets/responsive/7a4b71fb997126b9-320.webp 320w, ./assets/responsive/7a4b71fb997126b9-480.webp 480w, ./assets/responsive/7a4b71fb997126b9-564.webp 564w" sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 33vw" decoding="async" loading="lazy"><div><p class="eyebrow">ELECTRIC SEDAN</p><h3>Tesla Model S</h3></div></article>
         </div>
       </section>
     </main>

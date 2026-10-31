@@ -143,7 +143,10 @@
   function renderGallery(images, record) {
     const cover = document.querySelector("#rental-cover");
     const thumbs = document.querySelector("#rental-thumbnails");
-    const validImages = Array.isArray(images) ? images.map(safeImageUrl).filter(Boolean) : [];
+    cover.sizes = '(max-width: 760px) 100vw, 60vw';
+    window.LockdImages?.configure(cover, record);
+    const photographs = Array.isArray(images) ? images.map((source, index) => ({ url: safeImageUrl(source), index })).filter(photo => photo.url) : [];
+    const validImages = photographs.map(photo => photo.url);
     if (!validImages.length) {
       const photo = window.LockdPhotoFallbacks?.forListing(record);
       if (photo) {
@@ -164,6 +167,7 @@
       return;
     }
     cover.src = validImages[0];
+    window.LockdImages?.configure(cover, record, photographs[0].index);
     cover.alt = typeof listing.image_alt === "string" ? listing.image_alt : listing.title;
     document.querySelector("#rental-image-caption").textContent = `${validImages.length} ${validImages.length === 1 ? "photograph" : "photographs"}`;
     thumbs.replaceChildren();
@@ -176,15 +180,19 @@
       image.src = url;
       image.alt = "";
       image.loading = "lazy";
+      image.sizes = '74px';
+      window.LockdImages?.configure(image, record, photographs[index].index);
       button.append(image);
       button.addEventListener("click", async () => {
         if (button.getAttribute("aria-current") === "true") return;
         const requestId = ++galleryRequest;
         const preload = new Image();
         preload.decoding = "async";
+        preload.sizes = cover.sizes;
         try {
           if (preload.decode) {
             preload.src = url;
+            window.LockdImages?.configure(preload, record, photographs[index].index);
             await preload.decode();
           } else {
             await new Promise((resolve, reject) => {
@@ -196,6 +204,7 @@
         } catch { return; }
         if (requestId !== galleryRequest) return;
         cover.src = url;
+        window.LockdImages?.configure(cover, record, photographs[index].index);
         cover.alt = typeof listing.image_alt === "string" ? listing.image_alt : listing.title;
         thumbs.querySelectorAll("button").forEach((thumb) => thumb.setAttribute("aria-current", String(thumb === button)));
         if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -232,6 +241,7 @@
         image.src = imageUrl;
         image.alt = typeof record.image_alt === "string" ? record.image_alt : record.title;
         image.loading = "lazy";
+        window.LockdImages?.configure(image, record);
         image.decoding = "async";
         link.append(image);
       } else {

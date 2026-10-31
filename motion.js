@@ -82,7 +82,7 @@
   }
 
   const parallaxImages = !reduceMotion && !window.matchMedia("(max-width: 760px), (hover: none)").matches
-    ? [...document.querySelectorAll(".hero-figure img, .tech-hero-image img, .package-image img")]
+    ? [...document.querySelectorAll(".hero-figure img, .package-image img")]
     : [];
 
   if (parallaxImages.length) {

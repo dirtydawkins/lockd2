@@ -1,0 +1,82 @@
+/* Loaded after page styles. Stable frames, category-aware fit, no hidden content. */
+img[data-lockd-image] { display:block; max-width:100%; }
+img[data-lockd-image][style*="--photo-position"] { object-position:var(--photo-position); }
+img[data-lockd-image][data-image-fit="contain"] { object-fit:contain; }
+img[data-lockd-image][data-image-fit="cover"] { object-fit:cover; }
+img[data-image-state="error"] { color:var(--muted); background:var(--stone); font: .75rem/1.5 var(--sans); }
+.tech-card, .listing-card, .discovery-card, .account-saved-card, .owner-listing-card, .related-rental-card { min-width:0; }
+.tech-card-image, .listing-card-image, .discovery-card-image { isolation:isolate; }
+.listing-card[data-category] .listing-card-image, .discovery-card[data-category] .discovery-card-image, .tech-card .tech-card-image { aspect-ratio:6/5; }
+:is(.tech-card-image, .listing-card-image, .discovery-card-image) img[data-image-fit="contain"] { padding:clamp(.65rem, 2vw, 1.25rem); }
+/* A complete product must not get clipped again by a hover zoom. */
+:is(.tech-card, .listing-card, .discovery-card, .related-rental-card):is(:hover,:focus-within) img[data-image-fit="contain"],
+.tech-photo-card:is(:hover,:focus-visible) > img[data-image-fit="contain"] { transform:none; }
+.tech-card-image, .tech-photo-card > img { transition:background-color var(--motion-control) ease, box-shadow var(--motion-control) ease; }
+.tech-card:focus-within .tech-card-image, .tech-photo-card:focus-visible > img { box-shadow:inset 0 0 0 2px var(--burgundy); }
+@media (hover:hover) {
+  .tech-card:hover .tech-card-image, .tech-photo-card:hover > img { background-color:#e4ded8; }
+}
+.tech-hero-image { height:auto; aspect-ratio: 4/5; max-width:430px; }
+.tech-hero-image img[data-lockd-image] { padding:0; transform:none; will-change:auto; }
+.tech-hero-image figcaption { inset:auto 0 0; font-size:.65rem; }
+.tech-photo-card > img { height:auto; aspect-ratio:4/5; }
+.tech-preview-images figure { height:auto; aspect-ratio:3/4; }
+.tech-preview-images img { object-fit:contain; }
+.tech-preview-images figcaption { right:0; left:0; bottom:0; }
+.rental-cover { min-height:0; aspect-ratio:4/3; overflow:hidden; }
+.rental-cover img[data-lockd-image] { position:absolute; inset:0; width:100%; height:100%; min-height:0; }
+.rental-cover:has(img[data-image-fit="contain"]) { aspect-ratio:1; }
+.rental-cover img[data-image-fit="contain"] { padding:clamp(.8rem,2vw,1.5rem); }
+.rental-cover figcaption { width:fit-content; right:auto; max-width:calc(100% - 2rem); padding:.35rem .55rem; background:var(--paper); color:var(--muted); text-shadow:none; }
+.rental-thumbnails img[data-lockd-image] { padding:.2rem; }
+.related-rental-card img[data-image-fit="contain"], .account-saved-card img[data-image-fit="contain"], .owner-listing-card img[data-image-fit="contain"] { padding:.65rem; }
+.account-saved-card > img { height:auto; aspect-ratio:4/3; }
+.owner-listing-card > img { height:auto; aspect-ratio:4/3; }
+.owner-photo img[data-lockd-image] { aspect-ratio:1; height:auto; object-fit:contain; }
+.owner-preview-content > img[data-lockd-image] { height:auto; max-height:480px; aspect-ratio:4/3; object-fit:contain; }
+.owner-preview-content { min-width:0; grid-template-columns:minmax(0,.85fr) minmax(0,1fr); }
+@media (max-width:760px) { .owner-preview-content { grid-template-columns:minmax(0,1fr); } }
+.vehicle-hero-image { aspect-ratio:4/3; min-height:0; }
+.vehicle-hero-image img[data-lockd-image] { height:100%; min-height:0; }
+.vehicle-reference-card > img { height:auto; aspect-ratio:4/5; }
+.owner-hero-image { height:auto; aspect-ratio:735/686; }
+.owner-hero-image img[data-lockd-image] { object-fit:contain; }
+.catalogue-controls { flex-wrap:wrap; }
+.catalogue-search { min-width:0; flex:1 1 380px; }
+/* Keep tall destination scenes composed vertically rather than slicing out landmarks. */
+.destination-card > img[data-lockd-image] { min-height:0; height:100%; aspect-ratio:3/4; }
+@media (min-width:761px) and (max-width:1199px) {
+  .site-header { gap:1rem; }
+  .menu-toggle { display:flex; flex:0 0 38px; flex-direction:column; justify-content:center; gap:6px; width:38px; height:38px; margin-left:auto; border:1px solid var(--line); background:transparent; }
+  .menu-toggle span { display:block; width:15px; height:1px; margin-inline:auto; background:var(--oxblood); }
+  .primary-nav { position:absolute; top:100%; right:0; left:0; display:none; margin:0; padding:1rem var(--page-gutter); flex-direction:column; align-items:stretch; gap:0; background:var(--paper); border-bottom:1px solid var(--line); }
+  .primary-nav.is-open { display:flex; }
+  .primary-nav a { padding:.8rem 0; border-bottom:1px solid var(--line); }
+  .header-cta { flex:0 0 auto; }
+  .tech-hero { grid-template-columns:minmax(0,1fr) minmax(0,.8fr); gap:2rem; padding-inline:0; }
+  .tech-hero h1 { font-size:clamp(3.5rem,7vw,5.6rem); }
+}
+@media (max-width:600px) {
+  .tech-listing-grid, .tech-photo-grid { grid-template-columns:minmax(0,1fr); gap:1.75rem; }
+  .tech-card-image { aspect-ratio:6/5; }
+  .tech-card h3 { font-size:1.2rem; }
+  .tech-card-specs, .tech-card-location, .tech-card-topline, .tech-card-actions :is(a,button) { font-size:.75rem; }
+  .tech-photo-card { display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1fr); align-items:center; gap:1rem; padding-block:1rem; }
+  .tech-photo-card > img { width:100%; aspect-ratio:3/4; padding:.35rem; }
+  .tech-photo-card > div { padding:0; }
+  .tech-photo-card h3 { font-size:1.5rem; }
+  .tech-photo-card .eyebrow { font-size:.56rem; }
+  .tech-photo-card > div > p:not(.eyebrow) { font-size:.74rem; }
+  .tech-photo-card .text-button { font-size:.72rem; }
+  .tech-hero-image { width:100%; max-width:430px; height:auto; }
+  .rental-cover { aspect-ratio:4/3; min-height:0; }
+  .rental-cover:has(img[data-image-fit="contain"]) { aspect-ratio:4/5; }
+  .rental-thumbnails button { flex-basis:64px; height:64px; }
+  .destination-card > img[data-lockd-image] { width:100%; height:auto; aspect-ratio:4/5; }
+  .destination-hero-image { height:auto; aspect-ratio:3/4; }
+  .vehicle-hero-image { min-height:0; }
+  .vehicle-hero-image img[data-lockd-image] { min-height:0; }
+}
+@media (prefers-reduced-motion:reduce) {
+  img[data-lockd-image], .tech-card-image, .tech-photo-card > img { animation:none!important; transition:none!important; transform:none!important; will-change:auto!important; }
+}

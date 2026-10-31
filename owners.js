@@ -370,7 +370,8 @@
       const image = document.createElement("img");
       if (photo.objectUrl || photo.url) image.src = photo.objectUrl || photo.url;
       else image.hidden = true;
-      image.alt = "";
+      image.alt = photoLabel(index);
+      window.LockdImages?.configure(image, {category: categorySelect.value});
       const label = document.createElement("span"); label.className = "owner-photo-label";
       label.textContent = photo.file?.name || photoLabel(index);
       const actions = document.createElement("div"); actions.className = "owner-photo-actions";
@@ -585,7 +586,7 @@
       const card = document.createElement("article"); card.className = "owner-listing-card";
       const imageUrl = Array.isArray(item.images) ? item.images[0] : "";
       if (imageUrl) {
-        const image = document.createElement("img"); image.src = imageUrl; image.alt = ""; image.loading = "lazy"; card.append(image);
+        const image = document.createElement("img"); image.src = imageUrl; image.alt = ""; image.loading = "lazy"; window.LockdImages?.configure(image, item); card.append(image);
       } else {
         const placeholder = document.createElement("div"); placeholder.className = "owner-card-placeholder"; placeholder.textContent = (item.title || "L").slice(0, 1).toUpperCase(); card.append(placeholder);
       }

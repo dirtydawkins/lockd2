@@ -197,6 +197,7 @@
           image.src = imageUrl.href;
           image.alt = typeof item.title === "string" ? item.title : "Saved rental";
           image.loading = "lazy";
+          window.LockdImages?.configure(image, item);
           card.append(image);
         }
       } catch { /* Text information is still available if an image URL is invalid. */ }

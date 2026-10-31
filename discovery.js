@@ -199,6 +199,7 @@
       image.alt = item.image_alt || item.title || "Rental listing photograph";
       image.loading = "lazy";
       image.decoding = "async";
+      window.LockdImages?.configure(image, item);
       image.addEventListener("error", () => {
         const fallback = document.createElement("span");
         fallback.className = "discovery-card-image-fallback";
