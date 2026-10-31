@@ -8,3 +8,5 @@ services/
 infra/
 .github/
 .env*
+render.yaml
+lib/

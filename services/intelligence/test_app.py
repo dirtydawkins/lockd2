@@ -1,15 +1,13 @@
 import os
 import unittest
-from types import SimpleNamespace
-from unittest.mock import patch
 from fastapi.testclient import TestClient
-from app import app, secret_for_window, authorize
+from app import app, requests_in_window, authorize
 from fastapi import HTTPException
 
 class IntelligenceTests(unittest.TestCase):
     def setUp(self):
         os.environ["INTELLIGENCE_SHARED_SECRET"] = "test-only-" + "x" * 40
-        secret_for_window.cache_clear()
+        requests_in_window.clear()
         self.client = TestClient(app)
         self.auth = {"Authorization": "Bearer " + os.environ["INTELLIGENCE_SHARED_SECRET"]}
 
@@ -17,11 +15,11 @@ class IntelligenceTests(unittest.TestCase):
         self.assertFalse(self.client.get("/health").json()["trained_model"])
         self.assertEqual(self.client.get("/ready").status_code, 200)
         os.environ["INTELLIGENCE_SHARED_SECRET"] = ""
-        secret_for_window.cache_clear()
         self.assertEqual(self.client.get("/ready").status_code, 503)
 
     def test_unauthorized_and_missing_data(self):
         self.assertEqual(self.client.post("/v1/risk/assess", json={}).status_code, 401)
+        self.assertEqual(self.client.get("/v1/risk/assess").status_code, 401)
         r = self.client.post("/v1/risk/assess", headers=self.auth, json={})
         self.assertEqual(r.json()["decision"], "insufficient_data")
         self.assertIn("x-request-id", r.headers)
@@ -37,13 +35,29 @@ class IntelligenceTests(unittest.TestCase):
         self.assertFalse(r.json()["credit_check_performed"])
         self.assertFalse(r.json()["booking_authorized"])
 
-    def test_lambda_authentication_uses_aws_identity_not_browser_headers(self):
-        allowed = "arn:aws:sts::123456789012:assumed-role/lockd-backend/"
-        with patch.dict(os.environ, {"AWS_LAMBDA_FUNCTION_NAME": "test", "INTELLIGENCE_CALLER_ARN": allowed}):
-            with self.assertRaises(HTTPException):
-                authorize(SimpleNamespace(scope={}), self.auth["Authorization"])
-            request = SimpleNamespace(scope={"aws.event": {"requestContext": {"authorizer": {"iam": {"userArn": allowed + "test-session"}}}}})
-            self.assertIsNone(authorize(request, None))
+    def test_invalid_credentials_fail_without_an_alternate_authentication_path(self):
+        for authorization in (None, "Bearer wrong", "Bearer non-ascii-\u2603"):
+            with self.assertRaises(HTTPException) as caught:
+                authorize(authorization)
+            self.assertEqual(caught.exception.status_code, 401)
+
+    def test_oversized_and_streamed_requests_are_bounded(self):
+        self.assertEqual(self.client.post("/v1/risk/assess", headers=self.auth, content=b"x" * 9000).status_code, 413)
+        stream = iter([b"x" * 4000, b"x" * 4000, b"x" * 4000])
+        self.assertEqual(self.client.post("/v1/risk/assess", headers=self.auth, content=stream).status_code, 413)
+
+    def test_abuse_limit_returns_retry_state(self):
+        for _ in range(120):
+            self.client.post("/v1/risk/assess", headers=self.auth, json={})
+        response = self.client.post("/v1/risk/assess", headers=self.auth, json={})
+        self.assertEqual(response.status_code, 429)
+        self.assertEqual(response.headers["Retry-After"], "60")
+
+    def test_logs_exclude_authorization_and_request_facts(self):
+        with self.assertLogs("lockd.intelligence", level="INFO") as captured:
+            self.client.post("/v1/risk/assess", headers=self.auth, json={})
+        self.assertNotIn(os.environ["INTELLIGENCE_SHARED_SECRET"], "".join(captured.output))
+        self.assertNotIn("confirmed_unresolved_incident", "".join(captured.output))
 
 if __name__ == "__main__":
     unittest.main()
