@@ -15,7 +15,7 @@ The previous cloud-specific template, handler, authentication branch and adapter
 - Auto-deploys are disabled to control pipeline usage. Deploy a reviewed commit manually after CI passes. This also supports deploying from the public Git URL without granting additional repository permissions.
 - Select no disk, database, private service, worker, cron, paid monitoring, paid networking or scaling. No external keep-alive or uptime-ping job is permitted.
 
-Live deployment is **NOT VERIFIED** until the dashboard shows successful startup and a real service URL has passed health, readiness, unauthenticated denial and authorized rules checks. The repository does not invent a deployment URL.
+Live Free service: https://lockd-intelligence.onrender.com. The dashboard reported successful Python 3.12.12 startup for service code commit `5d66588` on 2026-10-31. Health, readiness and unsigned-access denial were verified in the inbuilt browser. Authorized rule execution passed local tests but a protected inference request from the live marketplace backend is **NOT VERIFIED**. See `RENDER_RELEASE.md` at the repository root for the release evidence and remaining limits.
 
 ## Cost preflight and limitations
 
@@ -51,4 +51,4 @@ Durable jobs and assessment audit records must be stored in the existing Supabas
 6. Do not schedule keep-alive requests. A cold-start timeout is an expected unavailable state, not evidence of payment/booking failure. Retest recovery after a normal later request when appropriate.
 7. If a release fails, use a previous available Render deploy or redeploy the known-good commit. No local state requires restoring. Rotate an exposed service token in both authorized server environments and investigate access without deleting evidence.
 
-Measurements and actual deployment outcomes are recorded in the release report; local startup/RSS measurements do not prove performance on Render's free instance.
+Local Windows import measurement: 1.612 seconds and 40.2 MiB process RSS. Render startup logs showed about nine seconds between starting the Uvicorn command and application startup. These are observations from this initial deployment, not a latency guarantee or a cold-start benchmark. Memory on the Render instance and behavior after a full idle sleep were not measured. Larger models, durable workers, high request volume, exceeding free usage, or always-on availability require a separate capacity review; no upgrade is authorized.

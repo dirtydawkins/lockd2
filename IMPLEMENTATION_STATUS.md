@@ -15,7 +15,7 @@ Existing buildless HTML/JS, Vercel functions, Supabase identity, listing publica
 | Customer/owner histories and listing snapshots | account UI, `bookings.js`, protected RPCs | SQL cross-account and no-direct-table-access tests | PARTIALLY COMPLETE: last 100 records; browser and live RLS verification outstanding |
 | Booking event journal | migration 0008 | event retention test | COMPLETE locally; no client write privileges |
 | Authenticated Python decision-support API | `services/intelligence/` | eight Python tests | PARTIALLY COMPLETE: actual deterministic rules; no model, no credit lookup, no marketplace invocation |
-| Render Free web-service definition | `render.yaml`, `services/intelligence/README.md` | schema reference, dependency and startup checks | PARTIALLY COMPLETE: deployment verification recorded in the service README |
+| Render Free web service | `render.yaml`, `services/intelligence/README.md`, `RENDER_RELEASE.md` | actual Free deployment, health/readiness and unsigned denial | COMPLETE hosting migration; protected live marketplace invocation remains NOT VERIFIED |
 | CI checks | `.github/workflows/checks.yml` | local Node/Python runs | NOT VERIFIED on GitHub until pushed |
 
 ## External setup and remaining work
