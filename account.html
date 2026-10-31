@@ -15,6 +15,7 @@
     <script src="./app.js" defer></script>
     <script src="./account-service.js" defer></script>
     <script src="./account.js" defer></script>
+    <script src="./bookings.js" defer></script>
   </head>
   <body class="account-page">
     <a class="skip-link" href="#main">Skip to content</a>
@@ -103,6 +104,7 @@
         <nav class="account-section-nav" aria-label="Account sections">
           <button type="button" data-account-section="overview" aria-current="page">Overview</button>
           <button type="button" data-account-section="saved">Saved rentals</button>
+          <button type="button" data-account-section="bookings" data-load-bookings="customer">Reservations</button>
           <button type="button" data-account-section="personal">Personal info</button>
           <button type="button" data-account-section="security">Login &amp; security</button>
           <button type="button" data-account-section="preferences">Preferences</button>
@@ -113,11 +115,12 @@
           <div class="account-overview-grid">
             <a class="account-overview-card" href="rentals.html"><span class="account-card-index">01</span><h4>Explore rentals</h4><p>Pick up your next stay, drive or experience.</p><span class="account-card-link">Browse the catalogue</span></a>
             <button class="account-overview-card" type="button" data-go-section="saved"><span class="account-card-index">02</span><h4>Saved rentals</h4><p id="saved-overview-count">Your saved listings appear here.</p><span class="account-card-link">View saved</span></button>
-            <article class="account-overview-card account-bookings-card"><span class="account-card-index">03</span><h4>Bookings &amp; trips</h4><p id="booking-history-note">Online reservations are not available yet, so there is no booking history to show.</p><span class="account-card-note">Not connected</span></article>
+            <button class="account-overview-card" type="button" data-go-section="bookings" data-load-bookings="customer"><span class="account-card-index">03</span><h4>Bookings &amp; trips</h4><p>View your recorded reservation requests and their current status.</p><span class="account-card-link">View reservations</span></button>
           </div>
           <p class="account-security-note">Your customer and owner tools use the same LOCKD sign-in. Owner listings remain managed in the <a href="owners.html">owner workspace</a>.</p>
         </section>
 
+        <section class="account-section" data-account-panel="bookings" hidden aria-labelledby="bookings-title"><p class="eyebrow">YOUR RENTALS</p><h3 id="bookings-title">Reservations.</h3><p>Requests awaiting payment are not confirmed rentals. Payment collection is not connected yet.</p><div class="account-section-nav"><button type="button" data-load-bookings="customer">My rentals</button><button type="button" data-load-bookings="owner">Incoming owner requests</button></div><div id="booking-history" aria-live="polite">Select My rentals or Incoming owner requests.</div></section>
         <section class="account-section" data-account-panel="saved" hidden aria-labelledby="saved-title">
           <div class="account-section-heading"><div><p class="eyebrow">KEPT CLOSE</p><h3 id="saved-title">Saved rentals.</h3></div><a class="text-button" href="rentals.html">Explore rentals</a></div>
           <p class="account-section-intro">Listings currently published by LOCKD appear first. Saved items that are no longer listed remain here as a private reference.</p>

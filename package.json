@@ -1,0 +1,18 @@
+{
+  "name": "lockd2-repo",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "node --test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dirtydawkins/lockd2.git"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.14"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  }
+}

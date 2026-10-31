@@ -58,7 +58,7 @@
   }
 
   function showSection(name) {
-    const selected = ["overview", "saved", "personal", "security", "preferences"].includes(name) ? name : "overview";
+    const selected = ["overview", "saved", "bookings", "personal", "security", "preferences"].includes(name) ? name : "overview";
     $$("[data-account-section]").forEach((button) => {
       if (button.dataset.accountSection === selected) button.setAttribute("aria-current", "page");
       else button.removeAttribute("aria-current");

@@ -119,3 +119,6 @@ button.account-overview-card { width: 100%; color: inherit; cursor: pointer; fon
   .account-section { animation: none; }
   .account-social { transition: none; }
 }
+
+.booking-history-item { padding:1.5rem 0; border-bottom:1px solid var(--line); }
+.booking-history-item .text-button { margin:1rem 1.5rem 0 0; }

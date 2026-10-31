@@ -382,6 +382,7 @@
         const configResponse = await fetch("/api/config", { headers: { Accept: "application/json" }, cache: "no-store" });
         if (configResponse.ok) config = await configResponse.json();
       } catch { /* The listing remains readable if optional public contact config is unavailable. */ }
+      form.dataset.listingId = data.item.id;
       renderListing(data.item, config);
     } catch (error) {
       const transitionPlaceholder = document.querySelector("#rental-transition-placeholder");

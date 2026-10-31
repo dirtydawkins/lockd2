@@ -1,3 +1,10 @@
 *.md
 *.sql
 supabase/
+
+node_modules/
+tests/
+services/
+infra/
+.github/
+.env*
