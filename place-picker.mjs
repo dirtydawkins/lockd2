@@ -1,9 +1,10 @@
 // Shared real-place selection. Searches run only on an explicit action, never each keystroke.
-export function placePicker({input,button,results,message,onSelect,onInvalidate=()=>{}}){
- let request,sequence=0;
- input.addEventListener('input',()=>{sequence++;request?.abort();button.disabled=false;results.replaceChildren();onInvalidate();});
+export function placePicker({input,button,results,message,onSelect,onInvalidate=()=>{},autoSearch=false}){
+ let request,sequence=0,debounce;
+ input.addEventListener('input',()=>{sequence++;request?.abort();clearTimeout(debounce);button.disabled=false;results.replaceChildren();onInvalidate();if(autoSearch&&input.value.trim().length>=3)debounce=setTimeout(()=>void search(),550);});
  async function search(){
-  const query=input.value.trim();const token=++sequence;request?.abort();request=new AbortController();results.replaceChildren();
+  if(button.disabled)return;
+  clearTimeout(debounce);const query=input.value.trim();const token=++sequence;request?.abort();request=new AbortController();results.replaceChildren();
   if(query.length<2){message.textContent='Enter a town or neighbourhood.';input.focus();return;}
   button.disabled=true;message.textContent='Finding places…';
   try{const response=await fetch('/api/listings?view=places',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query}),signal:request.signal});const data=await response.json();if(token!==sequence)return;if(!response.ok)throw Error(data.message||'Places could not be loaded. Please try again.');
@@ -12,5 +13,5 @@ export function placePicker({input,button,results,message,onSelect,onInvalidate=
   }catch(error){if(token===sequence&&error.name!=='AbortError')message.textContent=error.message||'Places could not be loaded. Please try again.';}finally{if(token===sequence)button.disabled=false;}
  }
  button.addEventListener('click',()=>void search());input.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();void search();}});
- return {search};
+ return {search,cancel:()=>{sequence++;request?.abort();clearTimeout(debounce);button.disabled=false;}};
 }

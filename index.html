@@ -26,7 +26,7 @@
     <script src="./app.js" defer></script>
     <script src="./account-service.js" defer></script>
     <script src="./discovery.js" defer></script><script src="./discovery-map.mjs" type="module"></script><link rel="stylesheet" href="./discovery-map.css">
-    <link rel="stylesheet" href="./place-picker.css"><script type="module" src="./discovery-locations.mjs"></script>
+    <link rel="stylesheet" href="./place-picker.css"><link rel="stylesheet" href="./location-privacy.css"><script type="module" src="./privacy-preferences.mjs"></script><script type="module" src="./discovery-locations.mjs"></script>
     <link rel="stylesheet" href="./marketplace-refinement.css">
   <script type="module" src="./unified-search.mjs"></script><script type="module" src="./messaging-onboarding.mjs"></script></head>
   <body>
@@ -51,7 +51,7 @@
         <a href="rentals.html?category=drive">Cars &amp; Mobility</a>
         <a href="destinations.html">Destinations</a>
         <a href="tech.html">Tech &amp; Gadgets</a>
-        <a href="#discover-feed">Discover nearby</a>
+        <button class="location-nav-trigger" type="button" data-location-trigger aria-haspopup="dialog" aria-controls="location-dialog"><span data-location-label>Anywhere</span></button>
         <a href="#how-it-works">How it works</a>
         <a href="#about">About LOCKD</a>
         <a class="account-nav-link" href="account.html">Account</a>
@@ -104,7 +104,7 @@
             <option value="">All categories</option><option value="stay">Accommodation</option><option value="drive">Cars &amp; Mobility</option><option value="experience">Experiences</option><option value="technology">Technology</option><option value="play">Gaming</option><option value="camera">Cameras</option><option value="phone">Phones</option><option value="laptop">Computers</option><option value="audio">Audio</option><option value="creative">Creative equipment</option>
           </select></div>
           <div class="search-field"><label for="idea-location">Where?</label>
-          <input id="idea-location" name="location" type="search" placeholder="City or area" autocomplete="off"></div>
+          <input id="idea-location" name="location" type="search" placeholder="Anywhere" autocomplete="off"></div>
           <button class="button button-burgundy" type="submit">Search rentals</button>
         </form>
         <p class="search-note" id="search-note">Check available dates on the rental page.</p>
@@ -165,7 +165,7 @@
           <p>Choose a town or area to see matching rentals. Sharing your location is optional.</p>
         </div>
         <div class="discovery-location-bar">
-          <div><span class="discovery-overline">YOUR AREA</span><p id="discovery-location-label">No location selected</p></div>
+          <div><span class="discovery-overline">YOUR AREA</span><p id="discovery-location-label">Anywhere</p></div>
           <button class="text-button" id="open-location-picker" type="button" aria-haspopup="dialog">Choose a location</button>
           <button class="discovery-clear-location" id="clear-location" type="button" hidden>Clear</button>
         </div>
@@ -318,23 +318,17 @@
     </main>
 
     <dialog class="location-dialog" id="location-dialog" aria-labelledby="location-dialog-title">
-      <form method="dialog" class="location-dialog-close-form"><button class="location-dialog-close" type="submit" aria-label="Close location options">×</button></form>
-      <p class="eyebrow">Your location, your choice</p>
-      <h2 id="location-dialog-title">Discover what’s around you.</h2>
-      <p>Find stays, cars, gear and experiences near a place you choose. Nearby search uses an approximate location and never blocks browsing.</p>
-      <div class="location-dialog-actions">
-        <button class="button button-burgundy" id="use-current-location" type="button">Use my current location</button>
-        <button class="text-button" id="choose-manual-location" type="button">Choose a location manually</button>
-      </div>
-      <form class="manual-location-form" id="manual-location-form" hidden>
+      <div class="location-sheet-grip" data-sheet-grip aria-hidden="true"><span></span></div>
+      <div class="location-picker-heading"><h2 id="location-dialog-title">Where to?</h2><button type="button" class="location-dialog-close" data-dialog-close aria-label="Close location options">×</button></div>
+      <form class="manual-location-form" id="manual-location-form">
         <label for="manual-location-input">Town or neighbourhood</label>
-        <input id="manual-location-input" type="search" placeholder="Search a town or neighbourhood" autocomplete="off" maxlength="80">
-        <button class="button button-dark" id="manual-location-search" type="button">Find place</button>
-        <div id="manual-place-results" class="place-results"></div>
-        <small>Powered by <a href="https://www.geoapify.com/" target="_blank" rel="noopener">Geoapify</a> · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a></small>
+        <div class="location-search-row"><input id="manual-location-input" type="search" placeholder="Search a place" autocomplete="off" maxlength="80"><button class="text-button" id="manual-location-search" type="button">Search</button></div>
+        <div id="manual-place-results" class="place-results" aria-label="Matching places"></div>
       </form>
+      <section id="recent-locations" hidden><h3>Recent places</h3><div id="recent-location-choices"></div></section>
+      <button class="text-button location-current" id="use-current-location" type="button">Use my current location</button>
       <p class="location-dialog-status" id="location-dialog-status" role="status" aria-live="polite"></p>
-      <button class="location-not-now" id="location-not-now" type="button">Not now</button>
+      <div class="location-picker-footer"><button class="text-button" id="location-anywhere" type="button">Anywhere</button><small><a href="https://www.geoapify.com/" target="_blank" rel="noopener">Geoapify</a> · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap</a></small></div>
     </dialog>
 
     <footer class="site-footer">

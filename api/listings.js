@@ -92,7 +92,8 @@ module.exports = async function handler(req, res) {
     return send(res, 400, { error: "invalid_slug", message: "This rental could not be found." });
   }
   const brand = filterText(req.query?.brand);
-  const location = filterText(req.query?.location);
+  const locationValue=req.query?.location;
+  const location=locationValue===undefined||locationValue===''?'':typeof locationValue==='string'&&locationValue.length<=160&&/^[\p{L}\p{N} .,'’()&_-]+$/u.test(locationValue)?locationValue.trim():null;
   const accessory = filterText(req.query?.accessory);
   const propertyType = filterText(req.query?.propertyType, 40);
   const amenity = filterText(req.query?.amenity, 40);

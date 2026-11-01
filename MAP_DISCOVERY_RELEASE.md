@@ -33,7 +33,7 @@ The catalogue has no genuine published inventory. Populated pins/card actions, v
 
 ## Deployment
 
-Supabase migrations and the lockd-places function are applied. Frontend GitHub CI, production deployment and final live browser verification are pending at this entry; the final deployment entry records their actual outcomes.
+Supabase migrations and the lockd-places function are applied. Commit 68a87c0 passed GitHub CI (run 41337783168), was pushed to main, and its production module/config/header and 13 actual endpoint checks were verified. The follow-up location/cookie UX is tracked in LOCATION_PRIVACY_RELEASE.md.
 
 ## Provider references
 

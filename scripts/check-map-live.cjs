@@ -19,6 +19,10 @@ function check(name,run){run();passed++;console.log('PASS '+name);}
  const selected=place.data.items.find(item=>item.country==='KE'&&item.label.includes('Nairobi'));
  const restore=await read('/api/listings?view=places&id='+selected.id);
  check('Selected real place can be restored from its stable reference',()=>{assert.equal(restore.status,200);assert.deepEqual(restore.data.item,selected);});
+ const formatted=await read('/api/listings?location='+encodeURIComponent(selected.label));
+ check('Real formatted locality names remain valid catalogue filters',()=>{assert.equal(formatted.status,200);assert.ok(Array.isArray(formatted.data.items));});
+ const locality=await read('/api/listings?view=places',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reverse:true,latitude:selected.latitude,longitude:selected.longitude})});
+ check('Coarse locality resolution returns genuine provider data',()=>{assert.equal(locality.status,200);assert.ok(locality.data.items.some(item=>item.country==='KE'&&item.id));});
  const nearby=await read('/api/nearby',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({latitude:selected.latitude,longitude:selected.longitude,radiusKm:10})});
  check('Nearby PostGIS search works for the actual selected place',()=>{assert.equal(nearby.status,200);assert.ok(Array.isArray(nearby.data.items));assert.equal(typeof nearby.data.hasMore,'boolean');});
  const config=await read('/api/config');const supabase=config.data.supabase;const headers={apikey:supabase.publishableKey,'Content-Type':'application/json'};

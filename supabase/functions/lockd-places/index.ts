@@ -18,12 +18,15 @@ Deno.serve(async request=>{
   const raw=await request.text();if(raw.length>1024)return send(413,{message:'Search is too long.'});
   let input;try{input=JSON.parse(raw);}catch{return send(400,{message:'Enter a town or neighbourhood.'});}
   const query=typeof input.query==='string'?input.query.trim().replace(/\s+/g,' '):'';
-  if(query.length<2||query.length>80||!/[\p{L}]/u.test(query)||!/^[\p{L} .,'’()&-]+$/u.test(query))return send(400,{message:'Enter a town or neighbourhood.'});
-  const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(query.toLocaleLowerCase('en'))))).map(n=>n.toString(16).padStart(2,'0')).join('');
+  const reverse=input.reverse===true,latitude=input.latitude,longitude=input.longitude;
+  if(reverse?(!Number.isFinite(latitude)||!Number.isFinite(longitude)||Math.abs(latitude)>90||Math.abs(longitude)>180):(query.length<2||query.length>80||!/[\p{L}]/u.test(query)||!/^[\p{L} .,'’()&-]+$/u.test(query)))return send(400,{message:'Enter a town or neighbourhood.'});
+  const coarseLat=Math.round(latitude*10)/10,coarseLon=Math.round(longitude*10)/10;
+  const cacheKey=reverse?`city:${coarseLat},${coarseLon}`:query.toLocaleLowerCase('en');
+  const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(cacheKey)))).map(n=>n.toString(16).padStart(2,'0')).join('');
   const cached=await db('lockd_place_search_cache?query_hash=eq.'+hash+'&expires_at=gt.'+encodeURIComponent(new Date().toISOString())+'&select=place_ids');
   if(cached.length){const ids=cached[0].place_ids;if(!ids.length)return send(200,{items:[]});const rows=await db('lockd_places?id=in.('+ids.join(',')+')&select=id,label,country_code,latitude,longitude');return send(200,{items:ids.map((id:string)=>rows.find((row:any)=>row.id===id)).filter(Boolean).map(publicPlace)});}
   if(await db('rpc/lockd_claim_place_lookup','POST',{})!==true)return send(429,{message:'Please try again shortly.'});
-  const endpoint=new URL('https://api.geoapify.com/v1/geocode/search');endpoint.search=new URLSearchParams({text:query,type:'locality',format:'json',lang:'en',limit:'6',apiKey:key}).toString();
+  const endpoint=new URL('https://api.geoapify.com/v1/geocode/'+(reverse?'reverse':'search'));endpoint.search=new URLSearchParams({...reverse?{lat:String(coarseLat),lon:String(coarseLon),type:'city'}:{text:query,type:'locality'},format:'json',lang:'en',limit:reverse?'1':'6',apiKey:key}).toString();
   const response=await fetch(endpoint,{signal:AbortSignal.timeout(9000)});if(!response.ok)return send(503,{message:'Places are unavailable.'});
   const result=await response.json();if(!Array.isArray(result.results))return send(503,{message:'Places are unavailable.'});
   const valid=result.results.filter((p:any)=>typeof p.place_id==='string'&&p.place_id.length<=1024&&Number.isFinite(p.lat)&&Math.abs(p.lat)<=90&&Number.isFinite(p.lon)&&Math.abs(p.lon)<=180&&/^[a-z]{2}$/i.test(p.country_code||'')&&!p.housenumber&&!p.street&&['city','suburb','district','county','state','village','town','municipality','locality','neighbourhood','quarter','hamlet'].includes(p.result_type));

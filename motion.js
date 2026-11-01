@@ -1,4 +1,5 @@
 (() => {
+  void import('./privacy-preferences.mjs').catch(()=>{});
   // Native cross-document transitions may be skipped by the browser; navigation still succeeds.
   for (const name of ["pageswap", "pagereveal"]) window.addEventListener(name, event => {
     const transition = event.viewTransition;

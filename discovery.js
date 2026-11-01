@@ -29,7 +29,7 @@
   let radiusIndex = 0;
   let location = null;
   let approximateArea = null;
-  let locationCleared = false;
+  let locationCleared = readAreaCookie()?.anywhere===true;
   const isPointLocation = (area=location) => area && Number.isFinite(area.latitude) && Number.isFinite(area.longitude);
   let activeController = null;
   let lastFeed = null;
@@ -37,15 +37,18 @@
   const pageButtons = { nearby: "#load-more-nearby", available: "#load-more-available", recent: "#load-more-recent" };
   const busyPages = new Set();
 
+  function readAreaCookie(){try{const value=document.cookie.split('; ').find(part=>part.startsWith('lockd_area='));if(!value)return null;const area=JSON.parse(decodeURIComponent(value.slice(11)));return area?.anywhere===true?{anywhere:true}:area&&/^[0-9a-f-]{36}$/i.test(area.id||'')&&typeof area.label==='string'&&area.label.length<=160?area:null;}catch{return null;}}
+  function writeAreaCookie(area){try{const value=encodeURIComponent(JSON.stringify(area?.id&&area?.label?{id:area.id,label:area.label}:{anywhere:true}));document.cookie='lockd_area='+value+'; Path=/; SameSite=Lax; Max-Age=7776000'+(window.location.protocol==='https:'?'; Secure':'');}catch{/* Current discovery remains available when cookies are blocked. */}}
   function readManualLocation() {
     try {
+      const area=readAreaCookie();if(area?.label)return area.label;if(area?.anywhere)return '';
       const value = localStorage.getItem(manualLocationKey);
       return typeof value === "string" && value.trim() ? value.trim().slice(0, 80) : "";
     } catch { return ""; }
   }
 
   let areaRestoreRun=0;
-  function readSelectedPlaceId(){try{return localStorage.getItem("lockd:selected-place:v1")||"";}catch{return "";}}
+  function readSelectedPlaceId(){try{return readAreaCookie()?.id||localStorage.getItem("lockd:selected-place:v1")||"";}catch{return "";}}
   async function restoreSelectedPlace(id){const run=++areaRestoreRun;try{const response=await fetch("/api/listings?view=places&id="+encodeURIComponent(id),{cache:"no-store"});const data=await response.json();if(run===areaRestoreRun&&response.ok&&data.item){applyLocation({mode:"selected",...data.item});loadFeed();}}catch{/* Existing manual area remains usable. */}}
 
   function setStatus(message, kind = "") {
@@ -64,24 +67,25 @@
     location = nextLocation;
     const clearButton = $("#clear-location");
     if (!nextLocation) {
-      locationLabel.textContent = "No location selected";
+      locationLabel.textContent = "Anywhere";
       clearButton.hidden = true;
     } else {
       locationLabel.textContent = ["manual","selected"].includes(nextLocation.mode)
         ? `${nextLocation.label} · selected area`
-        : nextLocation.mode === "approximate" ? `${nextLocation.label} · approximate area` : "Your current area";
+        : nextLocation.mode === "approximate" ? `${nextLocation.label} · nearby` : nextLocation.label || "Your current area";
       clearButton.hidden = false;
     }
     if (save) {
+      writeAreaCookie(nextLocation);
       try {
-        if (["manual","selected"].includes(nextLocation?.mode)) localStorage.setItem(manualLocationKey, nextLocation.label);
-        else localStorage.removeItem(manualLocationKey);
-        if(nextLocation?.mode==="selected" && nextLocation.id)localStorage.setItem("lockd:selected-place:v1",nextLocation.id);else localStorage.removeItem("lockd:selected-place:v1");
+        localStorage.removeItem(manualLocationKey);localStorage.removeItem('lockd:selected-place:v1');
+        if(nextLocation?.id){let recent=[];try{recent=JSON.parse(localStorage.getItem("lockd:recent-places:v1")||'[]');}catch{}if(!Array.isArray(recent))recent=[];localStorage.setItem("lockd:recent-places:v1",JSON.stringify([{id:nextLocation.id,label:nextLocation.label},...recent.filter(item=>item?.id!==nextLocation.id)].slice(0,4)));}else localStorage.removeItem('lockd:recent-places:v1');
       } catch { /* The selected area still works for this page when storage is unavailable. */ }
     }
     window.dispatchEvent(new CustomEvent("lockd:discovery-change", {detail: discoveryState()}));
     const globalLocation = $("#idea-location");
-    if (globalLocation) globalLocation.value = ["manual","selected"].includes(nextLocation?.mode) ? nextLocation.label : "";
+    if (globalLocation) globalLocation.value = nextLocation?.label || "";
+    document.querySelectorAll('[data-location-label]').forEach(el=>el.textContent=nextLocation?.label?.split(',')[0]||'Anywhere');
   }
 
   function filtersState({ includeDates = false } = {}) {
@@ -328,7 +332,7 @@
     areaRestoreRun++;
     const selectedId=params.has("location")?(params.get("place")||""):readSelectedPlaceId();
     if(selectedId && /^[0-9a-f-]{36}$/i.test(selectedId))restoreSelectedPlace(selectedId);
-    const savedManual = rawLocation.length <= 80 && /^[\p{L}\p{N} .,&'()_-]+$/u.test(rawLocation) ? rawLocation.trim().replace(/\s+/g, " ") : "";
+    const savedManual = rawLocation.length <= 160 && /^[\p{L}\p{N} .,&'()_-]+$/u.test(rawLocation) ? rawLocation.trim().replace(/\s+/g, " ") : "";
     applyLocation(savedManual ? { mode: "manual", label: savedManual } : null);
     const allowedCategory = params.get("category") || "";
     $("#discovery-category").value = Object.hasOwn(categories, allowedCategory) ? allowedCategory : "";
@@ -523,7 +527,8 @@
     }
   }
 
-  function openDialog() {
+  function openDialog(anchor) {
+    if(window.LockdLocationPicker)return window.LockdLocationPicker.open(anchor?.currentTarget||anchor);
     if (typeof dialog.showModal === "function" && !dialog.open) {
       locationDialogStatus.textContent = "";
       manualForm.hidden = true;
@@ -532,6 +537,7 @@
   }
 
   function useCurrentLocation() {
+    const deniedKey='lockd:location-denied:v1';try{if(localStorage.getItem(deniedKey)){showManualFallback('Location access is off. Search for a place instead.');return;}}catch{}
     if (!window.isSecureContext) { showManualFallback("Choose an area to keep browsing."); return; }
     if (!navigator.geolocation) {
       showManualFallback("Your browser does not provide location access here. Search by town or neighbourhood instead.");
@@ -540,18 +546,23 @@
     const button = $("#use-current-location");
     if (button.disabled) return;
     button.disabled = true;
+    const selectionVersion=++areaRestoreRun;
     locationCleared = false;
     locationDialogStatus.textContent = "Waiting for your browser’s location permission…";
-    navigator.geolocation.getCurrentPosition((position) => {
+    navigator.geolocation.getCurrentPosition(async (position) => {
       button.disabled = false;
+      if(selectionVersion!==areaRestoreRun)return;
       const latitude = Math.round(position.coords.latitude * 100) / 100;
       const longitude = Math.round(position.coords.longitude * 100) / 100;
-      applyLocation({ mode: "current", latitude, longitude }, { save: true });
+      applyLocation({ mode: "current", latitude, longitude });
       radiusIndex = 0;
-      dialog.close();
+      window.LockdLocationPicker?.close();if(!window.LockdLocationPicker)dialog.close();
       loadFeed({ updateUrl: true });
+      try{const response=await fetch('/api/listings?view=places',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reverse:true,latitude,longitude})});const data=await response.json();const place=data.items?.[0];if(response.ok&&place&&selectionVersion===areaRestoreRun){applyLocation({mode:'current',latitude,longitude,id:place.id,label:place.label},{save:true});loadFeed();}}catch{/* Nearby browsing works even if a locality name cannot be resolved. */}
     }, (error) => {
       button.disabled = false;
+      if(selectionVersion!==areaRestoreRun)return;
+      if(error.code===error.PERMISSION_DENIED){try{localStorage.setItem(deniedKey,'1');}catch{}button.hidden=true;}
       const message = error.code === error.PERMISSION_DENIED
         ? "Location permission was declined. Choose a town or neighbourhood manually; browsing still works."
         : error.code === error.TIMEOUT
@@ -564,14 +575,15 @@
 
   $("#open-location-picker").addEventListener("click", openDialog);
   $("#use-current-location").addEventListener("click", useCurrentLocation);
-  $("#choose-manual-location").addEventListener("click", () => showManualFallback("Search a town or neighbourhood, then choose a place."));
-  $("#location-not-now").addEventListener("click", () => dialog.close());
-  $("#clear-location").addEventListener("click", () => {
+  $("#choose-manual-location")?.addEventListener("click", () => showManualFallback("Search a town or neighbourhood, then choose a place."));
+  $("#location-not-now")?.addEventListener("click", () => window.LockdLocationPicker?window.LockdLocationPicker.close():dialog.close());
+  function clearArea(){
     locationCleared = true;areaRestoreRun++;
     applyLocation(null, { save: true });
     radiusIndex = 0;
     loadFeed({ updateUrl: true });
-  });
+  }
+  $("#clear-location").addEventListener("click",clearArea);
   filters.addEventListener("submit", (event) => {
     event.preventDefault();
     loadFeed({ updateUrl: true });
@@ -587,7 +599,7 @@
   window.addEventListener("popstate", () => { fillFromUrl(); loadFeed(); });
 
   function discoveryState() { return {location:location?{...location}:null,filters:{...filtersState({includeDates:true})}}; }
-  window.LockdDiscovery = {getState:discoveryState,createCard:cardFor,requestLocation:()=>{openDialog();useCurrentLocation();},setArea:(area,{save=false}={})=>{areaRestoreRun++;if(area&&Number.isFinite(area.latitude)&&Number.isFinite(area.longitude)&&Math.abs(area.latitude)<=90&&Math.abs(area.longitude)<=180){applyLocation({mode:"selected",id:area.id,latitude:Math.round(area.latitude*100)/100,longitude:Math.round(area.longitude*100)/100,label:area.label||""},{save});loadFeed({updateUrl:save});}}};
+  window.LockdDiscovery = {getState:discoveryState,createCard:cardFor,clearArea,openLocation:openDialog,cancelLocationRequest:()=>{areaRestoreRun++;$('#use-current-location').disabled=false;},requestLocation:()=>{openDialog();useCurrentLocation();},setArea:(area,{save=false}={})=>{areaRestoreRun++;if(area&&Number.isFinite(area.latitude)&&Number.isFinite(area.longitude)&&Math.abs(area.latitude)<=90&&Math.abs(area.longitude)<=180){applyLocation({mode:"selected",id:area.id,latitude:Math.round(area.latitude*100)/100,longitude:Math.round(area.longitude*100)/100,label:area.label||""},{save});loadFeed({updateUrl:save});}}};
   fillFromUrl();
   loadFeed();
   window.LockdAccount?.getConfig().then(config=>{approximateArea=config.approximateArea;if(!location&&!locationCleared&&approximateArea){applyLocation({mode:"approximate",...approximateArea});loadFeed();}}).catch(()=>{});
