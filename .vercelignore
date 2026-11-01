@@ -9,5 +9,5 @@ infra/
 .github/
 .env*
 render.yaml
-lib/
 scripts/
+lockd2/

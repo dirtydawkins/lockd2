@@ -4,6 +4,9 @@ Disallow: /api/
 Disallow: /lockd2/
 Disallow: /account.html
 Disallow: /auth-callback.html
+Disallow: /messages.html
+Disallow: /verification.html
+Disallow: /trust.html
 Disallow: /privacy.html
 
 Sitemap: https://lockd2.vercel.app/sitemap.xml

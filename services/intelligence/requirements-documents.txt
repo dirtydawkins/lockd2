@@ -1,0 +1,5 @@
+# Optional native worker dependencies; do not enable without memory/CPU and license review.
+-r requirements.txt
+PyMuPDF==1.28.2
+Pillow==13.0.0
+# OCR additionally requires the Tesseract executable + English traineddata, provisioned separately.

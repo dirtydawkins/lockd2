@@ -19,6 +19,7 @@
     <script src="./account-service.js" defer></script>
     <script src="./account.js" defer></script>
     <script src="./bookings.js" defer></script>
+  <script src="./messaging-onboarding.mjs" type="module"></script>
   </head>
   <body class="account-page">
     <a class="skip-link" href="#main">Skip to content</a>
@@ -122,6 +123,8 @@
           </div>
           <p class="account-security-note">Your customer and owner tools use the same LOCKD sign-in. Owner listings remain managed in the <a href="owners.html">owner workspace</a>.</p>
           <p class="account-security-note"><a href="trust.html">Verification, rental updates &amp; support</a></p>
+          <p class="account-security-note" data-lockd-messaging-entry hidden><a href="messages.html">Messages</a></p>
+          <p class="account-security-note" data-lockd-address-entry hidden><a href="verification.html">Address evidence</a></p>
         </section>
 
         <section class="account-section" data-account-panel="bookings" hidden aria-labelledby="bookings-title"><p class="eyebrow">YOUR RENTALS</p><h3 id="bookings-title">Reservations.</h3><p>Requests awaiting payment are not confirmed rentals. Payment collection is not connected yet.</p><div class="account-section-nav"><button type="button" data-load-bookings="customer">My rentals</button><button type="button" data-load-bookings="owner">Incoming owner requests</button></div><div id="booking-history" aria-live="polite">Select My rentals or Incoming owner requests.</div></section>

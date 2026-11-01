@@ -46,6 +46,15 @@
         const ref = document.createElement("small");
         ref.textContent = `Reference ${b.id}`;
         card.append(h, p, price, ref);
+        if (b.listing_id) {
+          const chat = document.createElement('a');
+          chat.href = `messages.html?listing=${encodeURIComponent(b.listing_id)}&booking=${encodeURIComponent(b.id)}`;
+          chat.className = 'text-button';
+          chat.dataset.lockdMessagingEntry = '';
+          chat.hidden = document.documentElement.dataset.lockdMessaging !== 'enabled';
+          chat.textContent = owner ? 'Message customer' : 'Message owner';
+          card.append(chat);
+        }
         if (b.trust_policy_id) {
           const requirements = document.createElement('p');
           requirements.textContent = `Verification policy v${b.trust_requirements?.version || ''} · Owner: ${b.owner_approval} · LOCKD: ${b.platform_approval}. Required checks are revalidated before payment and handover.`;

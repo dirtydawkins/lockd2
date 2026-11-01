@@ -393,6 +393,11 @@
         if (configResponse.ok) config = await configResponse.json();
       } catch { /* The listing remains readable if optional public contact config is unavailable. */ }
       form.dataset.listingId = data.item.id;
+      const messagesLink = document.querySelector('#rental-messages');
+      if (messagesLink) {
+        messagesLink.href = `messages.html?listing=${encodeURIComponent(data.item.id)}`;
+        messagesLink.hidden = document.documentElement.dataset.lockdMessaging !== 'enabled';
+      }
       renderListing(data.item, config);
     } catch (error) {
       const transitionPlaceholder = document.querySelector("#rental-transition-placeholder");

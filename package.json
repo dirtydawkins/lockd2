@@ -9,10 +9,16 @@
     "url": "git+https://github.com/dirtydawkins/lockd2.git"
   },
   "devDependencies": {
-    "@electric-sql/pglite": "^0.5.14"
+    "@electric-sql/pglite": "^0.5.14",
+    "esbuild": "0.28.2",
+    "fake-indexeddb": "6.2.7"
   },
   "private": true,
   "engines": {
     "node": ">=20"
+  },
+  "dependencies": {
+    "@supabase/realtime-js": "2.118.0",
+    "openpgp": "6.3.2"
   }
 }

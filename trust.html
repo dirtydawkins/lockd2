@@ -14,6 +14,8 @@
     <script src="./image-presentation.js" defer></script>
     <script src="account-service.js" defer></script>
     <script src="trust.js" defer></script>
+    <script src="communications-admin.mjs" type="module"></script>
+  <script src="./messaging-onboarding.mjs" type="module"></script>
   </head>
   <body class="account-page">
     <a class="skip-link" href="#main">Skip to content</a>
@@ -39,8 +41,11 @@
         Checking your account…
       </p>
       <div id="trust-content" hidden>
+        <section id="communication-reviews" class="trust-section" hidden></section>
         <section class="trust-section" aria-labelledby="passport-heading">
           <h2 id="passport-heading">Your verification</h2>
+          <p data-lockd-address-entry hidden><a href="verification.html">Address evidence &amp; alternative methods</a></p>
+          <p data-lockd-messaging-entry hidden><a href="messages.html">Messages</a></p>
           <div id="passport-results"></div>
           <p class="account-field-note">
             Verification is rechecked against each rental’s policy and expiry.

@@ -22,6 +22,7 @@
     <script src="./motion.js" defer></script>
     <script src="./account-service.js" defer></script>
     <script src="./owners.js" defer></script>
+  <script src="./messaging-onboarding.mjs" type="module"></script>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
@@ -77,6 +78,7 @@
         <section class="owner-workspace" id="owner-workspace" hidden aria-label="Owner listings workspace">
           <div class="owner-account-bar"><p id="owner-account-label"></p><button class="owner-text-link" id="owner-signout" type="button">Sign out</button></div>
           <div class="owner-dashboard">
+            <p data-lockd-messaging-entry hidden><a href="messages.html">Messages from customers</a></p>
             <div><p class="eyebrow">Your catalogue</p><h3>Listings</h3></div>
             <div class="owner-listings" id="owner-listings" aria-live="polite"><p>Loading your listings…</p></div>
           </div>

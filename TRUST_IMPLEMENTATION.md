@@ -1,5 +1,7 @@
 # LOCKD trust implementation — 1 November 2026
 
+The subsequent document and account-based messaging foundation is documented separately in [FOUNDATION_STATUS_20261101.md](FOUNDATION_STATUS_20261101.md), including the unactivated migrations and outstanding security/provider reviews.
+
 Persona registration and domain/email purchase were explicitly deferred by the owner. No domain, mailbox, Persona account, payment account, paid resource or production verification has been created by this increment. Apple sign-in remains removed.
 
 ## Dependency map

@@ -161,6 +161,23 @@ def reconcile_persona():
 
 @app.get('/v1/integrations', dependencies=[Depends(authorize)])
 def integration_capabilities():
+    from documents.jobs import configured
     return {'persona': {'configured': persona.enabled(), 'environment': 'sandbox', 'live_verified': False},
-            'credit': {'configured': False}, 'documents': {'uploads_enabled': False},
+            'credit': {'configured': False}, 'documents': {'processing_configured': configured(), 'uploads_enabled': False, 'trained_model': False},
             'training': {'trained_model': False}, 'payments': {'configured': False}}
+
+@app.post('/v1/jobs/documents/process', dependencies=[Depends(authorize)])
+def process_document():
+    from documents.jobs import process_one
+    try:
+        return process_one()
+    except persona.IntegrationUnavailable:
+        return JSONResponse({'detail': 'Document processing unavailable'}, status_code=503)
+
+@app.post('/v1/jobs/documents/retention', dependencies=[Depends(authorize)])
+def expire_document():
+    from documents.jobs import delete_one
+    try:
+        return delete_one()
+    except persona.IntegrationUnavailable:
+        return JSONResponse({'detail': 'Document retention unavailable'}, status_code=503)

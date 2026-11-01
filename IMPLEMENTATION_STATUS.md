@@ -1,5 +1,7 @@
 # LOCKD implementation register — 2026-10-31
 
+The document and private messaging increment is tracked in [FOUNDATION_STATUS_20261101.md](FOUNDATION_STATUS_20261101.md). It records capability gates, actual checks and deferred production/provider work; its migrations are not part of the preceding live release.
+
 The 1 November trust increment is documented in `TRUST_IMPLEMENTATION.md`, including the explicit 36-item acceptance register, provider deferrals, current tests and release evidence. That register distinguishes tested code from missing payment, document and ML pipelines.
 
 ## Preserved
