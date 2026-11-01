@@ -29,7 +29,7 @@ Migrations 0012–0017 were applied to existing Supabase project hqlrzbyhccoptjg
 ## Verification
 
 - Nine read-only source checks: JavaScript syntax, local asset references, deployment exclusions/function limit, utility enforcement, public-profile privacy, review constraints, participant-scoped inbox projection, shared Google account flow and customer-copy checks.
-- All 17 actual migration files parsed using pglast 8.7; Python modules compiled.
+- All 18 actual migration files parsed using pglast 8.7; Python modules compiled.
 - Real local handlers queried the existing Supabase project. Search empty states were based on actual responses, not mock API success.
 - Browser checked original desktop/mobile palette and image framing, experience-search URL/results, public lister empty state, Google/email lister entry and absence of theme controls. No console errors observed in inspected pages.
 - Dependency audit and GitHub workflow results are recorded with the release outcome below.
@@ -62,3 +62,7 @@ Independent messaging/crypto review; configured safe malware scanner/OCR process
 Pending GitHub CI, Vercel and Render verification at report creation. See the final release entry for actual status; local code is not itself deployment evidence.
 
 Live validation caught and repaired the legacy lister-page session refresh competing with the shared account service. Lister session restoration, refresh and sign-out now delegate exclusively to LockdAccount. Native skipped-transition promises are handled without changing animations or theme.
+
+User browser comments: hero eyebrow uses the user-selected “Stays and rentals, all in one place.”; footer Privacy and Back to top have separate wrapping touch targets. Migration 0018 restores the existing owner-publishing, indexed-search and location/discovery definitions that actual production preflight showed were missing; its application status is recorded in the final outcome. No business records are seeded by the migration.
+
+Migration 0018 applied successfully after restoring the existing Supabase dashboard sign-in. The actual signed-in lister workspace then returned its genuine empty listing history, showed Switch to renting and Sign out, and required no second LOCKD sign-in. Publication and cross-account mutation tests remain blocked by the absence of authorized genuine inventory. The selected car-image caption is “Find your next drive” (latest choice); left caption stays Cars & mobility.
