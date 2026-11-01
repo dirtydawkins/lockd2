@@ -11,5 +11,7 @@ module.exports = function handler(req, res) {
   return res.status(200).json({
     supportEmail: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail) ? supportEmail : null,
     supabase: config ? { url: config.url, publishableKey: config.key } : null,
+    approximateArea: require('../lib/approximate-area')(req),
+    maps: {enabled:process.env.LOCKD_MAPS_ENABLED !== 'false',provider:'openfreemap'},
   });
 };

@@ -25,7 +25,8 @@
     <script src="./motion.js" defer></script>
     <script src="./app.js" defer></script>
     <script src="./account-service.js" defer></script>
-    <script src="./discovery.js" defer></script>
+    <script src="./discovery.js" defer></script><script src="./discovery-map.mjs" type="module"></script><link rel="stylesheet" href="./discovery-map.css">
+    <link rel="stylesheet" href="./place-picker.css"><script type="module" src="./discovery-locations.mjs"></script>
     <link rel="stylesheet" href="./marketplace-refinement.css">
   <script type="module" src="./unified-search.mjs"></script><script type="module" src="./messaging-onboarding.mjs"></script></head>
   <body>
@@ -194,7 +195,7 @@
         </section>
 
         <section class="discovery-row" id="recent-row" hidden aria-labelledby="recent-row-title" hidden>
-          <div class="discovery-row-heading"><div><p class="eyebrow">Freshly published</p><h3 id="recent-row-title">Recently added</h3></div><p>Published LOCKD listings, ordered by publication time when the live database supports it.</p></div>
+          <div class="discovery-row-heading"><div><p class="eyebrow">Freshly published</p><h3 id="recent-row-title">Recently added</h3></div><p>Recently added rentals.</p></div>
           <div class="discovery-card-grid" id="recent-listings"></div>
           <button class="discovery-more" id="load-more-recent" type="button" hidden>Load more listings</button>
         </section>
@@ -327,12 +328,10 @@
       </div>
       <form class="manual-location-form" id="manual-location-form" hidden>
         <label for="manual-location-input">Town or neighbourhood</label>
-        <input id="manual-location-input" type="search" list="manual-location-suggestions" placeholder="For example, Nairobi or Ruiru" autocomplete="off" maxlength="80">
-        <datalist id="manual-location-suggestions">
-          <option value="Nairobi"><option value="Westlands, Nairobi"><option value="Kilimani, Nairobi"><option value="Karen, Nairobi"><option value="Ruiru"><option value="Kiambu"><option value="Mombasa"><option value="Kisumu"><option value="Nakuru"><option value="Eldoret"><option value="Maasai Mara"><option value="Amboseli">
-        </datalist>
-        <button class="button button-dark" type="submit">Use this area</button>
-        <small>Suggestions are places to search, not a promise that rentals are listed there.</small>
+        <input id="manual-location-input" type="search" placeholder="Search a town or neighbourhood" autocomplete="off" maxlength="80">
+        <button class="button button-dark" id="manual-location-search" type="button">Find place</button>
+        <div id="manual-place-results" class="place-results"></div>
+        <small>Powered by <a href="https://www.geoapify.com/" target="_blank" rel="noopener">Geoapify</a> · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a></small>
       </form>
       <p class="location-dialog-status" id="location-dialog-status" role="status" aria-live="polite"></p>
       <button class="location-not-now" id="location-not-now" type="button">Not now</button>

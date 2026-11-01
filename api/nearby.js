@@ -1,7 +1,7 @@
 const supabaseConfig = require("./supabase-config.js");
 const { signImages } = require("./listing-images.js");
 
-const categories = new Set(["stay", "drive", "play", "technology", "experience", "camera", "phone", "laptop", "audio", "creative", "other"]);
+const {categories} = require('../lib/discovery-input');
 const techCategories = ["technology", "play", "camera", "phone", "laptop", "audio", "creative"];
 const uuidPattern = /^[0-9a-f-]{36}$/i;
 
@@ -23,11 +23,13 @@ function dateDiff(start, end) {
 
 module.exports = async function handler(req, res) {
   res.setHeader("Allow", "POST");
-  if (req.method !== "POST") return send(res, 405, { error: "method_not_allowed", message: "Use POST to check approximate nearby inventory." });
+  if (req.method !== "POST") return send(res, 405, { error: "method_not_allowed", message: "Search for nearby rentals." });
   const config = supabaseConfig();
   if (!config) return send(res, 503, { error: "catalogue_not_configured", message: "Nearby rentals are unavailable right now." });
 
-  const body = req.body && typeof req.body === "object" && !Array.isArray(req.body) ? req.body : null;
+  if(Number(req.headers?.['content-length']||0)>4096)return send(res,413,{message:'Choose a shorter search.'});
+  let parsed=req.body;try{if(typeof parsed==='string')parsed=JSON.parse(parsed);}catch{parsed=null;}
+  const body = parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : null;
   if (!body) return send(res, 400, { error: "invalid_request", message: "Choose a valid nearby search." });
   const latitude = body.latitude;
   const longitude = body.longitude;
@@ -102,7 +104,7 @@ module.exports = async function handler(req, res) {
     if (!nearbyResponse.ok) {
       const failure = await nearbyResponse.json().catch(() => ({}));
       if (nearbyResponse.status === 404 || failure?.code === "PGRST202" || failure?.code === "42883") {
-        return send(res, 503, { error: "nearby_search_not_configured", message: "Approximate nearby search needs the LOCKD location migration before it can show distances." });
+        return send(res, 503, { error: "nearby_search_not_configured", message: "Nearby rentals could not be loaded. Please try again shortly." });
       }
       return send(res, 502, { error: "nearby_search_unavailable", message: "Nearby listings could not be loaded right now." });
     }

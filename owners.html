@@ -22,6 +22,7 @@
     <script src="./motion.js" defer></script>
     <script src="./account-service.js" defer></script>
     <script src="./owners.js" defer></script>
+    <link rel="stylesheet" href="./place-picker.css"><script src="./owner-guided.mjs" type="module"></script>
   <script src="./messaging-onboarding.mjs" type="module"></script>
   <script type="module" src="./lister-profile.mjs"></script><link rel="stylesheet" href="./marketplace-refinement.css"><script type="module" src="./reviews.mjs"></script></head>
   <body>
@@ -90,13 +91,15 @@
               <div class="owner-form-grid">
                 <label class="owner-field"><span>Category</span><select id="listing-category" required><option value="">Choose a category</option><option value="stay">Rooms &amp; accommodation</option><option value="drive">Cars &amp; Mobility</option><option value="play">Gaming &amp; consoles</option><option value="technology">Technology &amp; gadgets</option><option value="phone">Phones</option><option value="laptop">Computers</option><option value="camera">Cameras &amp; creator equipment</option><option value="audio">Audio &amp; event equipment</option><option value="creative">Creative equipment</option><option value="experience">Destinations &amp; experiences</option><option value="other">Other supported rentals</option></select></label>
                 <label class="owner-field"><span>Listing title</span><input id="listing-title" type="text" maxlength="180" required placeholder="A clear name renters will recognize"></label>
-                <label class="owner-field"><span>Location</span><input id="listing-location" type="text" maxlength="160" required placeholder="Town, neighbourhood or pickup area"></label>
-                <div class="owner-field-wide owner-approximate-pin"><p class="owner-help">Optional: add an approximate map pin so this listing can appear in nearby discovery. Use a neighbourhood-level point, never a private entrance or exact home address. LOCKD shows distance approximately, not the coordinates.</p>
-                  <div class="owner-form-grid">
-                    <label class="owner-field"><span>Approximate latitude <small>Optional</small></span><input id="listing-latitude" type="number" min="-90" max="90" step="0.01" inputmode="decimal" placeholder="e.g. -1.29"></label>
-                    <label class="owner-field"><span>Approximate longitude <small>Optional</small></span><input id="listing-longitude" type="number" min="-180" max="180" step="0.01" inputmode="decimal" placeholder="e.g. 36.82"></label>
-                  </div>
-                  <label class="owner-location-clear"><input id="listing-clear-location-pin" type="checkbox"> Remove the saved approximate pin</label>
+                <div class="owner-field-wide" id="owner-location-picker">
+                  <label class="owner-field" for="listing-place-search"><span>Town or neighbourhood</span></label>
+                  <div class="place-search-row"><input id="listing-place-search" type="search" maxlength="80" autocomplete="off" placeholder="Search a town or neighbourhood"><button id="listing-place-search-button" type="button" class="button button-light">Find place</button></div>
+                  <div id="listing-place-results" class="place-results"></div><p id="listing-place-message" class="place-picker-message" role="status"></p>
+                  <p class="place-attribution">Powered by <a href="https://www.geoapify.com/" target="_blank" rel="noopener">Geoapify</a> · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a></p>
+                  <label class="owner-field"><span>Selected area</span><input id="listing-location" type="text" maxlength="160" readonly placeholder="Choose a place from the results"></label>
+                  <input id="listing-place-id" type="hidden"><input id="listing-latitude" type="hidden"><input id="listing-longitude" type="hidden"><input id="listing-clear-location-pin" type="checkbox" hidden>
+                  <label class="owner-field"><span>Address <small>Private · optional</small></span><input id="listing-private-address" type="text" maxlength="500" autocomplete="off"></label>
+                  <p class="owner-help">Your listing shows the area, not your exact address. Keep entrance details and private directions out of your public description.</p>
                 </div>
                 <label class="owner-field owner-field-wide"><span>Short introduction</span><input id="listing-summary" type="text" maxlength="240" placeholder="A concise summary for search results"></label>
                 <label class="owner-field owner-field-wide"><span>Description <small>At least 30 characters to publish</small></span><textarea id="listing-description" rows="4" maxlength="5000" placeholder="Describe the real item or property, its condition, what's included and any restrictions." required></textarea></label>
@@ -122,7 +125,7 @@
               <label class="owner-upload" for="listing-photos"><strong>Add up to 12 photos</strong><span>JPEG, PNG or WebP · up to 8 MB each · choose your cover photo first</span><input id="listing-photos" type="file" accept="image/jpeg,image/png,image/webp" multiple></label>
               <div class="owner-photo-list" id="owner-photo-list" aria-live="polite"></div>
               <progress id="owner-upload-progress" max="100" value="0" hidden></progress>
-              <p class="owner-help">Use photos of the actual item or property you are listing. Editorial images elsewhere on LOCKD are not submitted as inventory.</p>
+              <p class="owner-help">Use clear photos of the item, property or experience you are offering.</p>
             </div>
 
             <div class="owner-form-footer"><p class="owner-form-status" id="owner-listing-status" role="status" aria-live="polite"></p><div><button class="owner-text-link" id="owner-preview-open" type="button">Preview listing</button><button class="owner-text-link" id="owner-reset-form" type="button">Start a new listing</button><button class="button button-light" type="submit" name="intent" value="draft">Save draft</button><button class="button button-dark" type="submit" name="intent" value="publish">Publish listing</button></div></div>
@@ -139,7 +142,7 @@
         <div class="owner-process-list">
           <article class="owner-process-step"><span>01</span><h3>Create an account</h3><p>Sign in securely and keep your listing drafts and published assets in your account.</p><span class="owner-step-status">Available</span></article>
           <article class="owner-process-step"><span>02</span><h3>Add the real details</h3><p>Describe the actual asset, location, rate, terms, availability and photographs.</p><span class="owner-step-status">Available</span></article>
-          <article class="owner-process-step"><span>03</span><h3>Publish or save a draft</h3><p>Complete listings appear in their matching public category after the database confirms publication.</p><span class="owner-step-status">Available</span></article>
+          <article class="owner-process-step"><span>03</span><h3>Publish or save a draft</h3><p>Published listings appear in search and their matching category.</p><span class="owner-step-status">Available</span></article>
           <article class="owner-process-step"><span>04</span><h3>Manage visibility</h3><p>Pause or resume a listing from your workspace. A paused item is removed from public search.</p><span class="owner-step-status">Available</span></article>
           <article class="owner-process-step" hidden><span>05</span><h3>Bookings and payouts</h3><p>LOCKD payment collection, refunds and payouts are currently unavailable. No payment will be reported as successful until a verified payment service is configured.</p><span class="owner-step-status">Unavailable</span></article>
         </div>

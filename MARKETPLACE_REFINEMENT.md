@@ -59,7 +59,7 @@ Independent messaging/crypto review; configured safe malware scanner/OCR process
 
 ## Release outcome
 
-Pending GitHub CI, Vercel and Render verification at report creation. See the final release entry for actual status; local code is not itself deployment evidence.
+Earlier marketplace release cf0fcd7 passed GitHub CI and was deployed to Vercel production and the existing Render Free service. Session repair 60d3f03 and selected homepage/footer copy 6fde251 also passed CI and were pushed to main. The follow-up free map and verified-place release is tracked in MAP_DISCOVERY_RELEASE.md.
 
 Live validation caught and repaired the legacy lister-page session refresh competing with the shared account service. Lister session restoration, refresh and sign-out now delegate exclusively to LockdAccount. Native skipped-transition promises are handled without changing animations or theme.
 

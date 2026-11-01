@@ -28,6 +28,9 @@
   let pageRun = 0;
   let radiusIndex = 0;
   let location = null;
+  let approximateArea = null;
+  let locationCleared = false;
+  const isPointLocation = (area=location) => area && Number.isFinite(area.latitude) && Number.isFinite(area.longitude);
   let activeController = null;
   let lastFeed = null;
   let pageState = {};
@@ -40,6 +43,10 @@
       return typeof value === "string" && value.trim() ? value.trim().slice(0, 80) : "";
     } catch { return ""; }
   }
+
+  let areaRestoreRun=0;
+  function readSelectedPlaceId(){try{return localStorage.getItem("lockd:selected-place:v1")||"";}catch{return "";}}
+  async function restoreSelectedPlace(id){const run=++areaRestoreRun;try{const response=await fetch("/api/listings?view=places&id="+encodeURIComponent(id),{cache:"no-store"});const data=await response.json();if(run===areaRestoreRun&&response.ok&&data.item){applyLocation({mode:"selected",...data.item});loadFeed();}}catch{/* Existing manual area remains usable. */}}
 
   function setStatus(message, kind = "") {
     status.textContent = message;
@@ -60,19 +67,21 @@
       locationLabel.textContent = "No location selected";
       clearButton.hidden = true;
     } else {
-      locationLabel.textContent = nextLocation.mode === "manual"
+      locationLabel.textContent = ["manual","selected"].includes(nextLocation.mode)
         ? `${nextLocation.label} · selected area`
-        : "Your approximate current area · this page only";
+        : nextLocation.mode === "approximate" ? `${nextLocation.label} · approximate area` : "Your current area";
       clearButton.hidden = false;
     }
     if (save) {
       try {
-        if (nextLocation?.mode === "manual") localStorage.setItem(manualLocationKey, nextLocation.label);
+        if (["manual","selected"].includes(nextLocation?.mode)) localStorage.setItem(manualLocationKey, nextLocation.label);
         else localStorage.removeItem(manualLocationKey);
+        if(nextLocation?.mode==="selected" && nextLocation.id)localStorage.setItem("lockd:selected-place:v1",nextLocation.id);else localStorage.removeItem("lockd:selected-place:v1");
       } catch { /* The selected area still works for this page when storage is unavailable. */ }
     }
+    window.dispatchEvent(new CustomEvent("lockd:discovery-change", {detail: discoveryState()}));
     const globalLocation = $("#idea-location");
-    if (globalLocation) globalLocation.value = nextLocation?.mode === "manual" ? nextLocation.label : "";
+    if (globalLocation) globalLocation.value = ["manual","selected"].includes(nextLocation?.mode) ? nextLocation.label : "";
   }
 
   function filtersState({ includeDates = false } = {}) {
@@ -147,7 +156,7 @@
       error.code = data.error || "nearby_search_unavailable";
       throw error;
     }
-    return { items: Array.isArray(data.items) ? data.items : [], total: Number(data.total || 0), radiusKm: Number(data.radiusKm || radiusKm) };
+    return { items: Array.isArray(data.items) ? data.items : [], hasMore: data.hasMore === true, total: Number(data.total || 0), radiusKm: Number(data.radiusKm || radiusKm) };
   }
 
   function safeImageUrl(value) {
@@ -297,9 +306,10 @@
   function updateShareUrl() {
     const values = filtersState({ includeDates: true });
     const next = new URL(window.location.href);
-    ["category", "location", "minPrice", "maxPrice", "startDate", "endDate", "quantity", "guests"].forEach((key) => next.searchParams.delete(key));
+    ["category", "location", "place", "minPrice", "maxPrice", "startDate", "endDate", "quantity", "guests"].forEach((key) => next.searchParams.delete(key));
     if (values.category) next.searchParams.set("category", values.category);
-    if (location?.mode === "manual") next.searchParams.set("location", location.label);
+    if (["manual","selected"].includes(location?.mode)) next.searchParams.set("location", location.label);
+    if (location?.mode === "selected" && location.id) next.searchParams.set("place",location.id);
     if (values.minPrice) next.searchParams.set("minPrice", values.minPrice);
     if (values.maxPrice) next.searchParams.set("maxPrice", values.maxPrice);
     if (values.startDate && values.endDate) {
@@ -315,6 +325,9 @@
   function fillFromUrl() {
     const params = new URLSearchParams(window.location.search);
     const rawLocation = params.get("location") || readManualLocation();
+    areaRestoreRun++;
+    const selectedId=params.has("location")?(params.get("place")||""):readSelectedPlaceId();
+    if(selectedId && /^[0-9a-f-]{36}$/i.test(selectedId))restoreSelectedPlace(selectedId);
     const savedManual = rawLocation.length <= 80 && /^[\p{L}\p{N} .,&'()_-]+$/u.test(rawLocation) ? rawLocation.trim().replace(/\s+/g, " ") : "";
     applyLocation(savedManual ? { mode: "manual", label: savedManual } : null);
     const allowedCategory = params.get("category") || "";
@@ -337,7 +350,7 @@
     const hasStart = Boolean(values.startDate);
     const hasEnd = Boolean(values.endDate);
     if (hasStart !== hasEnd || (hasStart && values.endDate <= values.startDate)) {
-      setStatus("Choose a valid start date and return date. No availability has been inferred.", "error");
+      setStatus("Choose a valid start and return date.", "error");
       return;
     }
     if (values.minPrice && values.maxPrice && Number(values.minPrice) > Number(values.maxPrice)) {
@@ -345,11 +358,12 @@
       return;
     }
     if (updateUrl) updateShareUrl();
+    window.dispatchEvent(new CustomEvent("lockd:discovery-change", {detail: discoveryState()}));
     lastFeed = { values: { ...values }, location: location ? { ...location } : null, radiusKm: radiusOptions[radiusIndex] };
     pageState = {};
     Object.values(pageButtons).forEach((selector) => { $(selector).hidden = true; $(selector).disabled = false; });
     $("#expand-nearby").hidden = true;
-    setStatus("Loading published rentals and checking the selected filters…");
+    setStatus("Finding rentals…");
     const recentRow = $("#recent-row");
     recentRow.hidden = !document.querySelector("#recent-listings")?.children.length;
     drawSkeletons($("#recent-listings"));
@@ -361,19 +375,20 @@
     $("#discovery-shelves").replaceChildren();
 
     const recentTask = requestList(values, { dates: false, newest: true, signal });
-    const nearbyTask = !location ? Promise.resolve(null) : location.mode === "current"
+    const nearbyTask = !location ? Promise.resolve(null) : isPointLocation()
       ? requestNearby(values, { radiusKm: radiusOptions[radiusIndex], signal })
       : requestList(values, { dates: false, signal });
-    const availableTask = !(hasStart && hasEnd) ? Promise.resolve(null) : location?.mode === "current"
+    const availableTask = !(hasStart && hasEnd) ? Promise.resolve(null) : isPointLocation()
       ? requestNearby(values, { dates: true, radiusKm: radiusOptions[radiusIndex], signal })
       : requestList(values, { dates: true, signal });
     const categoryTasks = location && !values.category ? marketGroups.map(async (group) => {
-      if (location.mode === "current" && !(await nearbyTask)?.items?.length) return { group, items: [] };
-      const result = location.mode === "current"
+      if (isPointLocation() && !(await nearbyTask)?.items?.length) return { group, items: [] };
+      const result = isPointLocation()
         ? await requestNearby(values, { category: group.category || "", market: group.market, radiusKm: radiusOptions[radiusIndex], signal })
         : await requestList(values, { category: group.category || "", market: group.market, signal });
       return { group, items: result.items.slice(0, 4) };
     }) : [];
+    const categoryResultsTask=Promise.allSettled(categoryTasks);
 
     const [recentResult, nearbyResult, availableResult] = await Promise.allSettled([recentTask, nearbyTask, availableTask]);
     if (run !== pageRun) return;
@@ -387,7 +402,7 @@
       $("#recent-row-title").textContent = recent.publicationTimestampReliable ? "Recently added" : "Published rentals";
       $("#recent-row").querySelector(".discovery-row-heading > p").textContent = recent.publicationTimestampReliable
         ? "Recently published listings from LOCKD listers."
-        : "The live database does not expose publication timestamps yet, so these use record creation order.";
+        : "Explore recently added rentals.";
       pageState.recent = { page: 0, hasMore: recent.hasMore, buffer: recent.items.slice(6) };
       $(pageButtons.recent).hidden = !pageState.recent.hasMore && !pageState.recent.buffer.length;
     }
@@ -397,24 +412,24 @@
       nearRow.hidden = false;
       const host = $("#nearby-listings");
       if (nearby.items.length) renderGrid(host, nearby.items.slice(0, 6));
-      else emptyMessage(host, location.mode === "current"
-        ? "No published listings were found within this radius. Broaden the search or choose a place manually."
+      else emptyMessage(host, isPointLocation()
+        ? "No rentals here yet. Try a wider area or choose another place."
         : `No published listings match ${location.label} yet. Try a nearby town or clear the location filter.`);
-      $("#nearby-row-title").textContent = location.mode === "current" ? `Near your area · ${radiusOptions[radiusIndex]} km` : `In ${location.label}`;
-      $("#nearby-row-note").textContent = location.mode === "current"
-        ? "Distances are approximate. Listings without lister-set approximate map pins are not included."
-        : "Matches the location text on published listings; no distance is inferred.";
+      $("#nearby-row-title").textContent = isPointLocation() ? `Near your area · ${radiusOptions[radiusIndex]} km` : `In ${location.label}`;
+      $("#nearby-row-note").textContent = isPointLocation()
+        ? "Locations and distances are approximate."
+        : "Rentals in your chosen area.";
       pageState.nearby = { page: 0, hasMore: nearby.hasMore, buffer: nearby.items.slice(6) };
       $(pageButtons.nearby).hidden = !pageState.nearby.hasMore && !pageState.nearby.buffer.length;
-      $("#expand-nearby").hidden = location.mode !== "current" || radiusIndex >= radiusOptions.length - 1 || nearby.items.length > 0;
+      $("#expand-nearby").hidden = !isPointLocation() || radiusIndex >= radiusOptions.length - 1 || nearby.items.length > 0;
     } else if (location) {
       nearRow.hidden = false;
       const notConfigured = nearbyResult.reason?.code === "nearby_search_not_configured";
       emptyMessage($("#nearby-listings"), notConfigured
-        ? "Approximate nearby search needs the location migration. You can still choose a town or neighbourhood and browse published rentals."
+        ? "Nearby rentals could not be loaded. Please try again."
         : nearbyResult.reason?.message || "Nearby listings could not be loaded. Try again.");
-      $("#nearby-row-title").textContent = notConfigured ? "Nearby search needs setup" : "Nearby rentals";
-      $("#nearby-row-note").textContent = "No precise location is stored or displayed.";
+      $("#nearby-row-title").textContent = notConfigured ? "Nearby rentals" : "Nearby rentals";
+      $("#nearby-row-note").textContent = "Choose another area or try again.";
       $("#expand-nearby").hidden = true;
       $(pageButtons.nearby).hidden = true;
     } else nearRow.hidden = true;
@@ -425,12 +440,12 @@
       if (available) {
         if (available.items.length) renderGrid(availableHost, available.items.slice(0, 6));
         else emptyMessage(availableHost, "No published rentals match these dates and filters. Choose different dates or clear a filter.");
-        $("#available-row-note").textContent = "Calendar checks show matching capacity for these dates. They do not reserve a rental.";
+        $("#available-row-note").textContent = "Dates checked. Select a rental to continue.";
         pageState.available = { page: 0, hasMore: available.hasMore, buffer: available.items.slice(6) };
         $(pageButtons.available).hidden = !pageState.available.hasMore && !pageState.available.buffer.length;
       } else {
         emptyMessage(availableHost, "Date-specific availability could not be confirmed. Try again before relying on these dates.");
-        $("#available-row-note").textContent = "No availability is claimed while the calendar check is unavailable.";
+        $("#available-row-note").textContent = "Please check again before booking.";
         $(pageButtons.available).hidden = true;
       }
     } else $("#available-row").hidden = true;
@@ -438,17 +453,17 @@
     if (failures.length) {
       const migrationPending = failures.some((error) => error?.code === "nearby_search_not_configured");
       setStatus(migrationPending
-        ? "Nearby distance search is waiting for the location migration. Published listings and manual area search remain available."
+        ? "Nearby rentals could not be loaded. Please try again."
         : "Some discovery results could not be loaded. Check your connection and try again.", "error");
     } else if (!recent?.items.length && !nearby?.items?.length && !available?.items?.length) {
-      setStatus(location ? "No published rentals matched these filters. Try another area or category." : "No published rentals are available to show yet. Choose an area or explore the categories below.");
+      setStatus(location ? "No rentals match these filters. Try another area or category." : "No rentals here yet. Choose an area or explore the categories below.");
     } else {
-      const locationText = location?.mode === "manual" ? ` Results use ${location.label}.` : location?.mode === "current" ? " Nearby distances use an approximate pin for this page only." : " Choose a location to see nearby inventory.";
-      setStatus(`Showing only real published, approved LOCKD listings.${locationText}`);
+      const locationText = location?.mode === "manual" ? ` Results use ${location.label}.` : isPointLocation() ? " Distances are approximate." : " Choose an area to find rentals nearby.";
+      setStatus(`Explore the rentals below.${locationText}`);
     }
 
     if (categoryTasks.length) {
-      const categoryResults = await Promise.allSettled(categoryTasks);
+      const categoryResults = await categoryResultsTask;
       if (run !== pageRun) return;
       const shelves = $("#discovery-shelves");
       categoryResults.forEach((result) => {
@@ -456,7 +471,7 @@
         const section = document.createElement("section");
         section.className = "discovery-shelf";
         const heading = document.createElement("h3");
-        heading.textContent = location.mode === "current" ? result.value.group.title : result.value.group.title.replace(" nearby", ` in ${location.label}`);
+        heading.textContent = isPointLocation() ? result.value.group.title : result.value.group.title.replace(" nearby", ` in ${location.label}`);
         const cards = document.createElement("div");
         cards.className = "discovery-card-grid";
         result.value.items.forEach((item, index) => cards.append(cardFor(item, index)));
@@ -483,7 +498,7 @@
         items = state.buffer.splice(0, 6);
       } else {
         const page = state.page + 1;
-        const useGeoSearch = settings.location?.mode === "current" && ["nearby", "available"].includes(sectionName);
+        const useGeoSearch = isPointLocation(settings.location) && ["nearby", "available"].includes(sectionName);
         const response = useGeoSearch
           ? await requestNearby(settings.values, { dates: sectionName === "available", radiusKm: settings.radiusKm, page, signal: activeController?.signal })
           : await requestList(settings.values, {
@@ -517,12 +532,15 @@
   }
 
   function useCurrentLocation() {
+    if (!window.isSecureContext) { showManualFallback("Choose an area to keep browsing."); return; }
     if (!navigator.geolocation) {
       showManualFallback("Your browser does not provide location access here. Search by town or neighbourhood instead.");
       return;
     }
     const button = $("#use-current-location");
+    if (button.disabled) return;
     button.disabled = true;
+    locationCleared = false;
     locationDialogStatus.textContent = "Waiting for your browser’s location permission…";
     navigator.geolocation.getCurrentPosition((position) => {
       button.disabled = false;
@@ -539,29 +557,19 @@
         : error.code === error.TIMEOUT
           ? "We could not get a location before the request timed out. Choose a place manually instead."
           : "Your current location is unavailable. Choose a place manually instead.";
+      if (!location && approximateArea && !locationCleared) { applyLocation({mode:"approximate",...approximateArea}); loadFeed(); }
       showManualFallback(message);
     }, { enableHighAccuracy: false, timeout: 12000, maximumAge: 300000 });
   }
 
   $("#open-location-picker").addEventListener("click", openDialog);
   $("#use-current-location").addEventListener("click", useCurrentLocation);
-  $("#choose-manual-location").addEventListener("click", () => showManualFallback("Search a town or neighbourhood. Only matching published listings will appear."));
+  $("#choose-manual-location").addEventListener("click", () => showManualFallback("Search a town or neighbourhood, then choose a place."));
   $("#location-not-now").addEventListener("click", () => dialog.close());
   $("#clear-location").addEventListener("click", () => {
+    locationCleared = true;areaRestoreRun++;
     applyLocation(null, { save: true });
     radiusIndex = 0;
-    loadFeed({ updateUrl: true });
-  });
-  manualForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const label = manualInput.value.trim().replace(/\s+/g, " ");
-    if (label.length < 2 || label.length > 80 || !/^[\p{L}\p{N} .,&'()_-]+$/u.test(label)) {
-      locationDialogStatus.textContent = "Enter a town or neighbourhood using letters and numbers.";
-      return;
-    }
-    applyLocation({ mode: "manual", label }, { save: true });
-    radiusIndex = 0;
-    dialog.close();
     loadFeed({ updateUrl: true });
   });
   filters.addEventListener("submit", (event) => {
@@ -578,6 +586,9 @@
   $(pageButtons.recent).addEventListener("click", () => loadMore("recent"));
   window.addEventListener("popstate", () => { fillFromUrl(); loadFeed(); });
 
+  function discoveryState() { return {location:location?{...location}:null,filters:{...filtersState({includeDates:true})}}; }
+  window.LockdDiscovery = {getState:discoveryState,createCard:cardFor,requestLocation:()=>{openDialog();useCurrentLocation();},setArea:(area,{save=false}={})=>{areaRestoreRun++;if(area&&Number.isFinite(area.latitude)&&Number.isFinite(area.longitude)&&Math.abs(area.latitude)<=90&&Math.abs(area.longitude)<=180){applyLocation({mode:"selected",id:area.id,latitude:Math.round(area.latitude*100)/100,longitude:Math.round(area.longitude*100)/100,label:area.label||""},{save});loadFeed({updateUrl:save});}}};
   fillFromUrl();
   loadFeed();
+  window.LockdAccount?.getConfig().then(config=>{approximateArea=config.approximateArea;if(!location&&!locationCleared&&approximateArea){applyLocation({mode:"approximate",...approximateArea});loadFeed();}}).catch(()=>{});
 })();

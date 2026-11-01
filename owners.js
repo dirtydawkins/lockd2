@@ -218,12 +218,12 @@
   function storeLocalDraft() {
     const details = {};
     const uploadedPhotos = selectedPhotos.filter((photo) => photo.storagePath && photo.uploaded);
-    $("#owner-category-fields").querySelectorAll("[data-attribute]").forEach((input) => { details[input.dataset.attribute] = input.value; });
+    $("#owner-category-fields").querySelectorAll("[data-attribute]").forEach((input) => { if (!["pickup_instructions","return_instructions"].includes(input.dataset.attribute)) details[input.dataset.attribute] = input.value; });
     const values = {
       id: $("#listing-id").value || crypto.randomUUID(), category: categorySelect.value,
       title: $("#listing-title").value, summary: $("#listing-summary").value,
       description: $("#listing-description").value, location: $("#listing-location").value,
-      latitude: $("#listing-latitude").value, longitude: $("#listing-longitude").value,
+      latitude: $("#listing-latitude").value, longitude: $("#listing-longitude").value, location_place_id: $("#listing-place-id").value,
       clearLocationPin: $("#listing-clear-location-pin").checked,
       price: $("#listing-price").value, priceUnit: $("#listing-price-unit").value,
       deposit: $("#listing-deposit").value, minDays: $("#listing-min-days").value,
@@ -280,6 +280,10 @@
     $("#listing-summary").value = values.summary || "";
     $("#listing-description").value = values.description || "";
     $("#listing-location").value = values.location_label || values.location || "";
+    $("#listing-place-id").value = values.location_place_id || "";
+    $("#listing-place-search").value = "";
+    $("#listing-private-address").value = values.private_address || "";
+    for (const key of ["pickup_instructions","return_instructions"]) { const field = document.querySelector(`[data-attribute="${key}"]`); if(field && values[`private_${key}`] !== undefined)field.value = values[`private_${key}`]; }
     $("#listing-latitude").value = values.location_latitude ?? values.latitude ?? "";
     $("#listing-longitude").value = values.location_longitude ?? values.longitude ?? "";
     $("#listing-clear-location-pin").checked = Boolean(values.clearLocationPin);
@@ -314,6 +318,7 @@
     $("#wizard-title").textContent = values.listing_status === "published" ? "Update your listing details." : "Continue your draft.";
     $("#wizard-eyebrow").textContent = values.listing_status === "published" ? "Edit a listing" : "Resume your draft";
     storeLocalDraft();
+    window.dispatchEvent(new Event("lockd:listing-restored"));
     $("#owner-listing-form").scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
@@ -460,7 +465,7 @@
     const errors = [];
     if (!categorySelect.value) errors.push("Choose a supported category.");
     if ($("#listing-title").value.trim().length < 2) errors.push("Add a listing title.");
-    if ($("#listing-location").value.trim().length < 2) errors.push("Add the location or pickup area.");
+    if (!$("#listing-place-id").value) errors.push("Choose a place from the search results.");
     if ($("#listing-description").value.trim().length < 30) errors.push("Add a description of at least 30 characters.");
     if (!(Number($("#listing-price").value) > 0)) errors.push("Set a rate greater than zero.");
     const latitude = $("#listing-latitude").value.trim();
@@ -494,6 +499,9 @@
       summary: $("#listing-summary").value.trim(), description: $("#listing-description").value.trim(),
       images: selectedPhotos.filter((photo) => photo.uploaded).map((photo) => photo.storagePath),
       image_alt: title, location_label: $("#listing-location").value.trim(),
+      location_place_id: $("#listing-place-id").value || null,
+      private_address: $("#listing-private-address").value.trim(),
+      private_pickup_instructions: attributes.pickup_instructions || "", private_return_instructions: attributes.return_instructions || "",
       price_amount: price ? Number(price) : null, currency: price ? "KES" : null,
       price_unit: price ? $("#listing-price-unit").value : null,
       deposit_amount: deposit ? Number(deposit) : null,

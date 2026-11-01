@@ -112,6 +112,8 @@ module.exports = async function handler(req, res) {
         "Add a future availability range with at least one available unit.", "Complete the required details for this category.",
         "Choose a valid deposit amount.", "This listing is unavailable or cannot be changed.",
         "Choose a valid listing and status.", "Sign in to manage your listings.",
+        "Choose a place from the search results.", "Shorten the address or pickup instructions.",
+        "Open your listing and review the details before publishing.", "Update the available dates before publishing.",
         "Add both approximate map coordinates or leave both blank.", "Choose valid approximate map coordinates.",
       ];
       if (allowedMessages.includes(message)) return send(res, 400, { error: "invalid_listing", message });
@@ -119,13 +121,13 @@ module.exports = async function handler(req, res) {
         error: response.status === 404 ? "owner_setup_pending" : "listing_save_failed",
         message: response.status === 404
           ? useLocationRpc
-            ? "Approximate nearby listing support needs its database migration. Remove the optional map pin or try again after the migration is applied."
-            : "The owner publishing database migration has not been applied yet."
+            ? "Your listing could not be saved right now. Please try again shortly."
+            : "Your listing could not be saved right now. Please try again shortly."
           : "The listing could not be saved. Check your details and try again.",
       });
     }
     return send(res, req.method === "POST" ? 201 : 200, { item: data });
   } catch {
-    return send(res, 502, { error: "owner_service_unavailable", message: "The owner service could not be reached. Your changes are still on this device; try again." });
+    return send(res, 502, { error: "owner_service_unavailable", message: "The owner service could not be reached. Please try again." });
   }
 };

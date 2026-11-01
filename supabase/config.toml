@@ -1,0 +1,3 @@
+[functions.lockd-places]
+# The function validates the project's current publishable key itself; the legacy JWT gateway cannot validate sb_publishable keys.
+verify_jwt = false

@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@supabase/realtime-js": "2.118.0",
+    "maplibre-gl": "6.16.0",
     "openpgp": "6.3.2"
   }
 }

@@ -1,6 +1,4 @@
-const categories = new Set([
-  "stay", "drive", "play", "technology", "experience", "camera", "phone", "laptop", "audio", "creative", "other",
-]);
+const {categories} = require('../lib/discovery-input');
 const supabaseConfig = require("./supabase-config.js");
 const { signImages } = require("./listing-images.js");
 const technologyCategories = ["technology", "play", "camera", "phone", "laptop", "audio", "creative"];
@@ -56,6 +54,8 @@ async function availableIds(config, startDate, endDate, quantity) {
 }
 
 module.exports = async function handler(req, res) {
+  if(req.query?.view==='map')return require('../lib/map-api')(req,res);
+  if(req.query?.view==='places')return require('../lib/places-api')(req,res);
   if (['hosts','host','listers','lister'].includes(req.query?.view)) return require('../lib/hosts-api')(req,res);
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
