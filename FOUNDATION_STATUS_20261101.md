@@ -5,6 +5,8 @@ This is an implementation register, not a production-readiness claim. The latest
 ## Release boundary
 
 - Development branch: `codex/verification-messaging`.
+- Implementation commit `d49c644` is pushed to GitHub; its Marketplace checks run [41301067863](https://github.com/dirtydawkins/lockd2/actions/runs/41301067863) passed. No merge to `main` was performed.
+- The initial Vercel preview caught the Hobby plan's 12-function limit. Private original downloads now share the document API function, keeping the existing plan; the corrected preview must be verified before release.
 - The preceding image/trust release is live on `main` at `3ed04eb`. Its production evidence is in `RELEASE_STATUS_20261101.md`.
 - New migrations **0012 and 0013 have not been applied to production**. They are additive, preserve existing rentals/accounts, contain no sample customers, listings, conversations or verification evidence, and default to disabled capabilities.
 - No KRA, scanning, identity-provider or investigator account was created. No paid resource was provisioned. No provider credential was invented or committed.
@@ -75,6 +77,7 @@ These omissions block full acceptance of the original end-to-end briefs. The use
 - Latest complete Node run: **153 passed, 0 failed** (including actual PostgreSQL/PGlite behavior, OpenPGP interoperability and device-key tests).
 - Latest complete Python run: **40 passed, 0 failed**. Fixtures are controlled synthetic documents for tests, not issuer authentication or ML validation.
 - `npm audit --audit-level=high`: **0 vulnerabilities reported**.
+- `pip-audit -r requirements-documents.txt --timeout 20`: **no known vulnerabilities found** after upgrading Pillow from 12.2.0 to 13.0.0. All 40 Python tests passed on the patched version. The earlier audit's Pillow findings were fixed, not ignored.
 - JavaScript module syntax and `git diff --check` passed. Python dependency auditing is also configured in GitHub CI, including the optional document requirements.
 - Earlier browser visual checks covered 320, 375, 390, 430, 768, 1024 and 1440 CSS pixels with no horizontal overflow, search filtering, More actions and mobile inbox navigation. The local fixture browser/server was then removed from the visible session. No synthetic preview is a final deliverable.
 - New production migrations, new provider checks, actual private document uploads and the final passwordless live messaging journey have **not** been verified in production.

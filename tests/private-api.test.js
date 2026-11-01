@@ -1,5 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
-const documents=require('../api/documents'),messages=require('../api/messages'),file=require('../api/document-file');
+const documents=require('../api/documents'),messages=require('../api/messages'),file=require('../lib/document-file');
 const id='11111111-1111-4111-8111-111111111111';
 function setup(t){const env={...process.env},original=fetch;t.after(()=>{process.env=env;global.fetch=original;});process.env.SUPABASE_URL='https://fixture.supabase.co';process.env.SUPABASE_PUBLISHABLE_KEY='sb_publishable_fixture';}
 async function call(handler,{method='GET',body,query={},token=true,headers={}}={}){
@@ -34,6 +34,7 @@ test('private provider/database failures are safe errors, never false empty resu
 test('private original downloads require configuration and audited server authorization',async t=>{
  setup(t);delete process.env.SUPABASE_SERVICE_ROLE_KEY;
  assert.equal((await call(file,{query:{id}})).code,503);
+ assert.equal((await call(documents,{query:{view:'file',id}})).code,503,'the shared document function dispatches private downloads');
  process.env.SUPABASE_SERVICE_ROLE_KEY='synthetic-server-key-'+'x'.repeat(40);let accessed=false;
  global.fetch=async url=>{if(url.endsWith('/user'))return {ok:true};if(url.includes('/rpc/'))return {ok:false,status:403};accessed=true;throw Error('No storage access allowed');};
  assert.equal((await call(file,{query:{id}})).code,404);assert.equal(accessed,false);

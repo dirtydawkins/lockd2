@@ -76,7 +76,7 @@ async function reviews(){
    for(const doc of detail.documents){
     panel.append(node('h4',`Document · ${pretty(doc.state)}`));
     if(doc.state==='screened')panel.append(action('Download original privately',async()=>{
-     try{const session=await window.LockdAccount.getSession();const response=await fetch('/api/document-file?id='+encodeURIComponent(doc.id),{headers:{Authorization:`Bearer ${session.access_token}`},cache:'no-store'});if(!response.ok)throw Error('The private original is not available.');const blob=await response.blob(),url=URL.createObjectURL(blob),link=node('a','',{href:url,download:'address-evidence'});link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(error){report(error);}
+     try{const session=await window.LockdAccount.getSession();const response=await fetch('/api/documents?view=file&id='+encodeURIComponent(doc.id),{headers:{Authorization:`Bearer ${session.access_token}`},cache:'no-store'});if(!response.ok)throw Error('The private original is not available.');const blob=await response.blob(),url=URL.createObjectURL(blob),link=node('a','',{href:url,download:'address-evidence'});link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(error){report(error);}
     }));
     if(doc.analysis){
      panel.append(node('p',`Screening ${doc.analysis.version}. Issuer: ${pretty(doc.analysis.issuer_status)}. No trained forgery model.`));

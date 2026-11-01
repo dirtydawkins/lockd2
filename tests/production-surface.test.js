@@ -9,6 +9,7 @@ test('production packaging excludes fixtures and legacy duplicates but retains f
  const ignore=fs.readFileSync('.vercelignore','utf8').split(/\r?\n/);
  assert.ok(ignore.includes('tests/'));assert.ok(ignore.includes('lockd2/'));assert.ok(ignore.includes('services/'));
  assert.equal(ignore.includes('lib/'),false,'server RPC helpers must be uploaded for Vercel function tracing');
+ assert.ok(fs.readdirSync('api').filter(name=>name.endsWith('.js')).length<=12,'stay within the existing Vercel Hobby function limit');
 });
 test('unfinished capabilities are hidden until the backend enables them',()=>{
  for(const file of ['account.html','owners.html','trust.html','rental.html'])assert.match(fs.readFileSync(file,'utf8'),/data-lockd-messaging-entry[^>]*hidden/);

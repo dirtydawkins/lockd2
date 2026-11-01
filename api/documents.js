@@ -1,5 +1,6 @@
 const {endpoint,uuid,text}=require('../lib/private-rpc');
-module.exports=endpoint((method,q,b)=>{
+const documentFile=require('../lib/document-file');
+const operations=endpoint((method,q,b)=>{
   if(method==='GET') {
     if(q.view==='capabilities') return {rpc:'lockd_document_capabilities'};
     if(q.view==='reviews') return {rpc:'lockd_address_review_queue'};
@@ -20,3 +21,4 @@ module.exports=endpoint((method,q,b)=>{
     return {rpc:'review_lockd_address_case',args:{p_case_id:b.caseId,p_version:b.version,p_decision:b.decision,p_reason:b.reason}};
   return null;
 });
+module.exports=(req,res)=>req.method==='GET'&&req.query?.view==='file'?documentFile(req,res):operations(req,res);
