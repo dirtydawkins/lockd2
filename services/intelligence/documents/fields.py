@@ -5,7 +5,11 @@ from datetime import date
 RULES = {
     "account_holder": r"(?:account holder|customer name|taxpayer name|tenant name|student name|name)\s*[:\-]\s*(.+)",
     "service_address": r"(?:service address|supply address|physical address|registered address|residential address|residence)\s*[:\-]\s*(.+)",
-    "account_reference": r"(?:account (?:number|no\.?|reference)|pin(?: number)?)\s*[:\-]\s*([A-Za-z0-9\-/]+)",
+    "account_reference": r"account (?:number|no\.?|reference)\s*[:\-]\s*([A-Za-z0-9\-/]+)",
+    "postal_address": r"postal address\s*[:\-]\s*(.+)",
+    "meter_reference": r"meter (?:number|no\.?)\s*[:\-]\s*([A-Za-z0-9\-/]+)",
+    "amount_due": r"(?:amount due|total due)\s*[:\-]\s*([\d,]+(?:\.\d{1,2})?)",
+    "currency": r"currency\s*[:\-]\s*([A-Z]{3})\b",
     "issue_date": r"(?:issue date|date issued|bill date)\s*[:\-]\s*(\d{4}-\d{2}-\d{2})",
     "due_date": r"(?:due date|pay by)\s*[:\-]\s*(\d{4}-\d{2}-\d{2})",
     "billing_period": r"billing period\s*[:\-]\s*(.+)",
@@ -19,7 +23,6 @@ def classify(text):
     for kind, terms in {
         "electricity_bill": ("kenya power", "electricity bill"),
         "water_bill": ("water bill", "water and sewerage"),
-        "kra_certificate": ("kenya revenue authority", "pin certificate"),
         "tenancy": ("tenancy agreement", "lease agreement"),
         "student": ("accommodation confirmation", "hostel allocation"),
         "landlord": ("landlord confirmation",),
@@ -37,7 +40,7 @@ def extract(lines):
             match = re.search(pattern, line["text"], re.I)
             if match:
                 value = match[1].strip()[:400]
-                if key == "account_reference":
+                if key in ("account_reference", "meter_reference"):
                     value = "•" * max(0, len(value) - 4) + value[-4:]
                 found.append({"value": value, "page": line["page"], "bbox": line["bbox"],
                               "extraction": line.get("source", "embedded_text"),

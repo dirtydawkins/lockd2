@@ -4,7 +4,7 @@ services:
     runtime: python
     plan: free
     region: frankfurt
-    branch: codex/marketplace-foundations
+    branch: codex/marketplace-refinement
     rootDir: services/intelligence
     buildCommand: pip install --no-cache-dir -r requirements.txt
     startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT --workers 1 --no-access-log --limit-concurrency 20 --timeout-keep-alive 5

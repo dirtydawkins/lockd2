@@ -203,6 +203,7 @@ async function connectMessages(){
   if(result.state==='signed_out'){lock();return;}
   if(result.state==='disabled'){$('#message-workspace').hidden=true;status(notice,'Messaging is unavailable right now. Please try again later.');return;}
   $('#message-workspace').hidden=false;await inbox();await myReports();
+  $('.message-attachment-control').hidden=capabilities.attachmentsEnabled!==true;
   if(result.state==='another_device'){
    device=result.active;$('#message-device').hidden=false;$('#message-workspace').classList.add('is-locked','has-open-thread');status(notice,'Approve this browser from one you already use for messages.');return;
   }
@@ -216,7 +217,7 @@ async function connectMessages(){
   else if(conversations.some(c=>c.id===url.searchParams.get('conversation')))await open(url.searchParams.get('conversation'));
   else if(conversations.length)await open(conversations[0].id);
   else $('#message-workspace').classList.remove('has-open-thread');
-  clearInterval(poll);poll=setInterval(()=>{if(!document.hidden&&privateKey)void sync().then(inbox).catch(error);},15000);
+  clearInterval(poll);poll=setInterval(()=>{if(!document.hidden&&privateKey)void refreshMessages().catch(error);},10000);
  }catch(err){lock(err.message||'Your messages couldn’t open. Please try again.');}
 }
 $('#verify-contact').addEventListener('click',async()=>{try{
@@ -252,7 +253,12 @@ $('#message-history').addEventListener('scroll',acknowledgeVisible,{passive:true
 $('#chat-file').addEventListener('change',()=>{$('#attachment-name').textContent=$('#chat-file').files[0]?.name||'';$('#remove-attachment').hidden=!$('#chat-file').files.length;});
 $('#remove-attachment').addEventListener('click',()=>{clearAttachment();$('#attachment-name').textContent='';$('#remove-attachment').hidden=true;});
 $('#message-text').addEventListener('keydown',event=>{if(event.key==='Enter'&&!event.shiftKey&&!event.isComposing){event.preventDefault();if(!$('#message-compose button').disabled)$('#message-compose').requestSubmit();}});
-$('#refresh-inbox').addEventListener('click',()=>inbox().then(()=>sync()).catch(error));
+async function refreshMessages(){
+ await inbox();
+ if(active&&!peer){const known=await getDevices(active.id);if(known.some(item=>item.user_id!==user.id&&!item.revoked_at)){await open(active.id);return;}}
+ await sync();
+}
+$('#refresh-inbox').addEventListener('click',()=>refreshMessages().catch(error));
 $('#back-to-inbox').addEventListener('click',()=>{$('#message-workspace').classList.remove('has-open-thread');$('#conversations button')?.focus();});
 $('#confirm-contact').addEventListener('click',()=>{$('#contact-check').open=true;$('#security-details').open=true;$('#fingerprint-compared').focus();});
 $('#block-contact').addEventListener('click',async()=>{if(!active)return;try{await request('messages',{}, {action:'block',conversationId:active.id,block:!active.blocked});await inbox();await open(active.id);}catch(err){error(err);}});
@@ -270,19 +276,25 @@ $('#accept-device-transfer').addEventListener('change',async event=>{try{const f
 $('#retry-message-access').addEventListener('click',()=>connectMessages());
 $('#revoke-device').addEventListener('click',async()=>{try{if(!$('#remove-access-confirm').checked)throw Error('Review and confirm the effect on your old messages first.');await removeMessageDevice(user.id,device.id);lock('Message access removed.');identity=null;await connectMessages();}catch(err){error(err);}});
 $('#report-messages').addEventListener('click',()=>{
- if(!capabilities.investigatorKey || !capabilities.investigatorFingerprint){error(Error('Private reporting isn’t available yet. Nothing from your conversation has been shared.'));return;}
  const records=[...selected].map(id=>({row:messages.get(id),payload:decrypted.get(id)})).filter(x=>x.row&&x.payload);
  if(!records.length||records.length>30){error(Error('Select between 1 and 30 readable messages.'));return;}
  pendingReport={clientId:crypto.randomUUID(),conversationId:active.id,messages:records.map(({row,payload})=>({id:row.id,senderId:row.sender_id,createdAt:row.created_at,ciphertext:row.ciphertext,payload}))};
- $('#report-preview').replaceChildren(...pendingReport.messages.map(item=>node('p',item.payload.text)));$('#report-form').reset();$('#report-dialog').showModal();
+ const canShare=Boolean(capabilities.investigatorKey&&capabilities.investigatorFingerprint);
+ $('#report-description').textContent=canShare?'Only the messages shown here will be shared with LOCKD for review. Attachments are not included. We can’t read the rest of your conversation.':'Report a concern about this conversation. Your message text and attachments will stay private.';
+ $('#report-consent-label').textContent=canShare?'I agree to share these messages with LOCKD for this report.':'I agree to send this concern and the selected message references to LOCKD.';
+ $('#report-preview').replaceChildren(...(canShare?pendingReport.messages.map(item=>node('p',item.payload.text)):[node('p',`${pendingReport.messages.length} message reference${pendingReport.messages.length===1?'':'s'} selected. No message content will be shared.`)]));$('#report-form').reset();$('#report-dialog').showModal();
 });
 $('#close-report').addEventListener('click',()=>{$('#report-dialog').close();pendingReport=null;$('#report-preview').replaceChildren();});
 $('#report-form').addEventListener('submit',async event=>{
  event.preventDefault();if(!pendingReport||!privateKey)return;const form=event.currentTarget,button=form.querySelector('[type=submit]'),message=form.querySelector('[role=status]');button.disabled=true;
  try{
-  const publicKey=await readPublic(capabilities.investigatorKey,capabilities.investigatorFingerprint);
-  const evidence=await encryptEvidence({...pendingReport,disclosure:'selected_messages_only',submittedAt:new Date().toISOString()},privateKey,publicKey);
-  const id=await request('messages',{}, {action:'report',conversationId:pendingReport.conversationId,clientId:pendingReport.clientId,category:form.elements.category.value,ids:pendingReport.messages.map(m=>m.id),evidence,fingerprint:capabilities.investigatorFingerprint,sha256:await hash(evidence),deviceId:device.id});
+  const body={action:'reportConcern',conversationId:pendingReport.conversationId,clientId:pendingReport.clientId,category:form.elements.category.value,ids:pendingReport.messages.map(m=>m.id),deviceId:device.id};
+  if(capabilities.investigatorKey&&capabilities.investigatorFingerprint){
+   const publicKey=await readPublic(capabilities.investigatorKey,capabilities.investigatorFingerprint);
+   const evidence=await encryptEvidence({...pendingReport,disclosure:'selected_messages_only',submittedAt:new Date().toISOString()},privateKey,publicKey);
+   Object.assign(body,{action:'report',evidence,fingerprint:capabilities.investigatorFingerprint,sha256:await hash(evidence)});
+  }
+  const id=await request('messages',{},body);
   $('#report-dialog').close();pendingReport=null;selected.clear();$('#report-preview').replaceChildren();render();status(notice,'Your report was received. Reference '+id.slice(0,8)+'.');await myReports();
  }catch(err){status(message,err.message,true);}finally{button.disabled=false;}
 });

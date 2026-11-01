@@ -7,9 +7,10 @@ export function fileMime(bytes){
  if(String.fromCharCode(...bytes.slice(0,5))==='%PDF-')return 'application/pdf';
  return null;
 }
-async function prepare(file,photoOnly){
+async function prepare(file,photoOnly,pdfOnly=false){
  if(!file||file.size<16||file.size>2097152)throw Error('Choose a file up to 2 MB.');
  const mime=fileMime(new Uint8Array(await file.slice(0,16).arrayBuffer()));
+ if(pdfOnly&&mime!=='application/pdf')throw Error('Choose your statement as a PDF, up to 2 MB.');
  if(!mime||photoOnly&&!photos.has(mime))throw Error(photoOnly?'Choose a JPG, PNG or WebP photo. PDF bills are not accepted.':'Choose a PDF, JPG, PNG or WebP file.');
  if(!photos.has(mime))return {file,mime};
  const bitmap=await createImageBitmap(file);
@@ -25,18 +26,18 @@ async function prepare(file,photoOnly){
  }finally{bitmap.close();}
 }
 export function uploadForm(item,request,refresh,output){
- const photoOnly=item.method==='utility',form=node('form',undefined,{class:'account-form'}),message=node('p','',{role:'status'});
- const input=node('input',undefined,{type:'file',accept:photoOnly?'image/jpeg,image/png,image/webp':'.pdf,.jpg,.jpeg,.png,.webp'});
+ const photoOnly=item.method==='utility',pdfOnly=['mpesa','bank'].includes(item.method),form=node('form',undefined,{class:'account-form'}),message=node('p','',{role:'status'});
+ const input=node('input',undefined,{type:'file',accept:photoOnly?'image/jpeg,image/png,image/webp':pdfOnly?'application/pdf':'.pdf,.jpg,.jpeg,.png,.webp'});
  const camera=node('input',undefined,{type:'file',accept:'image/jpeg,image/png,image/webp',capture:'environment',hidden:''});
  const preview=node('img',undefined,{class:'photo-upload-preview',alt:'Your selected photo',hidden:''}),progress=node('progress',undefined,{max:'100',value:'0',class:'photo-upload-progress',hidden:'','aria-label':'Upload progress'});
  const controls=node('div',undefined,{class:'photo-upload-actions'}),take=node('button','Take a photo',{type:'button',class:'text-button'}),replace=node('button','Choose another file',{type:'button',class:'text-button'}),submit=node('button','Upload privately',{type:'submit',class:'button button-light'});
  let chosen=null,url=null;
  const clear=()=>{if(url)URL.revokeObjectURL(url);url=null;chosen=null;preview.hidden=true;preview.removeAttribute('src');};
- async function select(file){clear();submit.disabled=true;try{chosen=await prepare(file,photoOnly);if(photos.has(chosen.mime)){url=URL.createObjectURL(chosen.file);preview.src=url;preview.hidden=false;}status(message,photoOnly?'Check that the name, address and dates are readable.':'Ready to upload.');}catch(error){status(message,error.message,true);}finally{submit.disabled=!chosen;}}
+ async function select(file){clear();submit.disabled=true;try{chosen=await prepare(file,photoOnly,pdfOnly);if(photos.has(chosen.mime)){url=URL.createObjectURL(chosen.file);preview.src=url;preview.hidden=false;}status(message,photoOnly?'Check that the name, address and dates are readable.':'Ready to upload.');}catch(error){status(message,error.message,true);}finally{submit.disabled=!chosen;}}
  input.addEventListener('change',()=>void select(input.files[0]));camera.addEventListener('change',()=>void select(camera.files[0]));
  take.addEventListener('click',()=>camera.click());replace.addEventListener('click',()=>input.click());
- controls.append(take,replace);submit.disabled=true;
- form.append(label(photoOnly?'Utility bill photo · JPG, PNG or WebP, up to 2 MB':'Supporting file · PDF or image, up to 2 MB',input),camera,preview,controls,progress,submit,message);
+ if(!pdfOnly)controls.append(take);controls.append(replace);submit.disabled=true;
+ form.append(label(photoOnly?'Utility bill photo · JPG, PNG or WebP, up to 2 MB':pdfOnly?'Statement PDF · up to 2 MB':'Supporting file · PDF or image, up to 2 MB',input),camera,preview,controls,progress,submit,message);
  form.addEventListener('submit',async event=>{event.preventDefault();if(!chosen)return;submit.disabled=true;input.disabled=true;progress.hidden=false;progress.value=0;
   try{const reservation=await request('documents',{}, {action:'reserve',caseId:item.id,mime:chosen.mime,bytes:chosen.file.size});status(message,'Uploading…');
    await storageRequest(reservation.bucket,reservation.path,{method:'POST',data:chosen.file,mime:chosen.mime,onProgress:percent=>{progress.value=percent;}});

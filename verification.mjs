@@ -1,12 +1,13 @@
 import {uploadForm} from './document-upload.mjs';
+import {mountVerificationWorkflow} from './verification-workflow.mjs';
 import {privateRequest,storageRequest,node,action,label,status} from './private-client.mjs';
 const output=document.querySelector('#verification-status'),content=document.querySelector('#verification-content');
 let capabilities=null,cases=[],creatingKey=null;
 let accountId=null;
 function request(service,query={},body){if(!accountId)throw Error('Open your account to continue.');return privateRequest(service,query,body,accountId);}
-const methodNotes={utility:'Electricity, water or another utility bill. A different account-holder name can be explained.',kra_certificate:'A certificate can support a review. Do not enter your full PIN here. Your certificate can be reviewed as supporting evidence.',tenancy:'Use your tenancy agreement, or explain an informal rental arrangement.',student:'A hostel allocation, accommodation letter or institutional confirmation can support your review.',landlord:'Explain who can confirm your residence. LOCKD will not contact them without an agreed, consent-based process.',family:'A bill in a family member’s name can support your review with an explanation of the connection.',other:'Explain your arrangement. A reviewer can consider alternative evidence under the rental’s rules.'};
+const methodNotes={utility:'Electricity, water or another utility bill. A different account-holder name can be explained.',tenancy:'Use your tenancy agreement, or explain an informal rental arrangement.',student:'A hostel allocation, accommodation letter or institutional confirmation can support your review.',landlord:'Explain who can confirm your residence. LOCKD will not contact them without an agreed, consent-based process.',family:'A bill in a family member’s name can support your review with an explanation of the connection.',other:'Explain your arrangement. A reviewer can consider alternative evidence under the rental’s rules.'};
 const pretty=value=>String(value||'').replaceAll('_',' ');
-const methodNames={utility:'Utility bill',kra_certificate:'KRA PIN certificate',tenancy:'Tenancy agreement',student:'Student accommodation',landlord:'Landlord or institution confirmation',family:'Family household',other:'Other supporting evidence'};
+const methodNames={utility:'Utility bill',tenancy:'Tenancy agreement',student:'Student accommodation',landlord:'Landlord or institution confirmation',family:'Family household',other:'Other supporting evidence'};
 function report(error){status(output,error.message||'Please try again.',true);}
 function field(name,value=''){const input=node('input');input.name=name;input.maxLength=400;input.value=value;return label(pretty(name),input);}
 async function refresh(){
@@ -97,3 +98,4 @@ try{
  if(!session){output.replaceChildren(node('a','Sign in to continue',{href:window.LockdAccount.authLink({returnTo:'/verification.html'})}));}
  else{capabilities=await request('documents',{view:'capabilities'});document.querySelector('#document-upload-note').textContent=capabilities.uploadsEnabled?`PDF or image, up to 2 MB. Supporting data is scheduled for deletion after ${capabilities.retentionDays} days or withdrawal, subject to the privacy notice.`:'Private document uploads are not enabled yet.';content.hidden=false;document.querySelector('#address-admin').hidden=session.user?.app_metadata?.role!=='admin';await refresh();if(capabilities.submissionsEnabled===false){for(const element of document.querySelector('#address-form').elements)element.disabled=true;status(output,'Address submissions are getting ready. Please check back later.');}else{status(output,'Your address evidence is private to you and authorized reviewers.');}}
 }catch(error){report(error);}
+void mountVerificationWorkflow().catch(report);

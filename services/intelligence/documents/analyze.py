@@ -86,12 +86,12 @@ def image_observations(data, page=1):
     return lines, observations, {"width": width, "height": height, "dhash": dhash, "edge_energy": edge_energy}, limitations
 
 
-def pdf_observations(data):
+def pdf_observations(data, password=None):
     import pymupdf
     findings, lines, pages, limitations = [], [], [], []
     try:
         with pymupdf.open(stream=data, filetype="pdf") as document:
-            if document.is_encrypted or document.needs_pass:
+            if document.needs_pass and (not password or not document.authenticate(password)):
                 raise UnsafeDocument("encrypted_pdf")
             if not 1 <= document.page_count <= MAX_PAGES or document.xref_length() > 5000:
                 raise UnsafeDocument("pdf_complexity")
@@ -148,21 +148,26 @@ def pdf_observations(data):
     return lines, findings, pages, limitations
 
 
-def analyze_scanned(data, declared_address="", today=None):
+def analyze_scanned(data, declared_address="", today=None, method=None, password=None):
     """Call ONLY after malware scan. Worker enforces process and execution bounds."""
     mime = identify(data)
     if mime == "application/pdf":
-        lines, findings, pages, limitations = pdf_observations(data)
+        lines, findings, pages, limitations = pdf_observations(data, password=password)
     else:
         lines, findings, page, limitations = image_observations(data)
         pages = [page]
     if len(lines) > 3000 or sum(len(line["text"]) for line in lines) > 100000:
         raise UnsafeDocument("text_complexity")
     text = "\n".join(line["text"] for line in lines)
+    pagination = {(int(a), int(b)) for a, b in re.findall(r'(?i)\bpage\s+(\d{1,3})\s+(?:of|/)\s*(\d{1,3})\b', text)}
+    if pagination and (len({total for _, total in pagination}) != 1 or {number for number, _ in pagination} != set(range(1, max(total for _, total in pagination) + 1))):
+        findings.append(finding('incomplete_page_sequence', 'semantic', 'review'))
     classification = classify(text)
+    from .providers import classify_provider
+    provider = classify_provider(text)
     fields = extract(lines)
     findings.extend(consistency(fields, today))
-    if "service_address" not in fields:
+    if "service_address" not in fields and method not in ('mpesa','bank'):
         findings.append(finding("address_not_extracted", "fields", "review"))
     if not text.strip():
         findings.append(finding("no_readable_text", "quality", "review"))
@@ -171,11 +176,18 @@ def analyze_scanned(data, declared_address="", today=None):
     match = compare(declared_address, fields.get("service_address", {}).get("value", ""))
     quality = any(f["module"] == "quality" and f["severity"] == "review" for f in findings)
     status = "document_quality_insufficient" if quality else "manual_review_required" if any(f["severity"] == "review" for f in findings) else "no_material_anomalies_detected"
-    return {"version": VERSION, "sha256": digest(data), "mime": mime, "pages": pages,
-            "classification": classification, "fields": fields, "findings": findings,
+    result = {"version": VERSION, "sha256": digest(data), "mime": mime, "pages": pages,
+            "classification": classification, "provider": provider, "fields": fields, "findings": findings,
             "address_match": match, "screening_status": status, "issuer_status": "not_independently_verified",
             "trained_model": False, "template_version": None, "review_required": True,
             "limitations": sorted(set(limitations + ["No lawfully validated issuer templates configured.",
                 "No calibrated manipulation model, compression/noise detector or copy-move detector configured.",
                 "Missing pages, cropping and text overlays cannot be reliably ruled out.",
                 "Absence of anomalies does not prove authenticity."]))}
+    if method in ('mpesa', 'bank'):
+        from .financial import parse
+        result['financial'] = parse(lines, method)
+        result['fields'] = result['financial']['fields']
+        result['classification'] = {'type': method + '_statement', 'method': 'declared_workflow', 'confidence': None}
+        result['review_required'] = True
+    return result

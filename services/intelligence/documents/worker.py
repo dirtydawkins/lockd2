@@ -13,10 +13,24 @@ from .analyze import analyze_scanned
 from .safety import MAX_BYTES, UnsafeDocument, utility_photo
 
 try:
-    raw = sys.stdin.buffer.read(MAX_BYTES + 1)
+    raw = sys.stdin.buffer.read(MAX_BYTES + 1029)
+    method = next((value.split('=', 1)[1] for value in sys.argv if value.startswith('--method=')), None)
+    # The optional PDF password travels only through the inherited private pipe,
+    # never argv/environment/queue/storage/logs. No password means normal durable processing.
+    password = None
+    if '--password-pipe' in sys.argv:
+        import struct
+        if len(raw) < 4:
+            raise UnsafeDocument('invalid_envelope')
+        length = struct.unpack('!I', raw[:4])[0]
+        if length > 1024 or len(raw) < 4 + length:
+            raise UnsafeDocument('invalid_envelope')
+        password = raw[4:4 + length].decode('utf-8')
+        raw = raw[4 + length:]
     if '--utility-photo' in sys.argv:
         utility_photo(raw)
-    output = analyze_scanned(raw)
+    output = analyze_scanned(raw, method=method, password=password)
+    password = None
     encoded = json.dumps(output)
     if len(encoded.encode()) > 250000:
         raise UnsafeDocument("analysis_complexity")

@@ -8,7 +8,7 @@ const operations=endpoint((method,q,b)=>{
     if(!q.view || q.view==='mine') return {rpc:'my_lockd_address_cases'};
     return null;
   }
-  if(b.action==='create' && ['utility','kra_certificate','tenancy','student','landlord','family','other'].includes(b.method) && text(b.address,1000,5) && text(b.explanation,2000) && text(b.consent,80,1) && uuid.test(b.requestKey||''))
+  if(b.action==='create' && ['utility','tenancy','student','landlord','family','other'].includes(b.method) && text(b.address,1000,5) && text(b.explanation,2000) && text(b.consent,80,1) && uuid.test(b.requestKey||''))
     return {rpc:'create_lockd_address_case',args:{p_method:b.method,p_address:b.address,p_explanation:b.explanation,p_consent:b.consent,p_request_key:b.requestKey}};
   if(b.action==='reserve' && uuid.test(b.caseId||'') && ['application/pdf','image/jpeg','image/png','image/webp'].includes(b.mime) && Number.isInteger(b.bytes) && b.bytes>=16 && b.bytes<=2097152)
     return {rpc:'reserve_lockd_document',args:{p_case_id:b.caseId,p_mime:b.mime,p_bytes:b.bytes}};
@@ -21,4 +21,4 @@ const operations=endpoint((method,q,b)=>{
     return {rpc:'review_lockd_address_case',args:{p_case_id:b.caseId,p_version:b.version,p_decision:b.decision,p_reason:b.reason}};
   return null;
 });
-module.exports=(req,res)=>req.method==='GET'&&req.query?.view==='file'?documentFile(req,res):operations(req,res);
+module.exports=(req,res)=>req.query?.module==='verification'?require('../lib/verification-api')(req,res):req.method==='GET'&&req.query?.view==='file'?documentFile(req,res):operations(req,res);

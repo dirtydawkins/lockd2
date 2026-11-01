@@ -4,6 +4,8 @@ import json
 import logging
 import os
 import time
+import asyncio
+from contextlib import asynccontextmanager
 from collections import deque
 from typing import Annotated
 from uuid import uuid4
@@ -12,9 +14,26 @@ from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict
 import persona
+import peleza
+import daraja
 
-app = FastAPI(title="LOCKD intelligence", docs_url=None, redoc_url=None, openapi_url=None)
 logger = logging.getLogger("lockd.intelligence")
+
+@asynccontextmanager
+async def lifespan(application):
+    application.state.daraja_authorization_verified = False
+    if daraja.configured():
+        try:
+            result = await asyncio.to_thread(daraja.check_connection)
+            application.state.daraja_authorization_verified = result['authorization_verified'] is True
+        except (persona.IntegrationUnavailable, persona.InvalidProviderResult):
+            pass
+        logger.warning(json.dumps({'event': 'daraja_sandbox_authorization',
+                                   'verified': application.state.daraja_authorization_verified,
+                                   'payments_enabled': False}))
+    yield
+
+app = FastAPI(title="LOCKD intelligence", docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
 VERSION = "rules-1"
 requests_in_window = deque(maxlen=120)
 
@@ -163,8 +182,10 @@ def reconcile_persona():
 def integration_capabilities():
     from documents.jobs import configured
     return {'persona': {'configured': persona.enabled(), 'environment': 'sandbox', 'live_verified': False},
-            'credit': {'configured': False}, 'documents': {'processing_configured': configured(), 'uploads_enabled': False, 'trained_model': False},
-            'training': {'trained_model': False}, 'payments': {'configured': False}}
+            'credit': {'configured': peleza.configured(), 'environment': 'sandbox', 'live_verified': False}, 'documents': {'processing_configured': configured(), 'uploads_enabled': False, 'trained_model': False},
+            'training': {'trained_model': False}, 'payments': {'configured': False,
+            'daraja_sandbox_credentials_present': daraja.configured(),
+            'daraja_sandbox_authorization_verified': getattr(app.state,'daraja_authorization_verified',False), 'live_enabled': False}}
 
 @app.post('/v1/jobs/documents/process', dependencies=[Depends(authorize)])
 def process_document():
@@ -181,3 +202,48 @@ def expire_document():
         return delete_one()
     except persona.IntegrationUnavailable:
         return JSONResponse({'detail': 'Document retention unavailable'}, status_code=503)
+
+
+class CreditInput(BaseModel):
+    model_config = ConfigDict(extra='forbid', strict=True)
+    case_id: str
+    provider: str
+    approved_test_id: str
+
+
+@app.post('/v1/integrations/daraja/check', dependencies=[Depends(authorize)])
+def check_daraja():
+    try:
+        return daraja.check_connection()
+    except (persona.IntegrationUnavailable, persona.InvalidProviderResult):
+        return JSONResponse({'detail': 'Daraja sandbox authorization is unavailable'}, status_code=503)
+
+
+@app.post('/v1/verification/credit', dependencies=[Depends(authorize)])
+def credit_request(body: CreditInput):
+    from uuid import UUID
+    import re
+    if not peleza.configured():
+        return JSONResponse({'detail': 'Credit provider is not configured'}, status_code=503)
+    try:
+        case_id = str(UUID(body.case_id))
+        if body.provider not in ('creditinfo', 'metropol') or not re.fullmatch(r'\d{6,10}', body.approved_test_id) or body.approved_test_id not in os.getenv('PELEZA_APPROVED_SANDBOX_IDS', '').split(','):
+            raise ValueError()
+    except ValueError:
+        return JSONResponse({'detail': 'Approved sandbox case and identity required'}, status_code=400)
+    try:
+        # The DB verifies subject membership, genuine booking, current policy and separate credit consent.
+        job = persona.database_rpc('claim_lockd_credit_request', {'p_case_id': case_id, 'p_provider': body.provider})
+        if job.get('state') != 'claimed':
+            return {'state': job.get('state'), 'retry_allowed': False}
+        reference, outcome = None, 'unknown'
+        try:
+            result = peleza.individual(body.approved_test_id, body.provider, True, job['id'])
+            reference, outcome = result['provider_reference'], 'received'
+        except (persona.IntegrationUnavailable, persona.InvalidProviderResult):
+            # A timeout can follow a billable provider acceptance. Never retry blindly.
+            pass
+        applied = persona.database_rpc('finish_lockd_credit_request', {'p_id': job['id'], 'p_reference': reference, 'p_outcome': outcome})
+        return {'state': outcome if applied else 'not_applied', 'environment': 'sandbox', 'booking_authorized': False}
+    except persona.IntegrationUnavailable:
+        return JSONResponse({'detail': 'Credit request unavailable'}, status_code=503)

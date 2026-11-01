@@ -10,7 +10,6 @@ from documents.address import compare
 from documents.fields import classify, extract, consistency
 from documents.safety import identify, scan, UnsafeDocument, ScannerUnavailable, MAX_BYTES
 from documents.analyze import analyze_scanned
-from documents.kra import check
 from documents.jobs import process_one, isolated
 from persona import IntegrationUnavailable
 
@@ -132,17 +131,6 @@ class DocumentTests(unittest.TestCase):
     def test_dates_are_evidence_not_fraud(self):
         fields = {"issue_date": {"value": "2030-01-01"}, "due_date": {"value": "2026-01-01"}}
         self.assertEqual({f["code"] for f in consistency(fields, date(2026, 11, 1))}, {"future_issue_date", "due_before_issue"})
-
-    def test_kra_no_credentials_never_confirms_residence(self):
-        with self.assertRaises(ValueError):
-            check("A123456789B", consent=False)
-        result = check("A123456789B", consent=True)
-        self.assertTrue(result["format_valid"])
-        self.assertFalse(result["pin_verified"])
-        self.assertFalse(result["address_verified"])
-        self.assertNotIn("A123456789B", str(result))
-        with self.assertRaises(ValueError):
-            check("password", consent=True)
 
     def test_isolated_parser_roundtrip(self):
         result = isolated(pdf("Kenya Power\nService address: Juja Kiambu"))

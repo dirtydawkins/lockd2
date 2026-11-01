@@ -36,11 +36,21 @@ def storage(method, path):
         raise IntegrationUnavailable() from None
 
 
-def isolated(data, photo_only=False):
+def isolated(data, photo_only=False, method=None, password=None):
     # A hard wall timeout and OS process exit protect the web process from parser hangs.
     # Linux child additionally applies CPU, address-space and output-file limits.
     with tempfile.TemporaryFile() as output:
-        result = subprocess.run([sys.executable, "-m", "documents.worker"] + (["--utility-photo"] if photo_only else []), input=data, stdout=output,
+        flags = (["--utility-photo"] if photo_only else [])
+        if method in ('mpesa', 'bank'):
+            flags.append('--method=' + method)
+        if password is not None:
+            import struct
+            encoded = password.encode('utf-8')
+            if len(encoded) > 1024:
+                raise UnsafeDocument('password_size')
+            data = struct.pack('!I', len(encoded)) + encoded + data
+            flags.append('--password-pipe')
+        result = subprocess.run([sys.executable, "-m", "documents.worker"] + flags, input=data, stdout=output,
                                 stderr=subprocess.DEVNULL, timeout=25, cwd=os.path.dirname(os.path.dirname(__file__)))
         output.seek(0)
         raw = output.read(262145)
@@ -70,11 +80,17 @@ def process_one(rpc=database_rpc, downloader=storage, scanner=scan, analyzer=iso
             raise UnsafeDocument("file_mismatch")
         # Always before native image/PDF parsing. Never treat absent scan as clean.
         scanner(raw)
-        if job.get('method') == 'utility':
+        if job.get('method') in ('mpesa', 'bank'):
+            result = analyzer(raw, method=job['method'])
+        elif job.get('method') == 'utility':
             result = analyzer(raw, photo_only=True)
         else:
             result = analyzer(raw)
         result["address_match"] = compare(job["declared_address"], result.get("fields", {}).get("service_address", {}).get("value", ""))
+        if job.get('method') in ('mpesa', 'bank'):
+            from .financial import rental_assessment
+            result['financial']['rental_assessment'] = rental_assessment(
+                result['financial'].get('summary'), job.get('booking_obligation'), job.get('booking_currency'))
     except ScannerUnavailable:
         error = "scanner_unavailable"
     except UnsafeDocument:
