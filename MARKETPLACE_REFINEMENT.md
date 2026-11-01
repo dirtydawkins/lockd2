@@ -60,3 +60,5 @@ Independent messaging/crypto review; configured safe malware scanner/OCR process
 ## Release outcome
 
 Pending GitHub CI, Vercel and Render verification at report creation. See the final release entry for actual status; local code is not itself deployment evidence.
+
+Live validation caught and repaired the legacy lister-page session refresh competing with the shared account service. Lister session restoration, refresh and sign-out now delegate exclusively to LockdAccount. Native skipped-transition promises are handled without changing animations or theme.

@@ -1,4 +1,12 @@
 (() => {
+  // Native cross-document transitions may be skipped by the browser; navigation still succeeds.
+  for (const name of ["pageswap", "pagereveal"]) window.addEventListener(name, event => {
+    const transition = event.viewTransition;
+    if (transition) {
+      void transition.ready.catch(() => {});
+      void transition.finished.catch(() => {});
+    }
+  });
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   document.documentElement.classList.add("motion-ready");
 

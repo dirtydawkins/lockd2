@@ -1,6 +1,5 @@
 (() => {
   const $ = (selector, root = document) => root.querySelector(selector);
-  const authStorageKey = "lockd:owner-session:v1";
   const draftStorageKey = "lockd:owner-draft:v1";
   const categories = {
     stay: "Rooms & accommodation", drive: "Cars & Mobility", play: "Gaming & consoles",
@@ -33,59 +32,14 @@
     element.dataset.kind = kind;
   };
 
-  const getSavedSession = () => {
-    try {
-      const saved = JSON.parse(localStorage.getItem(authStorageKey) || "null");
-      return saved && typeof saved.access_token === "string" && typeof saved.refresh_token === "string" ? saved : null;
-    } catch { return null; }
-  };
-
   function saveSession(value) {
     if (!value?.access_token || !value?.refresh_token) throw new Error("Sign-in did not return a complete session.");
-    session = {
-      access_token: value.access_token,
-      refresh_token: value.refresh_token,
-      expires_at: Number(value.expires_at || (Date.now() / 1000 + Number(value.expires_in || 3600))),
-      user: value.user || session?.user || null,
-    };
-    localStorage.setItem(authStorageKey, JSON.stringify(session));
-  }
-
-  function clearSession() {
-    session = null;
-    try { localStorage.removeItem(authStorageKey); } catch { /* Session storage may be unavailable. */ }
-  }
-
-  async function authRequest(path, payload, token = null) {
-    const response = await fetch(`${config.supabase.url}/auth/v1/${path}`, {
-      method: "POST",
-      headers: {
-        apikey: config.supabase.publishableKey,
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-      body: JSON.stringify(payload || {}),
-    });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      const message = typeof data.msg === "string" ? data.msg : typeof data.message === "string" ? data.message : "Authentication could not be completed.";
-      throw new Error(message);
-    }
-    return data;
+    session = value;
   }
 
   async function ensureSession() {
-    if (!session) return null;
-    if (Number(session.expires_at) > Date.now() / 1000 + 75) return session;
-    try {
-      const refreshed = await authRequest("token?grant_type=refresh_token", { refresh_token: session.refresh_token });
-      saveSession(refreshed);
-      return session;
-    } catch {
-      clearSession();
-      showAuth("Your session expired. Sign in again to continue.");
-      return null;
-    }
+    session = await window.LockdAccount.getSession();
+    return session;
   }
 
   function setBusy(value) {
@@ -716,45 +670,22 @@
   }
 
   async function signOut() {
-    try {
-      if (session && config?.supabase) await authRequest("logout", {}, session.access_token);
-    } catch { /* The local session is removed even when remote sign-out is unavailable. */ }
-    clearSession();
-    showAuth("You have signed out.");
+    try { await window.LockdAccount.signOut(); }
+    finally { session = null; showAuth("You have signed out."); }
   }
 
   async function loadConfig() {
     try {
-      const response = await fetch("/api/config", { cache: "no-store" });
-      const data = await response.json();
-      if (!response.ok || !data.supabase?.url || !data.supabase?.publishableKey) throw new Error("Supabase authentication and storage are not configured for this deployment.");
-      config = data;
-      liveStatus.textContent = "Your listing workspace is ready.";
-      liveStatus.dataset.kind = "success";
+      config = await window.LockdAccount.getConfig();
+      if (!config.supabase?.url || !config.supabase?.publishableKey) throw new Error("Account access is unavailable right now. Please try again later.");
       draft = readLocalDraft();
       if (!$("#listing-id").value) $("#listing-id").value = draft?.id || crypto.randomUUID();
-      const saved = getSavedSession();
-      session = saved;
-      if (session) {
-        try {
-          const userResponse = await fetch(`${config.supabase.url}/auth/v1/user`, { headers: { apikey: config.supabase.publishableKey, Authorization: `Bearer ${session.access_token}` } });
-          if (!userResponse.ok && Number(session.expires_at) <= Date.now() / 1000 + 75) await ensureSession();
-          const active = await ensureSession();
-          if (active) {
-            const user = await fetch(`${config.supabase.url}/auth/v1/user`, { headers: { apikey: config.supabase.publishableKey, Authorization: `Bearer ${session.access_token}` } });
-            if (!user.ok) throw new Error("session expired");
-            session.user = await user.json();
-            saveSession(session);
-            await enterWorkspace();
-            return;
-          }
-        } catch { clearSession(); }
-      }
+      session = await window.LockdAccount.getSession();
+      if (session) { await enterWorkspace(); return; }
       showAuth();
       if (draft) await restoreDraft(draft);
     } catch (error) {
-      liveStatus.textContent = error.message || "Your listings could not be loaded. Please try again.";
-      liveStatus.dataset.kind = "error";
+      setStatus(liveStatus, error.message || "Your listings could not be loaded. Please try again.", "error");
       authPanel.hidden = true;
       workspace.hidden = true;
     }
