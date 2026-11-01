@@ -5,9 +5,12 @@ This is an implementation register, not a production-readiness claim. The latest
 ## Release boundary
 
 - Development branch: `codex/verification-messaging`.
-- Implementation commit `d49c644` is pushed to GitHub; its Marketplace checks run [41301067863](https://github.com/dirtydawkins/lockd2/actions/runs/41301067863) passed. No merge to `main` was performed.
-- The initial Vercel preview caught the Hobby plan's 12-function limit. Private original downloads now share the document API function, keeping the existing plan; the corrected preview must be verified before release.
-- The preceding image/trust release is live on `main` at `3ed04eb`. Its production evidence is in `RELEASE_STATUS_20261101.md`.
+- Implementation commits `d49c644` and `07b73e5` are pushed to the development branch and `main`. The source-only, gated release follows the owner's existing deployment authorization; it does not activate new collection, credentials or reviewed-policy flags.
+- Marketplace checks passed for both increments: [41301067863](https://github.com/dirtydawkins/lockd2/actions/runs/41301067863) and [41301337226](https://github.com/dirtydawkins/lockd2/actions/runs/41301337226).
+- The initial Vercel preview caught the Hobby plan's 12-function limit. Private original downloads now share the document API function, keeping the existing plan. Corrected preview [6K9nCaEXNPUSLKtULDMnrmY1oMMZ](https://vercel.com/orengo/lockd2/6K9nCaEXNPUSLKtULDMnrmY1oMMZ) and production [2r5U2ZTWW1Wcg2441wzUQrw4midE](https://vercel.com/orengo/lockd2/2r5U2ZTWW1Wcg2441wzUQrw4midE) were both verified **Ready** in the inbuilt browser for `07b73e5`.
+- The preview has no Supabase environment configuration and accurately returns `catalogue_not_configured`; it cannot establish backend acceptance. Production account restoration was verified using the existing signed-in account, with Messages and Address evidence hidden, no horizontal overflow and no captured console errors in that check.
+- Production `/api/listings` returned its actual empty catalogue (`items: []`, `hasMore: false`), independently of the unconfigured preview. No sample inventory was substituted. A screenshot of the real signed-in production account was saved locally as `tests/artifacts/lockd-release-account.jpg` and excluded from deployment.
+- The preceding image/trust release was `3ed04eb`. Its production evidence is in `RELEASE_STATUS_20261101.md`; the subsequent source release above preserves those existing services and data.
 - New migrations **0012 and 0013 have not been applied to production**. They are additive, preserve existing rentals/accounts, contain no sample customers, listings, conversations or verification evidence, and default to disabled capabilities.
 - No KRA, scanning, identity-provider or investigator account was created. No paid resource was provisioned. No provider credential was invented or committed.
 - Test fixtures and the duplicate legacy application are excluded from Vercel. Local fixture servers were stopped and their browser tabs closed at the user's request. No fixture was published to production.
@@ -54,7 +57,7 @@ The supported model is **one logical message identity per account**, with option
 | Retention/withdrawal | document deletion jobs and RPCs | Storage acknowledgement before purge; token fencing; withdrawal revokes matching address evidence | Document worker implemented; live scheduler/Storage deletion and approved retention/legal policy pending |
 | KRA | `documents/kra.py` | Format/consent validation; unavailable status never verifies PIN or address | No approved API contract or credentials. Live transport/mapping is not implemented; no guessed endpoint |
 | Eligibility | existing passport and rental gates | Address review affects only address evidence; identity, approvals, deposit and payment remain independent in regression tests | No opaque fraud score, financial-hardship inference or new automatic rental approval |
-| Production surface | `.vercelignore`, capability gates, `tests/production-surface.test.js` | No synthetic/QA copy or separate message-password controls in root customer pages; fixtures/legacy duplicates excluded | Implemented; inspect actual preview artifact after push |
+| Production surface | `.vercelignore`, capability gates, `tests/production-surface.test.js` | No synthetic/QA copy or separate message-password controls in root customer pages; fixtures/legacy duplicates excluded; actual Vercel packaging and live account gates checked | Source deployed; new database capabilities remain disabled/unapplied |
 
 ## Explicitly incomplete work
 
