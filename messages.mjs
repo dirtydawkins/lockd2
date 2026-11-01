@@ -23,13 +23,21 @@ function lock(message='Sign in to open your messages.'){
 }
 async function getDevices(conversationId=null){return await request('messages',{view:'devices',...(conversationId?{conversationId}:{})});}
 async function inbox(){
- conversations=await request('messages');const list=$('#conversations');list.replaceChildren();
- if(!conversations.length)list.append(node('p','Your conversations will appear here. Message an owner from a rental or booking.'));
+ conversations=await request('messages');renderInbox();
+}
+function renderInbox(){
+ const list=$('#conversations');list.replaceChildren();
+ const term=$('#conversation-search').value.trim().toLocaleLowerCase();
+ if(!conversations.length)list.append(node('p','Your conversations will appear here. Message a lister from a rental or booking.'));
  for(const item of conversations){
-  const link=action(item.title||'Rental conversation',()=>open(item.id).catch(error),'conversation-link');link.setAttribute('aria-current',String(active?.id===item.id));
+  if(term&&![item.participant_name,item.title].some(value=>String(value||'').toLocaleLowerCase().includes(term)))continue;
+  const link=action(item.participant_name||item.title||'Rental conversation',()=>open(item.id).catch(error),'conversation-link');link.setAttribute('aria-current',String(active?.id===item.id));
+  if(item.participant_name)link.append(node('span',item.title||'Rental conversation'));
   link.append(node('span',`${item.unread?`${item.unread} unread · `:''}${item.booking_id?'Reservation':'Rental enquiry'}${item.blocked?' · Blocked':''}`));list.append(link);
  }
+ if(conversations.length&&!list.children.length)list.append(node('p','No conversations match that search.'));
 }
+$('#conversation-search').addEventListener('input',renderInbox);
 async function startRealtime(){
  const config=await window.LockdAccount.getConfig();
  if(config.messagingRealtimeEnabled===false)return;
@@ -44,7 +52,7 @@ async function subscribe(){
  channel=realtime.channel('lockd-conversation-'+context)
  .on('postgres_changes',{event:'INSERT',schema:'public',table:'lockd_encrypted_messages',filter:'conversation_id=eq.'+context},()=>{if(active?.id===context)void sync().catch(error);})
  .on('postgres_changes',{event:'*',schema:'public',table:'lockd_message_receipts',filter:'recipient_id=eq.'+peer?.user_id},()=>{if(active?.id===context)void sync().catch(error);})
- .subscribe(state=>{if(active?.id!==context)return;status($('#sync-status'),state==='SUBSCRIBED'?'New messages will appear here.':'Reconnecting… You can still refresh your messages.');});
+ .subscribe(state=>{if(active?.id!==context)return;status($('#sync-status'),state==='SUBSCRIBED'?'New messages will appear here.':'Trying again… You can refresh your messages.');});
 }
 async function open(id){
  const item=conversations.find(c=>c.id===id);if(!item)return;
@@ -193,10 +201,10 @@ async function connectMessages(){
   const accountId=user?.id,currentConnection=++connectionEpoch;
   status(notice,'Opening your messages…');const result=await ensureMessageDevice();if(currentConnection!==connectionEpoch||user?.id!==accountId||(result.userId&&result.userId!==accountId))return;capabilities=result.capabilities;
   if(result.state==='signed_out'){lock();return;}
-  if(result.state==='disabled'){$('#message-workspace').hidden=true;status(notice,'Messaging is getting ready. You’ll be able to contact owners here once it opens.');return;}
+  if(result.state==='disabled'){$('#message-workspace').hidden=true;status(notice,'Messaging is unavailable right now. Please try again later.');return;}
   $('#message-workspace').hidden=false;await inbox();await myReports();
   if(result.state==='another_device'){
-   device=result.active;$('#message-device').hidden=false;$('#message-workspace').classList.add('is-locked','has-open-thread');status(notice,'Connect your existing message access to this browser.');return;
+   device=result.active;$('#message-device').hidden=false;$('#message-workspace').classList.add('is-locked','has-open-thread');status(notice,'Approve this browser from one you already use for messages.');return;
   }
   identity=result.identity;privateKey=result.privateKey;device=result.device;
   $('#own-fingerprint').textContent=fingerprint(identity.fingerprint);outbox=(await stored(user.id,'outbox'))||[];

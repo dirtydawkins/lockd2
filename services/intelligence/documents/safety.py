@@ -35,6 +35,30 @@ def digest(data):
     return hashlib.sha256(data).hexdigest()
 
 
+def utility_photo(data):
+    """Authoritative raster decode, not an authenticity or utility-provider assertion."""
+    import io
+    import warnings
+    from PIL import Image
+    mime = identify(data)
+    formats = {'image/jpeg': 'JPEG', 'image/png': 'PNG', 'image/webp': 'WEBP'}
+    if mime not in formats:
+        raise UnsafeDocument('utility_photo_required')
+    Image.MAX_IMAGE_PIXELS = MAX_PIXELS
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter('error', Image.DecompressionBombWarning)
+            with Image.open(io.BytesIO(data)) as image:
+                if image.format != formats[mime] or image.width * image.height > MAX_PIXELS or getattr(image, 'n_frames', 1) != 1:
+                    raise UnsafeDocument('invalid_photo')
+                if image.getexif().get(34853):
+                    raise UnsafeDocument('photo_location_metadata')
+                image.verify()
+    except (OSError, ValueError, Image.DecompressionBombWarning, Image.DecompressionBombError):
+        raise UnsafeDocument('invalid_photo') from None
+    return mime
+
+
 def scan(data):
     """Official ClamD INSTREAM protocol on a local Unix socket; missing scanner fails closed.
 

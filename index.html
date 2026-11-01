@@ -26,7 +26,8 @@
     <script src="./app.js" defer></script>
     <script src="./account-service.js" defer></script>
     <script src="./discovery.js" defer></script>
-  </head>
+    <link rel="stylesheet" href="./marketplace-refinement.css">
+  <script type="module" src="./unified-search.mjs"></script><script type="module" src="./messaging-onboarding.mjs"></script></head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
 
@@ -53,113 +54,114 @@
         <a href="#how-it-works">How it works</a>
         <a href="#about">About LOCKD</a>
         <a class="account-nav-link" href="account.html">Account</a>
-        <a class="owner-nav-link" href="owners.html">List your asset</a>
+        <a href="messages.html" data-lockd-messaging-entry hidden>Messages</a>
+        <a class="owner-nav-link" href="owners.html">Become a lister</a>
       </nav>
 
-      <a class="header-cta" href="#categories">Explore Rentals</a>
+      <a class="header-cta" href="#discovery-title">Explore Rentals</a>
     </header>
 
     <main id="main">
       <section class="hero section-shell" aria-labelledby="hero-title">
         <div class="hero-copy">
-          <p class="eyebrow"><span class="eyebrow-rule"></span> A more considered way to rent</p>
+          <p class="eyebrow"><span class="eyebrow-rule"></span> RENTALS IN KENYA</p>
           <h1 id="hero-title">Your world.<br><em>Your way.</em><br>LOCKD in.</h1>
-          <p class="hero-lede">A stay, a drive, something to play or a reason to explore. Start with one thing, then bring more together when it makes sense.</p>
+          <p class="hero-lede">Find stays, cars, gaming and equipment in one place. Search by item, category or location.</p>
           <div class="hero-actions">
-            <a class="button button-dark" href="#categories">Explore Rentals</a>
+            <a class="button button-dark" href="#discovery-title">Explore Rentals</a>
           </div>
           <p class="hero-signoff">Stay. Drive. Play. Explore.</p>
         </div>
         <figure class="hero-figure">
           <img src="./WhatsApp%20Image%202026-10-27%20at%2023.36.06.jpeg" alt="Pale luxury SUV beneath palm trees on a clear day" fetchpriority="high" width="736" height="981" srcset="./assets/responsive/c3c5b6fbec407316-320.webp 320w, ./assets/responsive/c3c5b6fbec407316-480.webp 480w, ./assets/responsive/c3c5b6fbec407316-736.webp 736w" sizes="(max-width: 760px) 100vw, 60vw" decoding="async">
-          <figcaption><span>Room for a different route</span><span class="figure-index">01 / 05</span></figcaption>
+          <figcaption><span>Cars &amp; mobility</span><span>Category photography</span></figcaption>
           <span class="hero-photo-label" aria-hidden="true">DRIVE</span>
         </figure>
-        <div class="hero-side-note" aria-hidden="true">A good plan<br>starts with a feeling.</div>
+        <div class="hero-side-note" aria-hidden="true">Explore rentals<br>across Kenya.</div>
       </section>
 
       <section class="intro-band section-shell" aria-label="LOCKD at a glance">
-        <p>Considered rentals,<br>made to work together.</p>
-        <p class="intro-band-copy">Choose an individual rental, or build a coordinated bundle around the kind of time you want to have.</p>
+        <p>One rental, or a bundle.</p>
+        <p class="intro-band-copy">Choose what you need, select your dates and check the lister’s terms.</p>
       </section>
 
       <section class="discovery section-shell" aria-labelledby="discovery-title">
         <div class="section-heading discovery-heading">
           <div>
-            <p class="eyebrow">Start where you are</p>
-            <h2 id="discovery-title">What are you<br><em>in the mood for?</em></h2>
+            <p class="eyebrow">SEARCH LOCKD</p>
+            <h2 id="discovery-title">Find a rental.</h2>
           </div>
-          <p class="section-intro">Search published rentals or start with a category. Add verified listings to a bundle as you explore.</p>
+          <p class="section-intro">Search by name, then narrow down by category and location.</p>
         </div>
         <form class="idea-search" id="idea-search-form" role="search">
-          <label class="visually-hidden" for="idea-search">Describe what you are looking for</label>
-          <span class="search-mark" aria-hidden="true">⌕</span>
+          <div class="search-field search-query"><label for="idea-search">What do you need?</label>
+
           <input id="idea-search" name="idea" type="search" list="idea-suggestions" placeholder="Try “PS5 Pro”, “room in Nairobi”…”" autocomplete="off">
-          <datalist id="idea-suggestions"></datalist>
-          <label class="visually-hidden" for="idea-category">Category</label>
+          <datalist id="idea-suggestions"></datalist></div>
+          <div class="search-field"><label for="idea-category">Category</label>
           <select id="idea-category" name="category" aria-label="All categories">
             <option value="">All categories</option><option value="stay">Accommodation</option><option value="drive">Cars &amp; Mobility</option><option value="experience">Experiences</option><option value="technology">Technology</option><option value="play">Gaming</option><option value="camera">Cameras</option><option value="phone">Phones</option><option value="laptop">Computers</option><option value="audio">Audio</option><option value="creative">Creative equipment</option>
-          </select>
-          <label class="visually-hidden" for="idea-location">Location</label>
-          <input id="idea-location" name="location" type="search" placeholder="City or area" autocomplete="off">
+          </select></div>
+          <div class="search-field"><label for="idea-location">Where?</label>
+          <input id="idea-location" name="location" type="search" placeholder="City or area" autocomplete="off"></div>
           <button class="button button-burgundy" type="submit">Search rentals</button>
         </form>
-        <p class="search-note" id="search-note">Searches published rental listings. Availability is checked for your dates on each listing.</p>
+        <p class="search-note" id="search-note">Check available dates on the rental page.</p>
       </section>
 
       <section class="categories section-shell" id="categories" aria-labelledby="categories-title">
         <div class="section-heading categories-heading">
           <div>
-            <p class="eyebrow">A few ways to begin</p>
-            <h2 id="categories-title">One good thing<br><em>leads to another.</em></h2>
+            <p class="eyebrow">BROWSE CATEGORIES</p>
+            <h2 id="categories-title">What would you like to rent?</h2>
           </div>
-          <p class="section-intro">Make one part of the plan easier. Or let the whole idea take shape here.</p>
+          <p class="section-intro">Stays, vehicles and equipment for your plans.</p>
         </div>
 
         <div class="category-grid">
           <a class="category-card category-stay" href="rooms.html" aria-label="Book a room">
             <img src="./WhatsApp%20Image%202026-10-27%20at%2023.34.59.jpeg" alt="Warm, compact apartment with a mezzanine bedroom and living area" width="736" height="1312" srcset="./assets/responsive/70271be7fc5240e4-320.webp 320w, ./assets/responsive/70271be7fc5240e4-480.webp 480w, ./assets/responsive/70271be7fc5240e4-736.webp 736w" sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 33vw" decoding="async" loading="lazy">
             <span class="card-shade"></span>
-            <span class="category-meta"><span>01</span><span>Stay</span></span>
-            <span class="category-title">Somewhere<br>to settle in.</span>
+            <span class="category-meta"><span>Stays</span></span>
+            <span class="category-title">Rooms &amp; homes</span>
             <span class="category-link">Book a Room</span>
           </a>
           <a class="category-card category-drive" href="rentals.html?category=drive" aria-label="Explore vehicles">
             <img src="./WhatsApp%20Image%202026-10-27%20at%2023.35.55.jpeg" alt="Silver luxury sedan photographed in a dark studio" width="736" height="980" srcset="./assets/responsive/b7a961e7b4c7df32-320.webp 320w, ./assets/responsive/b7a961e7b4c7df32-480.webp 480w, ./assets/responsive/b7a961e7b4c7df32-736.webp 736w" sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 33vw" decoding="async" loading="lazy">
             <span class="card-shade"></span>
-            <span class="category-meta"><span>02</span><span>Cars &amp; Mobility</span></span>
-            <span class="category-title">Take the<br>long way.</span>
+            <span class="category-meta"><span>Cars &amp; Mobility</span></span>
+            <span class="category-title">Cars &amp; SUVs</span>
             <span class="category-link">Explore vehicles</span>
           </a>
           <a class="category-card category-play" href="rentals.html?category=play" aria-label="Explore gaming rentals">
             <img src="./WhatsApp%20Image%202026-10-27%20at%2023.34.41.jpeg" alt="PlayStation console and controller beside a television" width="736" height="1104" srcset="./assets/responsive/ade5057c50f063c2-320.webp 320w, ./assets/responsive/ade5057c50f063c2-480.webp 480w, ./assets/responsive/ade5057c50f063c2-736.webp 736w" sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 33vw" decoding="async" loading="lazy">
             <span class="card-shade"></span>
-            <span class="category-meta"><span>03</span><span>Play</span></span>
-            <span class="category-title">Make space<br>for game night.</span>
+            <span class="category-meta"><span>Gaming</span></span>
+            <span class="category-title">Consoles &amp; games</span>
             <span class="category-link">Explore gaming</span>
           </a>
           <a class="category-card category-tech" href="tech.html" aria-label="Explore technology rentals">
             <img src="./WhatsApp%20Image%202026-10-27%20at%2023.35.00.jpeg" alt="Burgundy smartphone held in one hand" width="736" height="981" srcset="./assets/responsive/5374e546a37f3502-320.webp 320w, ./assets/responsive/5374e546a37f3502-480.webp 480w, ./assets/responsive/5374e546a37f3502-736.webp 736w" sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 33vw" decoding="async" loading="lazy">
             <span class="card-shade"></span>
-            <span class="category-meta"><span>04</span><span>Technology</span></span>
-            <span class="category-title">The right tool<br>for the moment.</span>
+            <span class="category-meta"><span>Tech &amp; gadgets</span></span>
+            <span class="category-title">Phones &amp; equipment</span>
             <span class="category-link">Explore Tech &amp; Gadgets</span>
           </a>
           <a class="category-card category-explore" href="rentals.html?category=experience" aria-label="Explore experiences">
             <img src="./WhatsApp%20Image%202026-10-27%20at%2023.34.52.jpeg" alt="Clear turquoise water beneath steep, green coastal cliffs" width="736" height="1108" srcset="./assets/responsive/b4550d4fd454f3b6-320.webp 320w, ./assets/responsive/b4550d4fd454f3b6-480.webp 480w, ./assets/responsive/b4550d4fd454f3b6-736.webp 736w" sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 33vw" decoding="async" loading="lazy">
             <span class="card-shade"></span>
-            <span class="category-meta"><span>05</span><span>Explore</span></span>
-            <span class="category-title">Go a little<br>further out.</span>
+            <span class="category-meta"><span>Experiences</span></span>
+            <span class="category-title">Trips &amp; activities</span>
             <span class="category-link">Explore experiences</span>
           </a>
         </div>
-        <p class="image-disclaimer">The photography shows the kind of things that inspire LOCKD. It does not confirm that a pictured item, property or experience is available to rent.</p>
+        <p class="image-disclaimer">Category photos are for browsing. Available rentals appear in search.</p>
       </section>
 
       <section class="discovery-feed section-shell" id="discover-feed" aria-labelledby="discovery-feed-title">
         <div class="discovery-feed-heading">
-          <div><p class="eyebrow"><span class="eyebrow-rule"></span> Made for where you are</p><h2 id="discovery-feed-title">Find what fits<br><em>around you.</em></h2></div>
-          <p>Explore genuine published rentals nearby, or start with a place you have in mind. Location is optional and stays private.</p>
+          <div><p class="eyebrow"><span class="eyebrow-rule"></span> BY LOCATION</p><h2 id="discovery-feed-title">Rentals near you.</h2></div>
+          <p>Choose a town or area to see matching rentals. Sharing your location is optional.</p>
         </div>
         <div class="discovery-location-bar">
           <div><span class="discovery-overline">YOUR AREA</span><p id="discovery-location-label">No location selected</p></div>
@@ -191,7 +193,7 @@
           <button class="discovery-more" id="load-more-available" type="button" hidden>Load more available rentals</button>
         </section>
 
-        <section class="discovery-row" id="recent-row" aria-labelledby="recent-row-title" hidden>
+        <section class="discovery-row" id="recent-row" hidden aria-labelledby="recent-row-title" hidden>
           <div class="discovery-row-heading"><div><p class="eyebrow">Freshly published</p><h3 id="recent-row-title">Recently added</h3></div><p>Published LOCKD listings, ordered by publication time when the live database supports it.</p></div>
           <div class="discovery-card-grid" id="recent-listings"></div>
           <button class="discovery-more" id="load-more-recent" type="button" hidden>Load more listings</button>
@@ -204,10 +206,10 @@
         <div class="section-heading destination-preview-heading">
           <div>
             <p class="eyebrow">A few places to begin</p>
-            <h2 id="destination-preview-title">Places worth<br><em>the journey.</em></h2>
+            <h2 id="destination-preview-title">Explore destinations.</h2>
           </div>
           <div class="destination-preview-intro">
-            <p class="section-intro">From the Maasai Mara to Santorini, find a place that gives the trip its shape. Published experiences appear when a local operator lists them.</p>
+            <p class="section-intro">From the Maasai Mara to Santorini, find a place that gives the trip its shape. Published experiences appear when a lister lists them.</p>
             <a class="text-button" href="destinations.html">Explore destinations</a>
           </div>
         </div>
@@ -229,13 +231,13 @@
             <span><small>EGYPT · LANDMARKS</small><strong>Giza</strong></span>
           </a>
         </div>
-        <p class="image-disclaimer">Destination photography is here for inspiration. Stays and experiences are shown only when an approved listing is published on LOCKD.</p>
+        <p class="image-disclaimer">Browse destinations, then search for local stays and experiences.</p>
       </section>
 
       <section class="tech-preview section-shell" aria-labelledby="tech-preview-title">
         <div class="tech-preview-copy">
-          <p class="eyebrow"><span class="eyebrow-rule"></span> The Tech Edit</p>
-          <h2 id="tech-preview-title">Good tech.<br><em>For right now.</em></h2>
+          <p class="eyebrow"><span class="eyebrow-rule"></span> Tech &amp; gadgets</p>
+          <h2 id="tech-preview-title">Tech &amp; gadgets.</h2>
           <p>Explore gaming, phones, computers, cameras and useful gear through the published LOCKD catalogue.</p>
           <a class="text-button" href="tech.html">Explore Tech &amp; Gadgets <span aria-hidden="true">↗</span></a>
           <nav class="tech-preview-links" aria-label="Technology categories">
@@ -254,12 +256,12 @@
       <section class="package-section" aria-labelledby="package-title">
         <div class="package-image">
           <img src="./WhatsApp%20Image%202026-10-27%20at%2023.36.03.jpeg" alt="Elephants gather beneath a broad tree at sunset" width="736" height="1288" srcset="./assets/responsive/e5b71f5f531b7885-320.webp 320w, ./assets/responsive/e5b71f5f531b7885-480.webp 480w, ./assets/responsive/e5b71f5f531b7885-736.webp 736w" sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 33vw" decoding="async" loading="lazy">
-          <span class="package-image-caption">Make the time count.</span>
+          <span class="package-image-caption">Build a bundle</span>
         </div>
         <div class="package-copy">
-          <p class="eyebrow eyebrow-light"><span class="eyebrow-rule"></span> More than one way to get there</p>
-          <h2 id="package-title">One plan.<br><em>Your kind of</em><br>everything.</h2>
-          <p>Pair a stay with a drive. Add the console for the quiet night in. Put the pieces together around what you actually want to do.</p>
+          <p class="eyebrow eyebrow-light"><span class="eyebrow-rule"></span> RENT TOGETHER</p>
+          <h2 id="package-title">Build your bundle.</h2>
+          <p>Choose multiple rentals, add dates and quantities, then review each item’s availability and price.</p>
           <a class="button button-paper" href="rentals.html?bundle=1">Build Your Bundle</a>
           <div class="package-steps" aria-label="How to build a bundle">
             <span><b>01</b> Choose your items</span>
@@ -272,7 +274,7 @@
       <section class="how section-shell" id="how-it-works" aria-labelledby="how-title">
         <div class="how-heading">
           <p class="eyebrow">Simple by design</p>
-          <h2 id="how-title">A little clarity<br><em>goes a long way.</em></h2>
+          <h2 id="how-title">How renting works.</h2>
         </div>
         <div class="how-list">
           <article class="how-step">
@@ -296,8 +298,8 @@
         </div>
         <div class="closing-copy">
           <p class="eyebrow">Your world. Your way.</p>
-          <h2 id="closing-title">Make a little<br>room for <em>more.</em></h2>
-          <p>LOCKD brings considered rentals into one place, so the parts of a good plan can come together more easily.</p>
+          <h2 id="closing-title">Rent through LOCKD.</h2>
+          <p>Browse stays, cars and equipment. Compare the details and check dates before you request a booking.</p>
         </div>
       </section>
 
@@ -306,10 +308,10 @@
           <img src="./WhatsApp%20Image%202026-10-27%20at%2023.36.04.jpeg" alt="Contemporary home with a landscaped front garden" width="735" height="686" srcset="./assets/responsive/41562e48c23c65da-320.webp 320w, ./assets/responsive/41562e48c23c65da-480.webp 480w, ./assets/responsive/41562e48c23c65da-735.webp 735w" sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 33vw" decoding="async" loading="lazy">
         </div>
         <div class="owner-spotlight-copy">
-          <p class="eyebrow">For owners</p>
+          <p class="eyebrow">FOR LISTERS</p>
           <h2 id="owner-spotlight-title">Have something worth <em>renting?</em></h2>
-          <p>List your property, car or equipment with LOCKD.</p>
-          <a class="text-button" href="owners.html">List your asset</a>
+          <p>Offer a stay, car, equipment or experience on LOCKD.</p>
+          <a class="text-button" href="owners.html">Become a lister</a>
         </div>
       </section>
     </main>
@@ -344,7 +346,7 @@
       <p class="footer-line">Your next move, locked in.</p>
       <div class="footer-bottom">
         <span>© <span id="year">2026</span> LOCKD</span>
-        <span>Stay. Drive. Play. Explore.</span>
+        <a href="privacy.html">Privacy</a>
         <a href="#top">Back to top</a>
       </div>
     </footer>

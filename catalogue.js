@@ -1,4 +1,5 @@
 (() => {
+  if(new URLSearchParams(location.search).get("kind")==="lister")return;
   const categories = {
     stay: "Stay",
     drive: "Cars & Mobility",
@@ -414,7 +415,7 @@
           totals.set(estimate.currency, (totals.get(estimate.currency) || 0) + estimate.amount);
         });
         const summary = [...totals].map(([currency, amount]) => `${priceText(amount, currency, "")} estimated`).join(" + ");
-        const unpricedLabel = unpriced ? `${unpriced} ${unpriced === 1 ? "rental needs" : "rentals need"} owner pricing/term confirmation` : "";
+        const unpricedLabel = unpriced ? `${unpriced} ${unpriced === 1 ? "rental needs" : "rentals need"} lister pricing/term confirmation` : "";
         price.textContent = [summary, unpricedLabel].filter(Boolean).join(" · ") || "Rates need confirmation";
       }
     }
@@ -453,9 +454,9 @@
     const delivery = document.querySelector("#bundle-delivery")?.value;
     const deliveryStatus = document.querySelector("#bundle-delivery-note");
     if (delivery && bundle.items.some((item) => item[delivery === "delivery" ? "deliveryAvailable" : "collectionAvailable"] === false)) {
-      deliveryStatus.textContent = `One or more rentals do not offer ${delivery}. Choose another option or confirm with the owner.`;
+      deliveryStatus.textContent = `One or more rentals do not offer ${delivery}. Choose another option or confirm with the lister.`;
     } else if (delivery && bundle.items.some((item) => item[delivery === "delivery" ? "deliveryAvailable" : "collectionAvailable"] !== true)) {
-      deliveryStatus.textContent = `Confirm ${delivery} with the owner for any rental without a published service setting.`;
+      deliveryStatus.textContent = `Confirm ${delivery} with the lister for any rental without a published service setting.`;
     } else {
       deliveryStatus.textContent = "";
     }
@@ -477,6 +478,7 @@
     if (!append) renderLoadingSkeletons();
     const nextPage = append ? page + 1 : 0;
     const apiUrl = new URL("/api/listings", window.location.origin);
+    if(new URLSearchParams(location.search).get('kind')==='rental')apiUrl.searchParams.set('kind','rental');
     if (category) apiUrl.searchParams.set("category", category);
     if (query) apiUrl.searchParams.set("q", query);
     if (locationQuery) apiUrl.searchParams.set("location", locationQuery);
@@ -489,7 +491,7 @@
       if (run !== requestRun) return;
       if (!response.ok) {
         if (response.status === 503 || data.error === "catalogue_not_configured") {
-          throw new Error("The live catalogue is not connected yet. Add the Supabase project URL and anon key to the Vercel environment, then apply the catalogue migration.");
+          throw new Error("Rentals are unavailable right now. Please try again later.");
         }
         throw new Error(data.message || "The rental catalogue could not be loaded. Please try again shortly.");
       }
@@ -516,7 +518,7 @@
       } else {
         status.dataset.kind = "loaded";
         status.textContent = filterState.startDate && filterState.endDate
-          ? "Published listings with calendar capacity for the selected dates. Check availability again before contacting the owner."
+          ? "Published listings with calendar capacity for the selected dates. Check availability again before contacting the lister."
           : "Only published, approved listings appear here. Choose dates to check calendar capacity.";
       }
       loadMoreButton.hidden = !hasMore;

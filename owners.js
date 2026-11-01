@@ -107,15 +107,17 @@
   function showWorkspace() {
     authPanel.hidden = true;
     workspace.hidden = false;
-    liveStatus.textContent = "Owner workspace connected. Drafts and published listings are saved to your LOCKD account.";
+    liveStatus.textContent = "Your listings are saved to your LOCKD account.";
     liveStatus.dataset.kind = "success";
-    $("#owner-account-label").textContent = session?.user?.email ? `Signed in as ${session.user.email}` : "Signed in to your LOCKD owner account";
+    $("#owner-account-label").textContent = session?.user?.email ? `Signed in as ${session.user.email}` : "Signed in to your LOCKD lister account";
   }
+
+  document.querySelector("#owner-google")?.addEventListener("click",async event=>{event.currentTarget.disabled=true;try{window.LockdAccount.setPendingAuth({returnTo:"/owners.html"});await window.LockdAccount.startOAuth("google");}catch(error){setStatus(authStatus,error.message||"Google sign-in is unavailable. Use email or try again later.","error");event.currentTarget.disabled=false;}});
 
   function switchAuthMode(mode) {
     authMode = mode;
     const create = mode === "signup";
-    $("#owner-auth-title").textContent = create ? "Create your owner account." : "Sign in to continue.";
+    $("#owner-auth-title").textContent = create ? "Create your lister account." : "Sign in to continue.";
     $("#owner-auth-intro").textContent = create
       ? "Use an email address you can verify. Your listing draft stays on this device while you confirm it."
       : "Sign in to create, publish and manage your own listings.";
@@ -562,7 +564,7 @@
     if (!response.ok) {
       if (response.status === 401) { clearSession(); showAuth("Your session expired. Sign in again to continue."); }
       if (data.error === "owner_verification_required") showAuth(data.message || "Verify your email before managing listings.");
-      throw new Error(data.message || "The owner service could not save that change.");
+      throw new Error(data.message || "Your lister workspace could not save that change.");
     }
     return data;
   }
@@ -578,6 +580,7 @@
     host.replaceChildren(Object.assign(document.createElement("p"), { textContent: "Loading your listings…" }));
     const data = await ownerApi("GET");
     const items = Array.isArray(data.items) ? data.items : [];
+    window.dispatchEvent(new CustomEvent("lockd:listings-change", {detail:{count:items.length}}));
     host.replaceChildren();
     if (!items.length) {
       const empty = document.createElement("p"); empty.textContent = "No listings yet. Start with a draft or publish your first complete listing."; host.append(empty); return;
@@ -682,9 +685,10 @@
     submit.textContent = authMode === "signup" ? "Creating account…" : "Signing in…";
     setStatus(authStatus, authMode === "signup" ? "Creating your account…" : "Checking your details…");
     try {
+      window.LockdAccount.setPendingAuth({returnTo:"/owners.html"});
       const result = authMode === "signup"
-        ? await authRequest("signup", { email, password, data: { full_name: $("#owner-name").value.trim() } })
-        : await authRequest("token?grant_type=password", { email, password });
+        ? await window.LockdAccount.signUp({email,password,name:$("#owner-name").value.trim()})
+        : await window.LockdAccount.signIn({email,password});
       if (result.access_token && result.refresh_token) {
         saveSession(result);
         setStatus(authStatus, "Signed in. Loading your workspace…", "success");
@@ -725,7 +729,7 @@
       const data = await response.json();
       if (!response.ok || !data.supabase?.url || !data.supabase?.publishableKey) throw new Error("Supabase authentication and storage are not configured for this deployment.");
       config = data;
-      liveStatus.textContent = "Secure owner service connected.";
+      liveStatus.textContent = "Your listing workspace is ready.";
       liveStatus.dataset.kind = "success";
       draft = readLocalDraft();
       if (!$("#listing-id").value) $("#listing-id").value = draft?.id || crypto.randomUUID();
@@ -749,7 +753,7 @@
       showAuth();
       if (draft) await restoreDraft(draft);
     } catch (error) {
-      liveStatus.textContent = error.message || "The owner service could not be connected.";
+      liveStatus.textContent = error.message || "Your listings could not be loaded. Please try again.";
       liveStatus.dataset.kind = "error";
       authPanel.hidden = true;
       workspace.hidden = true;

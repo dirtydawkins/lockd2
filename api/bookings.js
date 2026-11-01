@@ -52,7 +52,7 @@ module.exports = async (req, res) => {
     return send(200, { requestsEnabled: enabled, paymentsEnabled: false });
   const config = getConfig();
   if (!config)
-    return send(503, { message: "Reservations are not connected yet." });
+    return send(503, { message: "Reservations are unavailable right now." });
   let body = req.body || {};
   if (typeof body === "string") {
     if (Buffer.byteLength(body) > 8192)

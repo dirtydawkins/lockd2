@@ -8,13 +8,13 @@
     <link rel="canonical" href="https://lockd2.vercel.app/tech.html">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="LOCKD">
-    <meta property="og:title" content="The Tech Edit — LOCKD">
-    <meta property="og:description" content="The technology you want. Only for as long as you need it.">
+    <meta property="og:title" content="Tech & gadgets — LOCKD">
+    <meta property="og:description" content="Browse consoles, phones, computers and equipment. Compare models, included accessories and rental rates.">
     <meta property="og:url" content="https://lockd2.vercel.app/tech.html">
     <meta property="og:image" content="https://lockd2.vercel.app/WhatsApp%20Image%202026-10-27%20at%2023.34.41.jpeg">
     <meta property="og:image:alt" content="PlayStation console and controller beside a television, an editorial category illustration">
     <meta name="twitter:card" content="summary_large_image">
-    <title>The Tech Edit — LOCKD</title>
+    <title>Tech & gadgets — LOCKD</title>
     <link rel="icon" href="./favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="./styles.css">
     <link rel="stylesheet" href="./catalogue.css">
@@ -27,7 +27,8 @@
     <script src="./account-service.js" defer></script>
     <script src="./photo-fallbacks.js" defer></script>
     <script src="./tech.js" defer></script>
-  </head>
+    <link rel="stylesheet" href="./marketplace-refinement.css">
+  <script type="module" src="./messaging-onboarding.mjs"></script></head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header" id="top">
@@ -44,7 +45,8 @@
         <a href="index.html#how-it-works">How it works</a>
         <a href="index.html#about">About LOCKD</a>
         <a class="account-nav-link" href="account.html">Account</a>
-        <a class="owner-nav-link" href="owners.html">List your asset</a>
+        <a href="messages.html" data-lockd-messaging-entry hidden>Messages</a>
+        <a class="owner-nav-link" href="owners.html">Become a lister</a>
       </nav>
       <a class="header-cta" href="rentals.html">Explore Rentals</a>
     </header>
@@ -56,16 +58,16 @@
 
       <section class="tech-hero" aria-labelledby="tech-title">
         <div class="tech-hero-copy">
-          <p class="eyebrow"><span class="eyebrow-rule"></span> LOCKD / THE TECH EDIT</p>
-          <h1 id="tech-title">The right tool<br><em>for the moment.</em></h1>
-          <p class="tech-hero-lede">The technology you want. Only for as long as you need it.</p>
+          <p class="eyebrow"><span class="eyebrow-rule"></span> TECH &amp; GADGETS</p>
+          <h1 id="tech-title">Tech &amp; gadgets.</h1>
+          <p class="tech-hero-lede">Browse consoles, phones, computers and equipment. Compare models, included accessories and rental rates.</p>
           <a class="text-button" href="#published-rentals">Explore published rentals <span aria-hidden="true">↘</span></a>
         </div>
         <figure class="tech-hero-image">
           <img src="./WhatsApp%20Image%202026-10-27%20at%2023.34.41.jpeg" alt="PlayStation console and controller beside a television, shown as an editorial category illustration" fetchpriority="high" width="736" height="1104" srcset="./assets/responsive/ade5057c50f063c2-320.webp 320w, ./assets/responsive/ade5057c50f063c2-480.webp 480w, ./assets/responsive/ade5057c50f063c2-736.webp 736w" sizes="(max-width: 760px) 100vw, 60vw" decoding="async">
           <figcaption>Editorial image · not a LOCKD listing</figcaption>
         </figure>
-        <div class="tech-hero-side" aria-hidden="true"><span>TECHNOLOGY</span><span>01 / 06</span></div>
+        <div class="tech-hero-side" aria-hidden="true"><span>TECHNOLOGY</span></div>
       </section>
 
       <nav class="tech-categories" aria-label="Browse technology categories" id="tech-categories">
@@ -123,12 +125,12 @@
         <p class="catalogue-status tech-status" id="tech-status" role="status" aria-live="polite">Loading published technology rentals…</p>
         <div class="tech-listing-grid" id="tech-listing-grid"></div>
         <button class="button button-paper tech-load-more" id="tech-load-more" type="button" hidden>Load more</button>
-        <p class="tech-date-note">Date filters use the LOCKD availability calendar when connected. A date check is not a reservation.</p>
+        <p class="tech-date-note">Check the calendar for your dates. Availability checks do not reserve an item.</p>
       </section>
 
       <section class="tech-personal" aria-label="Your saved items and history">
         <div class="tech-personal-panel" id="saved-panel">
-          <div class="tech-personal-heading"><div><p class="eyebrow">Your LOCKD account</p><h2>Keep what<br><em>catches your eye.</em></h2></div><a class="text-button" href="account.html#saved">Saved rentals</a></div>
+          <div class="tech-personal-heading"><div><p class="eyebrow">Your LOCKD account</p><h2>Saved rentals.</h2></div><a class="text-button" href="account.html#saved">Saved rentals</a></div>
           <p class="local-data-note">Save a published rental to your account and find it again across devices.</p>
         </div>
         <div class="tech-personal-panel" id="recent-panel" hidden>
@@ -139,13 +141,13 @@
 
       <section class="tech-photo-guide" aria-labelledby="tech-photo-guide-title">
         <div class="tech-section-heading">
-          <div><p class="eyebrow">Browse by category</p><h2 id="tech-photo-guide-title">Find the right<br><em>kit for now.</em></h2></div>
-          <p class="tech-section-copy">Explore gaming, phones and computer equipment. Published listings show the model, specifications, accessories, location and owner-confirmed rate.</p>
+          <div><p class="eyebrow">Browse by category</p><h2 id="tech-photo-guide-title">Browse equipment.</h2></div>
+          <p class="tech-section-copy">Explore gaming, phones and computer equipment. Published listings show the model, specifications, accessories, location and lister-confirmed rate.</p>
         </div>
         <div class="tech-photo-grid">
           <a class="tech-photo-card" href="tech.html?group=gaming">
             <img src="./assets/photos/playstation5-setup.jpeg" alt="PlayStation 5-family console and white DualSense controller beside a television" width="736" height="1104" srcset="./assets/responsive/ade5057c50f063c2-320.webp 320w, ./assets/responsive/ade5057c50f063c2-480.webp 480w, ./assets/responsive/ade5057c50f063c2-736.webp 736w" sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 33vw" decoding="async" loading="lazy">
-            <div><p class="eyebrow">PLAY · GAMING</p><h3>Gaming</h3><p>Consoles, controllers and complete setups listed by verified owners.</p><span class="text-button">Browse gaming</span></div>
+            <div><p class="eyebrow">PLAY · GAMING</p><h3>Gaming</h3><p>Consoles, controllers and complete setups listed on LOCKD.</p><span class="text-button">Browse gaming</span></div>
           </a>
           <a class="tech-photo-card" href="tech.html?group=phones">
             <img src="./assets/photos/iphone-pro-burgundy.jpeg" alt="Burgundy iPhone-style phone with three rear camera lenses" width="736" height="981" srcset="./assets/responsive/5374e546a37f3502-320.webp 320w, ./assets/responsive/5374e546a37f3502-480.webp 480w, ./assets/responsive/5374e546a37f3502-736.webp 736w" sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 33vw" decoding="async" loading="lazy">
@@ -153,7 +155,7 @@
           </a>
           <a class="tech-photo-card" href="tech.html?group=computers">
             <img src="./assets/photos/gaming-pc-purple-rgb.jpeg" alt="Custom gaming PC tower with purple RGB fans and a glass side panel" width="640" height="853" srcset="./assets/responsive/a93792108670a9bc-320.webp 320w, ./assets/responsive/a93792108670a9bc-480.webp 480w, ./assets/responsive/a93792108670a9bc-640.webp 640w" sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 33vw" decoding="async" loading="lazy">
-            <div><p class="eyebrow">COMPUTERS · WORK &amp; PLAY</p><h3>Computers</h3><p>Browse laptops, desktops and the specifications provided with each approved listing.</p><span class="text-button">Browse computers</span></div>
+            <div><p class="eyebrow">COMPUTERS · WORK &amp; PLAY</p><h3>Computers</h3><p>Browse laptops, desktops and the specifications provided with each listing.</p><span class="text-button">Browse computers</span></div>
           </a>
           <a class="tech-photo-card" href="tech.html?group=creator">
             <img src="./assets/photos/gaming-pc-white-liquid-cooled.jpeg" alt="White custom PC tower with RGB lighting and visible liquid-cooling components" width="736" height="920" srcset="./assets/responsive/ead412966a183f67-320.webp 320w, ./assets/responsive/ead412966a183f67-480.webp 480w, ./assets/responsive/ead412966a183f67-736.webp 736w" sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 33vw" decoding="async" loading="lazy">

@@ -32,9 +32,10 @@ async function request(config, token, path, options = {}) {
 }
 
 module.exports = async function handler(req, res) {
+  if(['host-profile','lister-profile'].includes(req.query?.view))return require('../lib/host-profile-api')(req,res);
   res.setHeader("Allow", "GET, POST, PATCH");
   const config = supabaseConfig();
-  if (!config) return send(res, 503, { error: "catalogue_not_configured", message: "Owner listings are not connected yet." });
+  if (!config) return send(res, 503, { error: "catalogue_not_configured", message: "Listing management is unavailable right now." });
   if (!["GET", "POST", "PATCH"].includes(req.method)) return send(res, 405, { error: "method_not_allowed", message: "Use GET, POST or PATCH for owner listings." });
 
   const token = userToken(req);
@@ -55,7 +56,7 @@ module.exports = async function handler(req, res) {
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: "{}",
       });
-      if (!response.ok) return send(res, response.status === 404 ? 503 : 502, { error: "owner_listings_unavailable", message: "Your listings could not be loaded. The owner database setup may still be pending." });
+      if (!response.ok) return send(res, response.status === 404 ? 503 : 502, { error: "owner_listings_unavailable", message: "Your listings could not be loaded. Please try again." });
       const rows = await response.json();
       if (!Array.isArray(rows)) return send(res, 502, { error: "owner_listings_unavailable", message: "Your listings could not be loaded." });
       const items = await Promise.all(rows.map(async (item) => {

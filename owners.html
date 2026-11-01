@@ -8,11 +8,11 @@
     <link rel="canonical" href="https://lockd2.vercel.app/owners.html">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="LOCKD">
-    <meta property="og:title" content="List Your Asset — LOCKD">
+    <meta property="og:title" content="Become a lister — LOCKD">
     <meta property="og:description" content="Create and manage rental listings with LOCKD.">
     <meta property="og:url" content="https://lockd2.vercel.app/owners.html">
     <meta name="twitter:card" content="summary">
-    <title>List Your Asset — LOCKD</title>
+    <title>Become a lister — LOCKD</title>
     <link rel="icon" href="./favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="./styles.css">
     <link rel="stylesheet" href="./owners-market.css">
@@ -23,7 +23,7 @@
     <script src="./account-service.js" defer></script>
     <script src="./owners.js" defer></script>
   <script src="./messaging-onboarding.mjs" type="module"></script>
-  </head>
+  <script type="module" src="./lister-profile.mjs"></script><link rel="stylesheet" href="./marketplace-refinement.css"><script type="module" src="./reviews.mjs"></script></head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header" id="top">
@@ -38,17 +38,17 @@
         <a href="rentals.html?category=drive">Cars &amp; Mobility</a>
         <a href="tech.html">Tech &amp; Gadgets</a>
         <a class="account-nav-link" href="account.html">Account</a>
-        <a href="owners.html#owner-portal">List your asset</a>
-      </nav>
+        <a href="owners.html#owner-portal">Become a lister</a>
+      <a href="reviews.html" data-lockd-reviews-entry hidden>Reviews</a></nav>
       <a class="header-cta" href="index.html#categories">Explore Rentals</a>
     </header>
 
     <main class="owner-page" id="main">
       <section class="owner-hero section-shell" aria-labelledby="owner-title">
         <div class="owner-hero-copy">
-          <p class="eyebrow"><span class="eyebrow-rule"></span> For owners</p>
+          <p class="eyebrow"><span class="eyebrow-rule"></span> FOR LISTERS</p>
           <h1 id="owner-title">Have something worth <em>renting?</em></h1>
-          <p class="owner-hero-lede">List your property, car or equipment with LOCKD. Set the details, rate and dates that work for you.</p>
+          <p class="owner-hero-lede">Offer a stay, car, equipment or experience on LOCKD. Set the details, rate and dates that work for you.</p>
           <a class="button button-dark" href="#owner-portal">Start a listing</a>
         </div>
         <figure class="owner-hero-image">
@@ -58,14 +58,14 @@
 
       <section class="owner-portal section-shell" id="owner-portal" aria-labelledby="owner-portal-title">
         <div class="owner-portal-heading">
-          <div><p class="eyebrow">Owner workspace</p><h2 id="owner-portal-title">Your listings,<br><em>in your hands.</em></h2></div>
+          <div><p class="eyebrow">Lister workspace</p><h2 id="owner-portal-title">Your listings,<br><em>in your hands.</em></h2></div>
           <p>Use one account to save a draft, publish a complete listing, and pause or resume it later. Published listings are available in the public catalogue as soon as LOCKD confirms the save.</p>
         </div>
-        <p class="owner-live-status" id="owner-live-status" role="status" aria-live="polite">Connecting to the secure owner service…</p>
+        <p class="owner-live-status" id="owner-live-status" role="status" aria-live="polite">Opening your lister workspace…</p>
 
         <section class="owner-auth" id="owner-auth" aria-labelledby="owner-auth-title" hidden>
           <div class="owner-auth-copy"><p class="eyebrow">Secure access</p><h3 id="owner-auth-title">Sign in to continue.</h3><p id="owner-auth-intro">Create an account to save and manage your own listings.</p></div>
-          <form id="owner-auth-form" class="owner-form" autocomplete="on">
+          <button type="button" class="button button-light owner-google" id="owner-google">Continue with Google</button><p class="owner-privacy-note">Or use your email. One LOCKD account lets you rent and list.</p><form id="owner-auth-form" class="owner-form" autocomplete="on">
             <label class="owner-field" id="owner-name-row" hidden><span>Your name</span><input id="owner-name" name="name" type="text" maxlength="100" autocomplete="name"></label>
             <label class="owner-field"><span>Email address</span><input id="owner-email" name="email" type="email" maxlength="254" autocomplete="email" required></label>
             <label class="owner-field"><span>Password</span><input id="owner-password" name="password" type="password" minlength="8" maxlength="128" autocomplete="current-password" required></label>
@@ -76,9 +76,9 @@
         </section>
 
         <section class="owner-workspace" id="owner-workspace" hidden aria-label="Owner listings workspace">
-          <div class="owner-account-bar"><p id="owner-account-label"></p><button class="owner-text-link" id="owner-signout" type="button">Sign out</button></div>
+          <div class="owner-account-bar"><a class="owner-text-link" href="account.html">Switch to renting</a><p id="owner-account-label"></p><button class="owner-text-link" id="owner-signout" type="button">Sign out</button></div>
           <div class="owner-dashboard">
-            <p data-lockd-messaging-entry hidden><a href="messages.html">Messages from customers</a></p>
+            <p data-lockd-messaging-entry hidden><a href="messages.html">Messages</a></p>
             <div><p class="eyebrow">Your catalogue</p><h3>Listings</h3></div>
             <div class="owner-listings" id="owner-listings" aria-live="polite"><p>Loading your listings…</p></div>
           </div>
@@ -135,13 +135,13 @@
       </section>
 
       <section class="owner-process section-shell" id="owner-process" aria-labelledby="owner-process-title">
-        <div class="owner-process-heading"><div><p class="eyebrow">A clear path for every listing</p><h2 id="owner-process-title">From your asset<br>to a good booking.</h2></div><p>Owners remain in control of their listing details and availability. Reservations and payments are not confirmed merely because an item appears in the catalogue.</p></div>
+        <div class="owner-process-heading"><div><p class="eyebrow">A clear path for every listing</p><h2 id="owner-process-title">From your asset<br>to a good booking.</h2></div><p>Listers remain in control of their listing details and availability. Reservations and payments are not confirmed merely because an item appears in the catalogue.</p></div>
         <div class="owner-process-list">
           <article class="owner-process-step"><span>01</span><h3>Create an account</h3><p>Sign in securely and keep your listing drafts and published assets in your account.</p><span class="owner-step-status">Available</span></article>
           <article class="owner-process-step"><span>02</span><h3>Add the real details</h3><p>Describe the actual asset, location, rate, terms, availability and photographs.</p><span class="owner-step-status">Available</span></article>
           <article class="owner-process-step"><span>03</span><h3>Publish or save a draft</h3><p>Complete listings appear in their matching public category after the database confirms publication.</p><span class="owner-step-status">Available</span></article>
           <article class="owner-process-step"><span>04</span><h3>Manage visibility</h3><p>Pause or resume a listing from your workspace. A paused item is removed from public search.</p><span class="owner-step-status">Available</span></article>
-          <article class="owner-process-step"><span>05</span><h3>Bookings and payouts</h3><p>LOCKD checkout, booking acceptance, refunds and payouts are not connected yet. No payment will be reported as successful until a verified payment service is configured.</p><span class="owner-step-status">Not connected</span></article>
+          <article class="owner-process-step" hidden><span>05</span><h3>Bookings and payouts</h3><p>LOCKD payment collection, refunds and payouts are currently unavailable. No payment will be reported as successful until a verified payment service is configured.</p><span class="owner-step-status">Unavailable</span></article>
         </div>
       </section>
     </main>

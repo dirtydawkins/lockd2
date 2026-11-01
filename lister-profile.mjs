@@ -1,0 +1,13 @@
+import {privateRequest,node,label,status} from './private-client.mjs';
+const workspace=document.querySelector('#owner-workspace');
+if(workspace){let accountId=null;const panel=node('section',undefined,{class:'lister-profile-settings',hidden:''});workspace.append(panel);
+ window.addEventListener('lockd:auth-change',()=>{accountId=null;panel.hidden=true;panel.replaceChildren();});
+ async function load(){if(workspace.hidden||accountId)return;const session=await window.LockdAccount.getSession();if(!session)return;accountId=session.user.id;const requestedAccount=accountId;
+  try{const [capabilities,profile]=await Promise.all([fetch('/api/listings?view=listers',{cache:'no-store'}).then(r=>r.ok?r.json():null),privateRequest('owner-listings',{view:'lister-profile'},undefined,accountId)]);if(!capabilities?.configured||accountId!==requestedAccount)return;const listings=await privateRequest('owner-listings',{},undefined,requestedAccount);if(accountId!==requestedAccount||!listings.items?.length)return;
+   const form=node('form',undefined,{class:'review-form'}),name=node('input',undefined,{required:'',maxlength:'80',value:profile?.name||''}),slug=node('input',undefined,{required:'',pattern:'[a-z0-9][a-z0-9-]{2,49}',maxlength:'50',value:profile?.slug||''}),bio=node('textarea',undefined,{rows:'3',maxlength:'600'}),visible=node('input',undefined,{type:'checkbox'}),message=node('p','',{role:'status'});bio.value=profile?.bio||'';visible.checked=profile?.public===true;
+   form.append(label('Public lister name',name),label('Profile link · lowercase letters, numbers and hyphens',slug),label('Short introduction',bio),label('Show my lister name, introduction and public listings in search',visible),node('p','Your private renter account and contact details stay private.'),node('button','Save lister profile',{type:'submit',class:'button button-burgundy'}),message);
+   form.addEventListener('submit',async event=>{event.preventDefault();const button=form.querySelector('button');button.disabled=true;try{await privateRequest('owner-listings',{view:'lister-profile'},{action:'save',name:name.value.trim(),slug:slug.value.trim(),bio:bio.value.trim(),public:visible.checked},accountId);status(message,'Lister profile saved.');}catch(error){status(message,error.message,true);}finally{button.disabled=false;}});panel.replaceChildren(node('h3','Your public lister profile'),form);panel.hidden=false;
+  }catch{/* No account setup controls for an unavailable capability. */}}
+ window.addEventListener('lockd:listings-change',()=>{accountId=null;panel.hidden=true;void load();});
+ new MutationObserver(()=>void load()).observe(workspace,{attributes:true,attributeFilter:['hidden']});void load();
+}

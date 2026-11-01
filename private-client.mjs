@@ -7,12 +7,20 @@ export async function privateRequest(service,query={},body,expectedUserId=null) 
   const result=await response.json().catch(()=>({}));
   if((await window.LockdAccount.getSession())?.user?.id!==callerId)throw Error('Your account changed. Reload this page to continue.');
   if(!response.ok) throw Error(result.message || 'This action could not be completed. Please retry.');
-  return result.item;
+  return Object.hasOwn(result,'item') ? result.item : result;
 }
-export async function storageRequest(bucket,path,{method='GET',data,mime='application/octet-stream'}={}) {
+export async function storageRequest(bucket,path,{method='GET',data,mime='application/octet-stream',onProgress}={}) {
   if(!/^[a-z0-9-]+$/.test(bucket) || !/^[a-f0-9/-]+$/.test(path)) throw Error('Invalid storage reference.');
   const [session,config]=await Promise.all([window.LockdAccount.getSession(),window.LockdAccount.getConfig()]);
   if(!session) throw Error('Sign in to continue.');
+  if(onProgress&&method==='POST'){
+    return await new Promise((resolve,reject)=>{const transfer=new XMLHttpRequest();transfer.open('POST',`${config.supabase.url}/storage/v1/object/${bucket}/${path}`);transfer.timeout=30000;
+      transfer.setRequestHeader('apikey',config.supabase.publishableKey);transfer.setRequestHeader('Authorization',`Bearer ${session.access_token}`);transfer.setRequestHeader('Content-Type',mime);transfer.setRequestHeader('x-upsert','false');
+      transfer.upload.onprogress=event=>{if(event.lengthComputable)onProgress(Math.round(event.loaded/event.total*100));};
+      transfer.onload=async()=>{if(transfer.status>=200&&transfer.status<300&&(await window.LockdAccount.getSession())?.user?.id===session.user.id)resolve(transfer);else reject(Error('The file could not be uploaded. Please try again.'));};
+      transfer.onerror=transfer.ontimeout=()=>reject(Error('The upload stopped. Please try again.'));transfer.send(data);
+    });
+  }
   const response=await fetch(`${config.supabase.url}/storage/v1/object/${bucket}/${path}`,{method,headers:{apikey:config.supabase.publishableKey,Authorization:`Bearer ${session.access_token}`,...(data?{'Content-Type':mime,'x-upsert':'false'}:{})},body:data,cache:'no-store',signal:AbortSignal.timeout(30000)});
   if(!response.ok) throw Error('The private file could not be transferred. Please retry.');
   return response;

@@ -20,7 +20,7 @@
     <script src="./account.js" defer></script>
     <script src="./bookings.js" defer></script>
   <script src="./messaging-onboarding.mjs" type="module"></script>
-  </head>
+  <script type="module" src="./reviews.mjs"></script></head>
   <body class="account-page">
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header" id="top">
@@ -36,8 +36,8 @@
         <a href="destinations.html">Destinations</a>
         <a href="tech.html">Tech &amp; Gadgets</a>
         <a href="account.html" aria-current="page">Account</a>
-        <a class="owner-nav-link" href="owners.html">List your asset</a>
-      </nav>
+        <a class="owner-nav-link" href="owners.html">Become a lister</a>
+      <a href="reviews.html" data-lockd-reviews-entry hidden>Reviews</a></nav>
       <a class="header-cta" href="rentals.html">Explore Rentals</a>
     </header>
 
@@ -104,7 +104,7 @@
       </section>
 
       <section class="account-dashboard" id="account-dashboard" hidden aria-labelledby="account-dashboard-title">
-        <div class="account-dashboard-heading"><div><p class="eyebrow">YOUR LOCKD</p><h2 id="account-dashboard-title">Welcome back.</h2><p id="account-email-label"></p></div><button class="account-link" id="account-signout" type="button">Sign out</button></div>
+        <div class="account-dashboard-heading"><div><p class="eyebrow">YOUR LOCKD</p><h2 id="account-dashboard-title">Welcome back.</h2><p id="account-email-label"></p></div><a class="account-link" href="owners.html">Lister dashboard</a><button class="account-link" id="account-signout" type="button">Sign out</button></div>
         <nav class="account-section-nav" aria-label="Account sections">
           <button type="button" data-account-section="overview" aria-current="page">Overview</button>
           <button type="button" data-account-section="saved">Saved rentals</button>
@@ -121,13 +121,13 @@
             <button class="account-overview-card" type="button" data-go-section="saved"><span class="account-card-index">02</span><h4>Saved rentals</h4><p id="saved-overview-count">Your saved listings appear here.</p><span class="account-card-link">View saved</span></button>
             <button class="account-overview-card" type="button" data-go-section="bookings" data-load-bookings="customer"><span class="account-card-index">03</span><h4>Bookings &amp; trips</h4><p>View your recorded reservation requests and their current status.</p><span class="account-card-link">View reservations</span></button>
           </div>
-          <p class="account-security-note">Your customer and owner tools use the same LOCKD sign-in. Owner listings remain managed in the <a href="owners.html">owner workspace</a>.</p>
+          <p class="account-security-note">Your customer and lister tools use the same LOCKD sign-in. Lister listings remain managed in the <a href="owners.html">lister workspace</a>.</p>
           <p class="account-security-note"><a href="trust.html">Verification, rental updates &amp; support</a></p>
           <p class="account-security-note" data-lockd-messaging-entry hidden><a href="messages.html">Messages</a></p>
           <p class="account-security-note" data-lockd-address-entry hidden><a href="verification.html">Address evidence</a></p>
         </section>
 
-        <section class="account-section" data-account-panel="bookings" hidden aria-labelledby="bookings-title"><p class="eyebrow">YOUR RENTALS</p><h3 id="bookings-title">Reservations.</h3><p>Requests awaiting payment are not confirmed rentals. Payment collection is not connected yet.</p><div class="account-section-nav"><button type="button" data-load-bookings="customer">My rentals</button><button type="button" data-load-bookings="owner">Incoming owner requests</button></div><div id="booking-history" aria-live="polite">Select My rentals or Incoming owner requests.</div></section>
+        <section class="account-section" data-account-panel="bookings" hidden aria-labelledby="bookings-title"><p class="eyebrow">YOUR RENTALS</p><h3 id="bookings-title">Reservations.</h3><p>Requests awaiting payment are not confirmed rentals. You won’t be charged when you send a booking request.</p><div class="account-section-nav"><button type="button" data-load-bookings="customer">My rentals</button><button type="button" data-load-bookings="owner">Bookings for my listings</button></div><div id="booking-history" aria-live="polite">Select My rentals or Bookings for my listings.</div></section>
         <section class="account-section" data-account-panel="saved" hidden aria-labelledby="saved-title">
           <div class="account-section-heading"><div><p class="eyebrow">KEPT CLOSE</p><h3 id="saved-title">Saved rentals.</h3></div><a class="text-button" href="rentals.html">Explore rentals</a></div>
           <p class="account-section-intro">Listings currently published by LOCKD appear first. Saved items that are no longer listed remain here as a private reference.</p>
@@ -140,7 +140,7 @@
           <form class="account-form account-profile-form" id="profile-form">
             <label class="account-field"><span>Display name</span><input id="profile-name" name="display_name" type="text" maxlength="100" autocomplete="name"></label>
             <label class="account-field"><span>Email address</span><input id="profile-email" type="email" readonly aria-describedby="email-readonly-note"></label>
-            <p class="account-field-note" id="email-readonly-note">Email changes are managed by Supabase account verification settings.</p>
+            <p class="account-field-note" id="email-readonly-note">Contact support if you need to change your email address.</p>
             <button class="button button-dark" type="submit">Save changes</button>
           </form>
         </section>

@@ -8,27 +8,28 @@
 </head>
 <body class="account-page messages-page">
   <a href="#main" class="skip-link">Skip to messages</a>
-  <header class="site-header"><a class="brand" href="index.html"><span class="brand-word">lockd<span class="brand-period">.</span></span></a><nav aria-label="Account navigation"><a href="account.html">Your account</a> · <a href="owners.html#owner-workspace">Owner workspace</a> · <a href="rentals.html">Explore rentals</a></nav></header>
+  <header class="site-header"><a class="brand" href="index.html"><span class="brand-word">lockd<span class="brand-period">.</span></span></a><nav aria-label="Account navigation"><a href="account.html">Your account</a> · <a href="owners.html#owner-workspace">Lister workspace</a> · <a href="rentals.html">Explore rentals</a></nav></header>
   <main id="main" class="messages-main">
     <div class="messages-heading"><div><p class="eyebrow">A LITTLE CLOSER TO YOUR NEXT PLAN</p><h1>Messages.</h1><p class="messages-lede">Make plans. Share details. Stay in touch.</p></div><a class="text-button" href="account.html">Your account</a></div>
     <p id="messages-status" role="status" aria-live="polite">Opening your messages…</p>
     <div id="message-workspace" class="message-workspace is-locked" hidden>
       <aside class="message-inbox" aria-label="Inbox">
         <div class="message-inbox-heading"><h2>Inbox</h2><button class="text-button" id="refresh-inbox" type="button">Refresh</button></div>
+        <label class="account-field">Search conversations<input type="search" id="conversation-search" placeholder="Lister, renter or rental name" autocomplete="off"></label>
         <div id="conversations"></div>
         <details class="message-device-details"><summary>Devices &amp; privacy</summary>
           <p>Message protection works automatically with your LOCKD account.</p>
           <details><summary>Your security code</summary><p id="own-fingerprint"></p></details>
-          <details><summary>Connect another browser</summary><p>Create a connection request on the new browser, then open that file here. Compare its code with the new browser before continuing.</p><input type="file" id="device-link-request" accept=".json" aria-label="Connection request from your new browser"><p id="device-link-code"></p><label class="account-consent"><input type="checkbox" id="device-link-confirm"><span>I checked that the code matches my new browser.</span></label><button type="button" class="text-button" id="create-device-transfer">Create connection file</button><p class="account-field-note">Open that connection file on the new browser. Keep both files private; connection requests expire after 10 minutes.</p></details>
-          <details><summary>Remove message access</summary><p>This removes the account’s current message key. You may lose access to old messages unless another connected browser still has the original access.</p><label class="account-consent"><input type="checkbox" id="remove-access-confirm"><span>I understand that old messages may become unreadable.</span></label><button class="text-button" type="button" id="revoke-device">Remove message access</button></details>
-          <details><summary>How privacy works</summary><p>Messages are protected on your device. LOCKD can review only the messages you choose to include in a report. Contact codes are remembered automatically; unexpected changes are flagged before sending.</p><p>Keep your browser and LOCKD account secure. Connected browsers currently share one message identity and cannot be removed separately. Someone with your unlocked message access could read past messages. Losing every connected browser can make old messages unreadable.</p></details>
+          <details><summary>Use messages on another browser</summary><p>Create a connection request on the new browser, then open that file here. Compare its code with the new browser before continuing.</p><input type="file" id="device-link-request" accept=".json" aria-label="Connection request from your new browser"><p id="device-link-code"></p><label class="account-consent"><input type="checkbox" id="device-link-confirm"><span>I checked that the code matches my new browser.</span></label><button type="button" class="text-button" id="create-device-transfer">Create connection file</button><p class="account-field-note">Open that connection file on the new browser. Keep both files private; connection requests expire after 10 minutes.</p></details>
+          <details><summary>Remove message access</summary><p>This removes the account’s current message key. You may lose access to old messages unless another approved browser still has the original access.</p><label class="account-consent"><input type="checkbox" id="remove-access-confirm"><span>I understand that old messages may become unreadable.</span></label><button class="text-button" type="button" id="revoke-device">Remove message access</button></details>
+          <details><summary>How privacy works</summary><p>Messages are protected on your device. LOCKD can review only the messages you choose to include in a report. Contact codes are remembered automatically; unexpected changes are flagged before sending.</p><p>Keep your browser and LOCKD account secure. Approved browsers currently share one message identity and cannot be removed separately. Someone with your unlocked message access could read past messages. Losing every approved browser can make old messages unreadable.</p></details>
         </details>
         <details><summary>Reports you’ve sent</summary><div id="my-message-reports"></div></details>
       </aside>
       <section class="message-thread" aria-labelledby="thread-title">
         <button type="button" id="back-to-inbox" class="text-button message-back">All messages</button>
         <section id="message-device" class="message-device" hidden>
-          <p class="eyebrow">YOUR CONVERSATIONS, WITH YOU</p><h2>Connect this browser.</h2>
+          <p class="eyebrow">YOUR CONVERSATIONS, WITH YOU</p><h2>Use messages on this browser.</h2>
           <p>Your private message history is linked to another browser. Connect it here to pick up where you left off.</p>
           <button type="button" class="button button-dark" id="create-link-request">Create connection request</button><p id="connection-request-code"></p>
           <label class="account-field">Open the connection file from your other browser<input type="file" id="accept-device-transfer" accept=".lockd,.asc,.txt" /></label>
@@ -36,7 +37,7 @@
           <details><summary>No longer have the other browser?</summary><p>Your account can start a new message identity, but old messages may become unreadable. Use “Remove message access” under Devices &amp; privacy after reviewing that choice.</p></details>
         </section>
         <div class="message-thread-content">
-          <header class="message-thread-header"><div><h2 id="thread-title">Your conversations, together.</h2><div class="message-context-links" id="message-context"></div></div>
+          <header class="message-thread-header"><div><h2 id="thread-title">Messages</h2><div class="message-context-links" id="message-context"></div></div>
             <details id="contact-check" class="conversation-options" hidden><summary>Conversation options</summary>
               <details id="security-details"><summary>Compare security codes</summary><p>Check this code with your contact by phone or another trusted way. Matching codes help make sure you’re speaking to the right person.</p><p id="peer-fingerprint"></p><label class="account-consent"><input type="checkbox" id="fingerprint-compared"><span>I checked the full code with my contact and it matches.</span></label><button class="text-button" type="button" id="verify-contact">Codes match</button></details>
               <button class="text-button" type="button" id="block-contact">Block contact</button>

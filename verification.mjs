@@ -1,9 +1,10 @@
+import {uploadForm} from './document-upload.mjs';
 import {privateRequest,storageRequest,node,action,label,status} from './private-client.mjs';
 const output=document.querySelector('#verification-status'),content=document.querySelector('#verification-content');
 let capabilities=null,cases=[],creatingKey=null;
 let accountId=null;
 function request(service,query={},body){if(!accountId)throw Error('Open your account to continue.');return privateRequest(service,query,body,accountId);}
-const methodNotes={utility:'Electricity, water or another utility bill. A different account-holder name can be explained.',kra_certificate:'A certificate can support a review. Live KRA PIN checks are not connected; do not enter your full PIN here.',tenancy:'Use your tenancy agreement, or explain an informal rental arrangement.',student:'A hostel allocation, accommodation letter or institutional confirmation can support your review.',landlord:'Explain who can confirm your residence. LOCKD will not contact them without an agreed, consent-based process.',family:'A bill in a family member’s name can support your review with an explanation of the connection.',other:'Explain your arrangement. A reviewer can consider alternative evidence under the rental’s rules.'};
+const methodNotes={utility:'Electricity, water or another utility bill. A different account-holder name can be explained.',kra_certificate:'A certificate can support a review. Do not enter your full PIN here. Your certificate can be reviewed as supporting evidence.',tenancy:'Use your tenancy agreement, or explain an informal rental arrangement.',student:'A hostel allocation, accommodation letter or institutional confirmation can support your review.',landlord:'Explain who can confirm your residence. LOCKD will not contact them without an agreed, consent-based process.',family:'A bill in a family member’s name can support your review with an explanation of the connection.',other:'Explain your arrangement. A reviewer can consider alternative evidence under the rental’s rules.'};
 const pretty=value=>String(value||'').replaceAll('_',' ');
 const methodNames={utility:'Utility bill',kra_certificate:'KRA PIN certificate',tenancy:'Tenancy agreement',student:'Student accommodation',landlord:'Landlord or institution confirmation',family:'Family household',other:'Other supporting evidence'};
 function report(error){status(output,error.message||'Please try again.',true);}
@@ -22,20 +23,7 @@ function render(){
   const docs=item.documents||[];
   for(const doc of docs)card.append(node('p',`Document: ${pretty(doc.state)}. Issuer not independently verified.`));
   if(['draft','more_evidence'].includes(item.state) && capabilities.uploadsEnabled){
-   const form=node('form',undefined,{class:'account-form'}),input=node('input',undefined,{type:'file',accept:'.pdf,.jpg,.jpeg,.png,.webp',required:''});
-   const message=node('p','',{role:'status'}),submit=node('button','Upload privately',{type:'submit',class:'button button-light'});
-   form.append(label('Supporting document · PDF or image, up to 2 MB',input),submit,message);
-   form.addEventListener('submit',async event=>{event.preventDefault();submit.disabled=true;try{
-    const file=input.files[0];if(!file || file.size>2097152 || file.size<16)throw Error('Choose a PDF or image up to 2 MB.');
-    const magic=new Uint8Array(await file.slice(0,16).arrayBuffer());
-    const mime=magic[0]===37&&magic[1]===80&&magic[2]===68&&magic[3]===70?'application/pdf':magic[0]===255&&magic[1]===216&&magic[2]===255?'image/jpeg':magic[0]===137&&magic[1]===80&&magic[2]===78&&magic[3]===71?'image/png':String.fromCharCode(...magic.slice(0,4))==='RIFF'&&String.fromCharCode(...magic.slice(8,12))==='WEBP'?'image/webp':null;
-    if(!mime)throw Error('This file format is not supported.');
-    const reservation=await request('documents',{}, {action:'reserve',caseId:item.id,mime,bytes:file.size});
-    status(message,'Transferring to private quarantine…');
-    await storageRequest(reservation.bucket,reservation.path,{method:'POST',data:file,mime});
-    await request('documents',{}, {action:'queue',documentId:reservation.id});
-    status(output,'Document received in private quarantine. Screening is pending; this is not verification.');await refresh();
-   }catch(error){status(message,error.message,true);}finally{submit.disabled=false;}});card.append(form);
+   card.append(uploadForm(item,request,refresh,output));
   }
   if(['draft','needs_confirmation','more_evidence'].includes(item.state)){
    const form=node('form',undefined,{class:'account-form'}),message=node('p','',{role:'status'});
@@ -50,7 +38,7 @@ function render(){
    const submit=node('button','Submit for review',{type:'submit',class:'button button-dark'});form.append(submit,message);
    form.addEventListener('submit',async event=>{event.preventDefault();submit.disabled=true;try{
     const fields=Object.fromEntries(controls.filter(input=>input.value.trim()).map(input=>[input.name,input.value.trim()]));
-    await request('documents',{}, {action:'submit',caseId:item.id,version:item.version,fields});status(output,'Submitted for a private review. No booking or verification has been confirmed.');await refresh();
+    await request('documents',{}, {action:'submit',caseId:item.id,version:item.version,fields});status(output,'Submitted for review. You can follow its progress here.');await refresh();
    }catch(error){status(message,error.message,true);}finally{submit.disabled=false;}});card.append(form);
   }
   if(!['withdrawn','expired'].includes(item.state)){

@@ -16,15 +16,13 @@
     <script src="trust.js" defer></script>
     <script src="communications-admin.mjs" type="module"></script>
   <script src="./messaging-onboarding.mjs" type="module"></script>
-  </head>
+  <script type="module" src="./reviews.mjs"></script><script type="module" src="./review-admin.mjs"></script><link rel="stylesheet" href="./marketplace-refinement.css"></head>
   <body class="account-page">
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header">
       <a class="brand" href="index.html"
         ><span class="brand-word"
-          >lockd<span class="brand-period">.</span></span
-        ></a
-      >
+          >lockd<span class="brand-period">.</span></span></a>
       <nav aria-label="Account navigation">
         <a href="account.html">Your account</a> ·
         <a href="rentals.html">Explore rentals</a>
@@ -82,7 +80,7 @@
           <p id="handover-reference"></p>
           <div id="condition-history"></div>
           <p>
-            The owner records the item’s condition. Review it together before
+            The lister records the item’s condition. Review it together before
             acknowledging. A revised summary requires a new customer
             acknowledgement.
           </p>
@@ -91,8 +89,7 @@
               >Stage<select name="phase">
                 <option value="out">Pickup / handover</option>
                 <option value="return">Return</option>
-              </select></label
-            >
+              </select></label>
             <div id="handover-current"></div>
             <label class="account-field"
               >Condition summary<textarea
@@ -106,9 +103,7 @@
             <label class="account-consent"
               ><input name="agree" type="checkbox" required /><span
                 >I reviewed this summary and agree that it records the item’s
-                condition at this stage.</span
-              ></label
-            >
+                condition at this stage.</span></label>
             <button class="button button-dark" type="submit">
               Acknowledge condition
             </button>
@@ -128,8 +123,7 @@
                 minlength="10"
                 maxlength="2000"
                 required
-              ></textarea></label
-            ><button class="button button-light" type="submit">
+              ></textarea></label><button class="button button-light" type="submit">
               Open dispute
             </button>
             <p role="status"></p>
@@ -149,15 +143,13 @@
             </p>
             <form id="appeal-form" class="account-form">
               <label class="account-field"
-                >Case reference<input name="disputeId" required /></label
-              ><label class="account-field"
+                >Case reference<input name="disputeId" required /></label><label class="account-field"
                 >Appeal reason<textarea
                   name="reason"
                   minlength="10"
                   maxlength="2000"
                   required
-                ></textarea></label
-              ><button class="button button-light" type="submit">
+                ></textarea></label><button class="button button-light" type="submit">
                 Request review
               </button>
               <p role="status"></p>
@@ -199,12 +191,10 @@
                   <option value="audio">Audio</option>
                   <option value="creative">Creative equipment</option>
                   <option value="other">Other</option>
-                </select></label
-              >
+                </select></label>
               <label
                 ><input type="checkbox" name="enabled" checked /> Enable this
-                policy version</label
-              >
+                policy version</label>
               <label class="account-field"
                 >Replacement-value threshold (KES, optional)<input
                   name="replacement_value_threshold"
@@ -227,32 +217,26 @@
               </p>
               <label
                 ><input type="checkbox" name="identity_required" /> Identity
-                verification</label
-              ><label
+                verification</label><label
                 ><input type="checkbox" name="address_required" /> Address
-                verification</label
-              >
+                verification</label>
               <label
                 ><input
                   type="checkbox"
                   name="owner_approval_required"
                   checked
                 />
-                Owner approval</label
-              ><label
+                Lister approval</label><label
                 ><input
                   type="checkbox"
                   name="platform_approval_required"
                   checked
                 />
-                LOCKD approval</label
-              ><label
+                LOCKD approval</label><label
                 ><input type="checkbox" name="manual_review_required" checked />
-                Human review</label
-              ><label
+                Human review</label><label
                 ><input type="checkbox" name="handover_required" checked />
-                Handover safeguards</label
-              >
+                Handover safeguards</label>
               <label class="account-field"
                 >Minimum deposit (KES)<input
                   name="minimum_deposit"
@@ -264,7 +248,7 @@
               /></label>
               <p class="account-field-note">
                 Listings below this deposit cannot accept new requests. This
-                does not change an owner’s price or charge a customer
+                does not change an lister’s price or charge a customer
                 automatically.
               </p>
               <label class="account-field"
@@ -302,9 +286,7 @@
               <label class="account-consent"
                 ><input type="checkbox" required /><span
                   >I reviewed these rules and their effects on new and pending
-                  reservations.</span
-                ></label
-              ><button class="button button-dark" type="submit">
+                  reservations.</span></label><button class="button button-dark" type="submit">
                 Save policy version
               </button>
               <p role="status"></p>
@@ -314,15 +296,13 @@
             <summary>Record a reviewed replacement value</summary>
             <form id="value-form" class="account-form">
               <label class="account-field"
-                >Listing reference<input name="listingId" required /></label
-              ><label class="account-field"
+                >Listing reference<input name="listingId" required /></label><label class="account-field"
                 >Replacement value (KES)<input
                   name="value"
                   type="number"
                   min="0"
                   step="0.01"
-                  required /></label
-              ><button class="button button-dark" type="submit">
+                  required /></label><button class="button button-dark" type="submit">
                 Record value
               </button>
               <p role="status"></p>
@@ -332,44 +312,36 @@
             <summary>Record a human verification decision</summary>
             <form id="verification-form" class="account-form">
               <label class="account-field"
-                >Customer reference<input name="userId" required /></label
-              ><label class="account-field"
+                >Customer reference<input name="userId" required /></label><label class="account-field"
                 >Check<select name="kind">
                   <option value="identity">Identity</option>
                   <option value="address">Address</option>
-                </select></label
-              ><label class="account-field"
+                </select></label><label class="account-field"
                 >Outcome<select name="outcome">
                   <option value="review_required">Needs further review</option>
                   <option value="verified">Verified</option>
                   <option value="revoked">Revoke</option>
-                </select></label
-              ><label class="account-field"
+                </select></label><label class="account-field"
                 >Private evidence-system reference<input
                   name="reference"
                   maxlength="200"
-                  required /></label
-              ><label class="account-field"
+                  required /></label><label class="account-field"
                 >Validity (days)<input
                   name="validDays"
                   type="number"
                   min="1"
                   max="365"
                   value="30"
-                  required /></label
-              ><label class="account-field"
+                  required /></label><label class="account-field"
                 >Environment<select name="environment">
                   <option value="sandbox">Sandbox — test evidence only</option>
                   <option value="production">
                     Production — reviewed genuine evidence
                   </option>
-                </select></label
-              ><label class="account-consent"
+                </select></label><label class="account-consent"
                 ><input type="checkbox" required /><span
                   >I am authorized to review this evidence and have verified its
-                  source. This is not self-verification.</span
-                ></label
-              ><button class="button button-dark" type="submit">
+                  source. This is not self-verification.</span></label><button class="button button-dark" type="submit">
                 Record decision
               </button>
               <p role="status"></p>
@@ -379,13 +351,11 @@
             <summary>Resolve a dispute</summary>
             <form id="resolve-form" class="account-form">
               <label class="account-field"
-                >Dispute reference<input name="disputeId" required /></label
-              ><label class="account-field"
+                >Dispute reference<input name="disputeId" required /></label><label class="account-field"
                 >Decision<select name="resolution">
                   <option value="resolved">Resolved</option>
                   <option value="dismissed">Dismissed</option>
-                </select></label
-              ><label class="account-field"
+                </select></label><label class="account-field"
                 >Reason<textarea
                   name="reason"
                   minlength="10"
@@ -407,8 +377,7 @@
             <summary>Finalize a returned item after a dispute</summary>
             <form id="finalize-form" class="account-form">
               <label class="account-field"
-                >Reservation reference<input name="bookingId" required /></label
-              ><label class="account-field"
+                >Reservation reference<input name="bookingId" required /></label><label class="account-field"
                 >Reviewed operational reason<textarea
                   name="reason"
                   minlength="10"

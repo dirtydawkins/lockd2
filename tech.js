@@ -322,7 +322,7 @@
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
         if (response.status === 503 || data.error === "catalogue_not_configured") {
-          throw new Error("The live LOCKD catalogue is not connected yet. Please check back later.");
+          throw new Error("Rentals are unavailable right now. Please try again later.");
         }
         throw new Error(data.message || "LOCKD rentals could not be loaded. Please try again shortly.");
       }
@@ -339,7 +339,7 @@
         status.dataset.kind = "empty";
         status.textContent = Object.keys(filters).some((key) => !["sort", "quantity"].includes(key))
           ? "No published LOCKD technology rentals match these filters yet. Clear a filter or try another category."
-          : "No published LOCKD technology rentals are available to show yet. Check back after owners publish approved listings.";
+          : "No published LOCKD technology rentals are available to show yet. Check back after listers publish approved listings.";
       } else {
         status.dataset.kind = "loaded";
         status.textContent = "Published, approved LOCKD listings only. Check each listing’s terms and availability.";
@@ -443,8 +443,8 @@
       Configuration: attrs.configuration || attrs.specifications || "Not stated",
       Included: Array.isArray(attrs.included_accessories) ? attrs.included_accessories.join(", ") : attrs.included_accessories || "Not stated",
       Location: listing.location_label || "Not stated",
-      Collection: listing.collection_available === true ? "Yes" : listing.collection_available === false ? "No" : "Confirm with owner",
-      Delivery: listing.delivery_available === true ? "Yes" : listing.delivery_available === false ? "No" : "Confirm with owner",
+      Collection: listing.collection_available === true ? "Yes" : listing.collection_available === false ? "No" : "Confirm with lister",
+      Delivery: listing.delivery_available === true ? "Yes" : listing.delivery_available === false ? "No" : "Confirm with lister",
     };
     return String(values[key] ?? "Not stated");
   }

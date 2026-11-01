@@ -2,7 +2,8 @@
   "name": "lockd2-repo",
   "version": "1.0.0",
   "scripts": {
-    "test": "node --test"
+    "test": "node scripts/check-marketplace.cjs",
+    "check": "node scripts/check-marketplace.cjs"
   },
   "repository": {
     "type": "git",

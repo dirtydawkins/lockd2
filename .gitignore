@@ -8,3 +8,6 @@ __pycache__/
 tests/native-qa/
 tests/artifacts/
 tests/release-sql/
+
+/scripts/preview-*.cjs
+/scripts/release-review.cjs

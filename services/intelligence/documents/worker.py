@@ -10,10 +10,12 @@ if os.name == "posix":
     resource.setrlimit(resource.RLIMIT_FSIZE, (2 * 1024 * 1024,) * 2)
 
 from .analyze import analyze_scanned
-from .safety import MAX_BYTES, UnsafeDocument
+from .safety import MAX_BYTES, UnsafeDocument, utility_photo
 
 try:
     raw = sys.stdin.buffer.read(MAX_BYTES + 1)
+    if '--utility-photo' in sys.argv:
+        utility_photo(raw)
     output = analyze_scanned(raw)
     encoded = json.dumps(output)
     if len(encoded.encode()) > 250000:

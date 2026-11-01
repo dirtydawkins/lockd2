@@ -474,7 +474,7 @@
     setStatus("Opening Google sign-in…");
     try { await account.startOAuth(button.dataset.provider); }
     catch (error) {
-      setStatus(error.message || "Google sign-in could not be started. Check its Supabase provider settings.", "error");
+      setStatus(error.message || "Google sign-in could not be started. Use email or try again later.", "error");
       setBusy(false, button);
     }
   }));

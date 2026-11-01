@@ -28,7 +28,8 @@
     <script src="./rental.js" defer></script>
     <script src="./bookings.js" defer></script>
   <script src="./messaging-onboarding.mjs" type="module"></script>
-  </head>
+    <link rel="stylesheet" href="./marketplace-refinement.css">
+  <script type="module" src="./reviews.mjs"></script><script type="module" src="./rental-gallery.mjs"></script></head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header" id="top">
@@ -45,7 +46,8 @@
         <a href="index.html#how-it-works">How it works</a>
         <a href="index.html#about">About LOCKD</a>
         <a class="account-nav-link" href="account.html">Account</a>
-        <a class="owner-nav-link" href="owners.html">List your asset</a>
+        <a href="messages.html" data-lockd-messaging-entry hidden>Messages</a>
+        <a class="owner-nav-link" href="owners.html">Become a lister</a>
       </nav>
       <a class="header-cta" href="rentals.html?bundle=1">Build Your Bundle</a>
     </header>
@@ -71,7 +73,7 @@
           <p class="rental-price" id="rental-price"></p>
           <div class="rental-description" id="rental-description"></div>
           <dl class="rental-facts" id="rental-facts"></dl>
-          <p><a id="rental-messages" href="messages.html" data-lockd-messaging-entry hidden>Message owner</a></p>
+          <p><a id="rental-messages" href="messages.html" data-lockd-messaging-entry hidden>Message lister</a></p>
 
           <section class="availability-box" aria-labelledby="availability-title">
             <p class="eyebrow">Plan your dates</p>
@@ -87,13 +89,13 @@
             <p class="availability-note">A date check does not hold or reserve the rental. Final confirmation depends on the listing’s stated booking process.</p>
           <p class="availability-note approval-note" id="approval-note" hidden></p>
           </section>
-          <section id="reservation-request" hidden><h3>Book this rental</h3><p>Review the current price, then send a reservation request. Payment is not connected, and a request is not a confirmed booking.</p><button type="button" class="button button-dark">Review booking request</button><p role="status" aria-live="polite"></p></section>
+          <section id="reservation-request" hidden><h3>Book this rental</h3><p>Review the total before sending your request. You won’t be charged at this step.</p><button type="button" class="button button-dark">Review booking request</button><p role="status" aria-live="polite"></p></section>
           <a class="button button-dark manual-enquiry" id="manual-enquiry" href="#" hidden>Enquire About This Rental</a>
           <button class="text-button add-to-bundle" id="add-to-bundle" type="button">Add to bundle</button>
         </div>
       </article>
-      <section class="related-rentals" id="related-tech-rentals" aria-labelledby="related-tech-title" hidden>
-        <div class="related-rentals-heading"><div><p class="eyebrow">More from this category</p><h2 id="related-tech-title">Keep<br><em>looking.</em></h2></div><p>Other published LOCKD rentals in this category.</p></div>
+      <section id="listing-reviews" class="review-section" hidden aria-label="Rental reviews"></section><section class="related-rentals" id="related-tech-rentals" aria-labelledby="related-tech-title" hidden>
+        <div class="related-rentals-heading"><div><p class="eyebrow">More from this category</p><h2 id="related-tech-title">More rentals.</h2></div><p>Other published LOCKD rentals in this category.</p></div>
         <div class="related-rentals-grid" id="related-tech-grid"></div>
       </section>
     </main>

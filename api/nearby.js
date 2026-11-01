@@ -25,7 +25,7 @@ module.exports = async function handler(req, res) {
   res.setHeader("Allow", "POST");
   if (req.method !== "POST") return send(res, 405, { error: "method_not_allowed", message: "Use POST to check approximate nearby inventory." });
   const config = supabaseConfig();
-  if (!config) return send(res, 503, { error: "catalogue_not_configured", message: "Nearby listings are not connected yet." });
+  if (!config) return send(res, 503, { error: "catalogue_not_configured", message: "Nearby rentals are unavailable right now." });
 
   const body = req.body && typeof req.body === "object" && !Array.isArray(req.body) ? req.body : null;
   if (!body) return send(res, 400, { error: "invalid_request", message: "Choose a valid nearby search." });

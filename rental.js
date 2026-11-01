@@ -111,8 +111,8 @@
     });
     if (!estimate) {
       setEstimate(output, listing.price_unit === "week" || listing.price_unit === "month"
-        ? `This ${listing.price_unit} rate needs a whole ${listing.price_unit} period for a reliable estimate. Confirm partial periods with the owner.`
-        : "The listing rate cannot be calculated from the selected dates. Confirm the total with the owner.");
+        ? `This ${listing.price_unit} rate needs a whole ${listing.price_unit} period for a reliable estimate. Confirm partial periods with the lister.`
+        : "The listing rate cannot be calculated from the selected dates. Confirm the total with the lister.");
       return;
     }
     setEstimate(output, `Rental subtotal estimate: ${priceText(estimate.amount, estimate.currency, "")} (${estimate.period} × ${estimate.quantity}). Fees and refundable deposit are separate. This estimate does not reserve the rental.`);
@@ -345,6 +345,7 @@
     const transitionPlaceholder = document.querySelector("#rental-transition-placeholder");
     const showDetail = () => {
       detail.hidden = false;
+      detail.dataset.listingId = record.id;
       state.hidden = true;
       if (transitionPlaceholder) transitionPlaceholder.hidden = true;
     };
@@ -382,7 +383,7 @@
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
         if (response.status === 503 || data.error === "catalogue_not_configured") {
-          throw new Error("The live catalogue is not connected yet. Add the Supabase project URL and anon key to Vercel, then apply the catalogue migration.");
+          throw new Error("This rental could not be loaded. Please try again later.");
         }
         throw new Error(data.message || "This rental could not be loaded.");
       }
@@ -461,7 +462,7 @@
       const result = await response.json().catch(() => ({}));
       if (!response.ok) {
         if (response.status === 503 || result.error === "catalogue_not_configured") {
-          throw new Error("Live availability is not connected yet. Please check back later.");
+          throw new Error("Available dates could not be checked. Please try again later.");
         }
         throw new Error(result.message || "Availability could not be checked.");
       }

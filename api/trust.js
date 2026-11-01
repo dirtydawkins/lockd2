@@ -22,6 +22,7 @@ const safe = new Set([
   "An appeal reason is required.",
 ]);
 module.exports = async (req, res) => {
+  if(req.query?.module==='reviews')return require('../lib/reviews-api')(req,res);
   const send = (status, data) => {
     res.setHeader("Cache-Control", "no-store");
     return res.status(status).json(data);
@@ -32,7 +33,7 @@ module.exports = async (req, res) => {
   }
   const config = configFor();
   if (!config)
-    return send(503, { message: "Account verification is not connected." });
+    return send(503, { message: "Account checks are unavailable right now." });
   const token = (req.headers?.authorization || "").match(
     /^Bearer ([A-Za-z0-9._~-]{32,4096})$/i,
   )?.[1];

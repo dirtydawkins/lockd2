@@ -351,7 +351,7 @@
     $("#expand-nearby").hidden = true;
     setStatus("Loading published rentals and checking the selected filters…");
     const recentRow = $("#recent-row");
-    recentRow.hidden = false;
+    recentRow.hidden = !document.querySelector("#recent-listings")?.children.length;
     drawSkeletons($("#recent-listings"));
     const nearRow = $("#nearby-row");
     nearRow.hidden = !location;
@@ -386,7 +386,7 @@
       renderGrid($("#recent-listings"), recent.items.slice(0, 6));
       $("#recent-row-title").textContent = recent.publicationTimestampReliable ? "Recently added" : "Published rentals";
       $("#recent-row").querySelector(".discovery-row-heading > p").textContent = recent.publicationTimestampReliable
-        ? "Recently published listings from LOCKD owners."
+        ? "Recently published listings from LOCKD listers."
         : "The live database does not expose publication timestamps yet, so these use record creation order.";
       pageState.recent = { page: 0, hasMore: recent.hasMore, buffer: recent.items.slice(6) };
       $(pageButtons.recent).hidden = !pageState.recent.hasMore && !pageState.recent.buffer.length;
@@ -402,7 +402,7 @@
         : `No published listings match ${location.label} yet. Try a nearby town or clear the location filter.`);
       $("#nearby-row-title").textContent = location.mode === "current" ? `Near your area · ${radiusOptions[radiusIndex]} km` : `In ${location.label}`;
       $("#nearby-row-note").textContent = location.mode === "current"
-        ? "Distances are approximate. Listings without owner-set approximate map pins are not included."
+        ? "Distances are approximate. Listings without lister-set approximate map pins are not included."
         : "Matches the location text on published listings; no distance is inferred.";
       pageState.nearby = { page: 0, hasMore: nearby.hasMore, buffer: nearby.items.slice(6) };
       $(pageButtons.nearby).hidden = !pageState.nearby.hasMore && !pageState.nearby.buffer.length;

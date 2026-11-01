@@ -25,6 +25,7 @@
     });
   }
 
+  window.addEventListener("lockd:auth-change",event=>{document.querySelectorAll(".owner-nav-link").forEach(link=>{link.textContent=event.detail?.user?"Lister dashboard":"Become a lister";});});
   const year = document.querySelector("#year");
   if (year) year.textContent = String(new Date().getFullYear());
 
@@ -59,6 +60,8 @@
         const controller = new AbortController();
         suggestionRequest = controller;
         const url = new URL("/api/listings", window.location.origin);
+        const hostSearch=document.querySelector('.search-scopes input:checked')?.value==='lister';
+        if(hostSearch)url.searchParams.set('view','listers');
         url.searchParams.set("q", term);
         url.searchParams.set("page", "0");
         if (searchCategory?.value) url.searchParams.set("category", searchCategory.value);
@@ -66,7 +69,7 @@
           const response = await fetch(url, { headers: { Accept: "application/json" }, signal: controller.signal, cache: "no-store" });
           if (!response.ok) return;
           const data = await response.json();
-          const titles = [...new Set((Array.isArray(data.items) ? data.items : []).map((item) => item.title).filter((title) => typeof title === "string"))].slice(0, 8);
+          const titles = [...new Set((Array.isArray(data.items) ? data.items : []).map((item) => hostSearch?item.name:item.title).filter((title) => typeof title === "string"))].slice(0, 8);
           searchSuggestions.replaceChildren(...titles.map((title) => Object.assign(document.createElement("option"), { value: title })));
         } catch { /* Suggestions are optional; the submitted search remains available. */ }
       }, 320);

@@ -134,7 +134,7 @@
   }
 
   function headers(token, extra = {}) {
-    if (!config?.supabase) throw new Error("LOCKD account services are not connected.");
+    if (!config?.supabase) throw new Error("Account access is unavailable right now. Please try again later.");
     return {
       apikey: config.supabase.publishableKey,
       ...(token ? { Authorization: `Bearer ${token}` } : {}),

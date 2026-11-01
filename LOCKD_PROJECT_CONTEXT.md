@@ -5,7 +5,7 @@ Latest user decisions, 1 November 2026. Preserve these across subsequent work.
 - The final customer and owner UI must use genuine account, listing, booking and conversation records only.
 - No mockups, synthetic conversations, demo inventory, fabricated history, fake availability, simulated success or QA/test labels in the final product.
 - Show truthful, useful empty states when no real records exist. Never disguise sample data as genuine inventory.
-- Automated fixtures belong only in isolated development tests. Exclude tests, fixture servers, screenshots and scratch files from deployment. Do not publish fixture records to production databases.
+- Latest merged briefs prohibit fabricated marketplace records and mock API success in every environment, including tests and screenshots. Do not run historical fixture-creating suites for this increment. Use source/SQL parsing, genuine authorized assets, actual read-only service responses and safe validation; mark record-dependent journeys blocked until genuine qualifying data is available. Preserve historical tests as excluded source, without presenting their prior runs as current verification.
 - Messaging must feel seamless and familiar, with a simple inbox, conversations, search, attachments, receipts, reply, copying, reporting and blocking preserved.
 - Reuse the user's existing signed-in LOCKD account. No second messaging sign-in, separate message password or routine key-setup flow.
 - Generate and manage elliptic-curve device identities automatically. Use fresh per-message AES session keys protected by the recipient's public key; account identity, passwords and authentication tokens are not encryption keys.
@@ -17,3 +17,11 @@ Latest user decisions, 1 November 2026. Preserve these across subsequent work.
 - Preserve LOCKD's existing architecture, authentic supplied images, brand, marketplace functionality and one Supabase identity system.
 
 This document is development context, not customer-facing copy. Markdown and test artifacts are excluded by `.vercelignore`.
+
+- Preserve the hero and search identity; refine selected layouts and remove buzzwords and customer-facing integration diagnostics (including connected/not connected).
+
+- Latest terminology override: use Lister/Listers, not Host/Hosts, for everyone offering stays, items, cars and experiences. Use Become a lister, Message lister and Lister dashboard; customers are Renters. Existing database owner/host identifiers are internal compatibility details and do not create separate accounts.
+
+- Preserve the current visual mode exactly. Do not add light/dark toggles, a new theme, or theme setup text. Keep the current colour palette, typography and hero treatment.
+
+- Migrations 0012–0017 applied on 1 November 2026. Live audit: all LOCKD tables RLS-enabled, private profile/review direct reads denied, private buckets private, zero business records, reviews/messaging disabled. See MARKETPLACE_REFINEMENT.md for verification limits and release status.

@@ -52,9 +52,10 @@
           chat.className = 'text-button';
           chat.dataset.lockdMessagingEntry = '';
           chat.hidden = document.documentElement.dataset.lockdMessaging !== 'enabled';
-          chat.textContent = owner ? 'Message customer' : 'Message owner';
+          chat.textContent = owner ? 'Message renter' : 'Message lister';
           card.append(chat);
         }
+        if (!owner && b.status === "completed") { const review=document.createElement("a"); review.href="reviews.html?booking="+encodeURIComponent(b.id);review.textContent="Leave a review";review.dataset.lockdReviewsEntry="";review.hidden=document.documentElement.dataset.lockdReviews!=="enabled";card.append(review); }
         if (b.trust_policy_id) {
           const requirements = document.createElement('p');
           requirements.textContent = `Verification policy v${b.trust_requirements?.version || ''} · Owner: ${b.owner_approval} · LOCKD: ${b.platform_approval}. Required checks are revalidated before payment and handover.`;
@@ -185,7 +186,7 @@
           ({ item } = await request("POST", attempted));
         } else {
           const quote = await request("POST", { ...body, action: "quote" });
-          message.textContent = `${quote.item.currency} ${quote.item.totalAmount} total, including ${quote.item.depositAmount} refundable deposit. Payment is not connected. Review this total before sending your request.`;
+          message.textContent = `${quote.item.currency} ${quote.item.totalAmount} total, including ${quote.item.depositAmount} refundable deposit. You won’t be charged when you send this request.`;
           const reviewed = JSON.stringify([
             current,
             quote.item.currency,

@@ -56,6 +56,7 @@ async function availableIds(config, startDate, endDate, quantity) {
 }
 
 module.exports = async function handler(req, res) {
+  if (['hosts','host','listers','lister'].includes(req.query?.view)) return require('../lib/hosts-api')(req,res);
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
     return send(res, 405, { error: "method_not_allowed", message: "Use GET to read the rental catalogue." });

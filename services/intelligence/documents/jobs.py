@@ -36,11 +36,11 @@ def storage(method, path):
         raise IntegrationUnavailable() from None
 
 
-def isolated(data):
+def isolated(data, photo_only=False):
     # A hard wall timeout and OS process exit protect the web process from parser hangs.
     # Linux child additionally applies CPU, address-space and output-file limits.
     with tempfile.TemporaryFile() as output:
-        result = subprocess.run([sys.executable, "-m", "documents.worker"], input=data, stdout=output,
+        result = subprocess.run([sys.executable, "-m", "documents.worker"] + (["--utility-photo"] if photo_only else []), input=data, stdout=output,
                                 stderr=subprocess.DEVNULL, timeout=25, cwd=os.path.dirname(os.path.dirname(__file__)))
         output.seek(0)
         raw = output.read(262145)
@@ -70,7 +70,10 @@ def process_one(rpc=database_rpc, downloader=storage, scanner=scan, analyzer=iso
             raise UnsafeDocument("file_mismatch")
         # Always before native image/PDF parsing. Never treat absent scan as clean.
         scanner(raw)
-        result = analyzer(raw)
+        if job.get('method') == 'utility':
+            result = analyzer(raw, photo_only=True)
+        else:
+            result = analyzer(raw)
         result["address_match"] = compare(job["declared_address"], result.get("fields", {}).get("service_address", {}).get("value", ""))
     except ScannerUnavailable:
         error = "scanner_unavailable"
