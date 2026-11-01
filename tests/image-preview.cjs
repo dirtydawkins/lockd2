@@ -21,6 +21,23 @@ const rows = [
 http.createServer(async(req,res)=>{
   const url=new URL(req.url,'http://127.0.0.1:8772');
   const json=(body,status=200)=>{res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(body));};
+  // Local UI-only artifact sink: screenshots are posted by an explicit form,
+  // not browser network scripting. No arbitrary paths or external requests.
+  if(url.pathname==='/__capture') {
+    if(req.method==='POST') {
+      if(req.headers.origin!=='http://127.0.0.1:8772')return json({message:'Local form only.'},403);
+      let body='';for await(const chunk of req){body+=chunk;if(body.length>1000000)return json({message:'Too large.'},413);}
+      const form=new URLSearchParams(body),name=form.get('name');
+      if(!['mobile-390','desktop-1440'].includes(name))return json({message:'Invalid artifact.'},400);
+      const data=Buffer.from(form.get('image')||'','base64');
+      if(data.length<4||data[0]!==255||data[1]!==216)return json({message:'JPEG required.'},400);
+      await fs.mkdir(path.join(root,'tests/artifacts'),{recursive:true});
+      await fs.writeFile(path.join(root,'tests/artifacts',`lockd-${name}.jpg`),data);
+      res.writeHead(200,{'Content-Type':'text/html'});return res.end('<p>Screenshot saved to local QA artifacts.</p>');
+    }
+    res.writeHead(200,{'Content-Type':'text/html'});
+    return res.end('<!doctype html><html><head><title>Save local QA screenshot</title></head><body><h1>Local screenshot artifact</h1><form method="post"><label>Screenshot name<select name="name"><option value="mobile-390">Mobile 390</option><option value="desktop-1440">Desktop 1440</option></select></label><label>JPEG data<textarea name="image"></textarea></label><button>Save screenshot</button></form></body></html>');
+  }
   if(url.pathname==='/api/config')return json({auth:{configured:false},bookingRequestsEnabled:false});
   if(url.pathname==='/image-lab.html') {
     res.writeHead(200,{'Content-Type':'text/html','Cache-Control':'no-store'});

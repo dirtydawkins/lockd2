@@ -6,3 +6,5 @@ __pycache__/
 .venv/
 *.pyc
 tests/native-qa/
+tests/artifacts/
+tests/release-sql/
