@@ -38,3 +38,18 @@ payment collection, fabricated records, new resources or paid plans.
 
 - https://paystack.com/docs/api/authentication/
 - https://paystack.com/docs/api/integration/
+
+## Observed release
+
+- Code commit `94cdb3ff7725ad3746c39afca2f2524034722283` pushed to
+  `codex/marketplace-refinement` and `main`.
+- GitHub Marketplace checks completed successfully:
+  https://github.com/dirtydawkins/lockd2/actions/runs/41396435446
+- Existing Render Free service deployed that exact commit successfully:
+  https://dashboard.render.com/web/srv-dbj35n942hec73bthgng/deploys/dep-dbk2a5flk1mc73aku7p0
+- Actual startup event at 08:53 EAT on 2 November reported
+  `daraja_sandbox_authorization`, `verified: true`, `payments_enabled: false`.
+  This verifies the consumer credentials with Safaricom, not a payment.
+- Actual production `/health` and `/ready` returned 200. Both Daraja and Paystack
+  protected connection routes returned 401 without a service token.
+- Paystack remains at sign-in; no test secret has been configured or authorized.
