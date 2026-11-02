@@ -16,26 +16,35 @@ from pydantic import BaseModel, ConfigDict
 import persona
 import peleza
 import daraja
+import paystack
 
 logger = logging.getLogger("lockd.intelligence")
 
 @asynccontextmanager
 async def lifespan(application):
-    application.state.daraja_authorization_verified = False
-    if daraja.configured():
-        try:
-            result = await asyncio.to_thread(daraja.check_connection)
-            application.state.daraja_authorization_verified = result['authorization_verified'] is True
-        except (persona.IntegrationUnavailable, persona.InvalidProviderResult):
-            pass
-        logger.warning(json.dumps({'event': 'daraja_sandbox_authorization',
-                                   'verified': application.state.daraja_authorization_verified,
-                                   'payments_enabled': False}))
+    for provider, environment, adapter in (('daraja', 'sandbox', daraja), ('paystack', 'test', paystack)):
+        setattr(application.state, provider + '_authorization_verified', False)
+        if adapter.configured():
+            try:
+                await asyncio.to_thread(check_payment_connection, application, provider, adapter)
+            except (persona.IntegrationUnavailable, persona.InvalidProviderResult):
+                pass
+            logger.warning(json.dumps({'event': provider + '_' + environment + '_authorization',
+                                       'verified': getattr(application.state, provider + '_authorization_verified'),
+                                       'payments_enabled': False}))
     yield
 
 app = FastAPI(title="LOCKD intelligence", docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
 VERSION = "rules-1"
 requests_in_window = deque(maxlen=120)
+
+
+def check_payment_connection(application, provider, adapter):
+    attribute = provider + '_authorization_verified'
+    setattr(application.state, attribute, False)
+    result = adapter.check_connection()
+    setattr(application.state, attribute, result.get('authorization_verified') is True)
+    return result
 
 def shared_secret() -> str:
     return os.getenv("INTELLIGENCE_SHARED_SECRET", "")
@@ -185,7 +194,9 @@ def integration_capabilities():
             'credit': {'configured': peleza.configured(), 'environment': 'sandbox', 'live_verified': False}, 'documents': {'processing_configured': configured(), 'uploads_enabled': False, 'trained_model': False},
             'training': {'trained_model': False}, 'payments': {'configured': False,
             'daraja_sandbox_credentials_present': daraja.configured(),
-            'daraja_sandbox_authorization_verified': getattr(app.state,'daraja_authorization_verified',False), 'live_enabled': False}}
+            'daraja_sandbox_authorization_verified': getattr(app.state,'daraja_authorization_verified',False),
+            'paystack_test_credentials_present': paystack.configured(),
+            'paystack_test_authorization_verified': getattr(app.state,'paystack_authorization_verified',False), 'live_enabled': False}}
 
 @app.post('/v1/jobs/documents/process', dependencies=[Depends(authorize)])
 def process_document():
@@ -214,9 +225,17 @@ class CreditInput(BaseModel):
 @app.post('/v1/integrations/daraja/check', dependencies=[Depends(authorize)])
 def check_daraja():
     try:
-        return daraja.check_connection()
+        return check_payment_connection(app, 'daraja', daraja)
     except (persona.IntegrationUnavailable, persona.InvalidProviderResult):
         return JSONResponse({'detail': 'Daraja sandbox authorization is unavailable'}, status_code=503)
+
+
+@app.post('/v1/integrations/paystack/check', dependencies=[Depends(authorize)])
+def check_paystack():
+    try:
+        return check_payment_connection(app, 'paystack', paystack)
+    except (persona.IntegrationUnavailable, persona.InvalidProviderResult):
+        return JSONResponse({'detail': 'Paystack test authorization is unavailable'}, status_code=503)
 
 
 @app.post('/v1/verification/credit', dependencies=[Depends(authorize)])
