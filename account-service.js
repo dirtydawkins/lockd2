@@ -119,7 +119,7 @@
     if (config) return config;
     if (configPromise) return configPromise;
     configPromise = (async () => {
-      const response = await fetch("/api/config", { headers: { Accept: "application/json" }, cache: "no-store" });
+      const response = await accountFetch("/api/config", { headers: { Accept: "application/json" }, cache: "no-store" });
       const data = await response.json().catch(() => ({}));
       if (!response.ok || !data.supabase?.url || !data.supabase?.publishableKey) {
         throw new Error("LOCKD account services are not configured for this deployment yet.");
@@ -133,6 +133,10 @@
     catch (error) { configPromise = null; throw error; }
   }
 
+  async function accountFetch(url,options) {
+    try{return await fetch(url,options);}
+    catch{throw new Error('LOCKD could not be reached. Check your connection and try again.');}
+  }
   function headers(token, extra = {}) {
     if (!config?.supabase) throw new Error("Account access is unavailable right now. Please try again later.");
     return {
@@ -162,7 +166,7 @@
 
   async function authRequest(path, { method = "POST", body, token, query = "" } = {}) {
     await init();
-    const response = await fetch(`${config.supabase.url}/auth/v1/${path}${query}`, {
+    const response = await accountFetch(`${config.supabase.url}/auth/v1/${path}${query}`, {
       method,
       headers: headers(token, body === undefined ? {} : { "Content-Type": "application/json" }),
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
@@ -193,7 +197,7 @@
       await init();
       const active = await ensureFreshSession();
       if (!active) return null;
-      const response = await fetch(`${config.supabase.url}/auth/v1/user`, {
+      const response = await accountFetch(`${config.supabase.url}/auth/v1/user`, {
         headers: headers(active.access_token), cache: "no-store",
       });
       if (response.status === 401 || response.status === 403) {
@@ -216,7 +220,7 @@
   async function signUp({ email, password, name }) {
     const url = new URL(`${(await init()).supabase.url}/auth/v1/signup`);
     url.searchParams.set("redirect_to", callbackUrl());
-    const response = await fetch(url, {
+    const response = await accountFetch(url, {
       method: "POST",
       headers: headers(null, { "Content-Type": "application/json" }),
       body: JSON.stringify({ email: email.trim(), password, data: { full_name: name.trim() } }),
@@ -236,7 +240,7 @@
   async function resendVerification(email) {
     const url = new URL(`${(await init()).supabase.url}/auth/v1/resend`);
     url.searchParams.set("redirect_to", callbackUrl());
-    const response = await fetch(url, {
+    const response = await accountFetch(url, {
       method: "POST",
       headers: headers(null, { "Content-Type": "application/json" }),
       body: JSON.stringify({ type: "signup", email: email.trim() }),
@@ -248,7 +252,7 @@
   async function requestPasswordReset(email) {
     const url = new URL(`${(await init()).supabase.url}/auth/v1/recover`);
     url.searchParams.set("redirect_to", callbackUrl());
-    const response = await fetch(url, {
+    const response = await accountFetch(url, {
       method: "POST",
       headers: headers(null, { "Content-Type": "application/json" }),
       body: JSON.stringify({ email: email.trim() }),
@@ -270,7 +274,7 @@
     const token = currentPassword
       ? (await reauthenticate(active.user.email, currentPassword)).access_token
       : active.access_token;
-    const response = await fetch(`${config.supabase.url}/auth/v1/user`, {
+    const response = await accountFetch(`${config.supabase.url}/auth/v1/user`, {
       method: "PUT",
       headers: headers(token, { "Content-Type": "application/json" }),
       body: JSON.stringify({ password }),
@@ -421,7 +425,7 @@
     await init();
     const active = token ? { access_token: token } : await ensureFreshSession();
     if (!active?.access_token) throw new Error("Sign in to continue.");
-    const response = await fetch(`${config.supabase.url}/rest/v1/${path}`, {
+    const response = await accountFetch(`${config.supabase.url}/rest/v1/${path}`, {
       method,
       headers: headers(active.access_token, {
         Accept: "application/json",
@@ -483,7 +487,7 @@
     const active=await getSession();if(!active||expectedUserId&&active.user.id!==expectedUserId)return null;
     const path=`${active.user.id}/avatar.webp`;
     if(profile?.avatar_url===`lockd-avatars/${path}`){
-      const response=await fetch(`${config.supabase.url}/storage/v1/object/sign/lockd-avatars/${path}`,{method:'POST',headers:headers(active.access_token,{'Content-Type':'application/json'}),body:JSON.stringify({expiresIn:3600}),cache:'no-store'});
+      const response=await accountFetch(`${config.supabase.url}/storage/v1/object/sign/lockd-avatars/${path}`,{method:'POST',headers:headers(active.access_token,{'Content-Type':'application/json'}),body:JSON.stringify({expiresIn:3600}),cache:'no-store'});
       if(!response.ok)return null;const data=await response.json();if((await getSession())?.user?.id!==active.user.id)return null;
       try{const raw=data.signedURL||data.signedUrl;const url=new URL(raw.startsWith('/object/')?'/storage/v1'+raw:raw,config.supabase.url+'/storage/v1/');return url.origin===new URL(config.supabase.url).origin&&url.pathname==='/storage/v1/object/sign/lockd-avatars/'+path?url.href:null;}catch{return null;}
     }
@@ -501,14 +505,14 @@
     const image=await new Promise(resolve=>canvas.toBlob(resolve,'image/webp',.84));canvas.width=canvas.height=0;
     if(!image||image.type!=='image/webp'||image.size>524288)throw new Error('Your browser could not prepare a suitable photo. Please try another.');
     if((await getSession())?.user?.id!==active.user.id)throw new Error('Your account changed. Reopen your profile to continue.');
-    const response=await fetch(`${config.supabase.url}/storage/v1/object/lockd-avatars/${active.user.id}/avatar.webp`,{method:'POST',headers:headers(active.access_token,{'Content-Type':'image/webp','x-upsert':'true','cache-control':'max-age=0'}),body:image,cache:'no-store'});
+    const response=await accountFetch(`${config.supabase.url}/storage/v1/object/lockd-avatars/${active.user.id}/avatar.webp`,{method:'POST',headers:headers(active.access_token,{'Content-Type':'image/webp','x-upsert':'true','cache-control':'max-age=0'}),body:image,cache:'no-store'});
     if(!response.ok)throw new Error('Your photo could not be saved. Please try again.');
     return saveProfile({avatar_url:`lockd-avatars/${active.user.id}/avatar.webp`},active.user.id);
   }
 
   async function removeProfilePhoto() {
     const active=await getSession();if(!active)throw new Error('Sign in to remove your photo.');
-    const response=await fetch(`${config.supabase.url}/storage/v1/object/lockd-avatars`,{method:'DELETE',headers:headers(active.access_token,{'Content-Type':'application/json'}),body:JSON.stringify({prefixes:[`${active.user.id}/avatar.webp`]}),cache:'no-store'});
+    const response=await accountFetch(`${config.supabase.url}/storage/v1/object/lockd-avatars`,{method:'DELETE',headers:headers(active.access_token,{'Content-Type':'application/json'}),body:JSON.stringify({prefixes:[`${active.user.id}/avatar.webp`]}),cache:'no-store'});
     if(!response.ok&&response.status!==404)throw new Error('Your photo could not be removed. Please try again.');
     return saveProfile({avatar_url:null},active.user.id);
   }

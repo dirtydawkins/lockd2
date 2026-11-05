@@ -1,4 +1,4 @@
-import {privateRequest,storageRequest,node,action,status} from './private-client.mjs';
+import {privateRequest,storageRequest,fetchResponse,node,action,status} from './private-client.mjs';
 import {PROTOCOL,readPublic,encryptMessage,decryptMessage,encryptEvidence,encryptAttachment,decryptAttachment,hash,assertPinned} from './messaging-crypto.mjs';
 import {stored} from './messaging-store.mjs';
 import {ensureMessageDevice,createConnectionRequest,connectAnotherDevice,acceptConnection,removeMessageDevice} from './messaging-device.mjs';
@@ -16,7 +16,7 @@ const objectURLs=new Set();
 const reading=new Set(),readOnDevice=new Set();
 const drafts=new Map();let syncCursor=null,pendingConversation=null;
 const pretty=value=>String(value||'').replaceAll('_',' ');
-function error(err){status(notice,err.message||'Messaging could not be reached.',true);}
+function error(err){const message=err?.name==='TypeError'||err?.name==='TimeoutError'||err?.name==='AbortError'?'Messages couldn’t refresh. Check your connection and try Refresh.':err.message||'Messages could not be reached. Please try again.';status(notice,message,true);}
 function fingerprint(value){return value?.match(/.{1,4}/g)?.join(' ')||'';}
 function listingArtwork(item){
  const artwork=node('span',undefined,{class:'conversation-artwork','aria-hidden':'true'});
@@ -65,7 +65,7 @@ let targetRequest=null,targetSequence=0,targetDebounce;
 const targetUI=dialogUI(targetDialog,{focus:()=>targetQuery,onOpen:()=>{targetQuery.value='';targetResults.replaceChildren();$('#message-target-back').hidden=true;status(targetNotice,'Search for a rental or lister by name.');}});
 $('#new-message').addEventListener('click',()=>targetUI.open($('#new-message')));
 targetDialog.addEventListener('close',()=>{targetSequence++;targetRequest?.abort();clearTimeout(targetDebounce);if(targetDialog.dataset.started){delete targetDialog.dataset.started;requestAnimationFrame(()=>$('#message-compose').hidden?$('#thread-title').focus():$('#message-text').focus());}});
-async function publicTargets(url,signal){const response=await fetch(url,{cache:'no-store',signal}),data=await response.json();if(!response.ok||data.configured===false)throw Error('Search is unavailable right now. Please try again.');return data;}
+async function publicTargets(url,signal){const response=await fetchResponse(url,{cache:'no-store',signal}),data=await response.json().catch(()=>null);if(!response.ok||!data||data.configured===false)throw Error('Search is unavailable right now. Please try again.');return data;}
 function targetButton(item,lister=false){
  const button=action('',async()=>{try{
   if(lister){const current=++targetSequence;targetRequest?.abort();targetRequest=new AbortController();targetResults.replaceChildren();$('#message-target-back').hidden=false;status(targetNotice,'Finding rentals…');const data=await publicTargets('/api/listings?'+new URLSearchParams({view:'lister',lister:item.slug}),AbortSignal.any([targetRequest.signal,AbortSignal.timeout(15000)]));if(current!==targetSequence)return;const ids=data.item?.listingIds?.slice(0,24)||[];if(!ids.length){status(targetNotice,'This lister has no rentals to message about right now.');return;}const listings=await publicTargets('/api/listings?ids='+ids.join(','),targetRequest.signal);if(current!==targetSequence)return;targetResults.replaceChildren(...listings.items.map(row=>targetButton(row)));status(targetNotice,'Choose a rental to start your conversation.');return;}
@@ -308,6 +308,7 @@ async function refreshMessages(){
  await inbox();
  if(active&&!peer){const known=await getDevices(active.id);if(known.some(item=>item.user_id!==user.id&&!item.revoked_at)){await open(active.id);return;}}
  await sync();
+ if(notice.dataset.kind==='error')status(notice,'');
 }
 $('#refresh-inbox').addEventListener('click',()=>refreshMessages().catch(error));
 $('#back-to-inbox').addEventListener('click',()=>{$('#message-workspace').classList.remove('has-open-thread');($('#conversations [aria-current=true]')||$('#conversations button'))?.focus();});

@@ -1,9 +1,12 @@
+export async function fetchResponse(url,options) {
+  try{return await fetch(url,options);}catch(error){if(error.name==='AbortError')throw error;throw Error('LOCKD could not be reached. Check your connection and try again.');}
+}
 export async function privateRequest(service,query={},body,expectedUserId=null,{timeoutMs=15000}={}) {
   const session=await window.LockdAccount.getSession();
   if(!session) throw Error('Sign in to continue.');
   const callerId=expectedUserId||session.user.id;
   if(expectedUserId&&session.user?.id!==expectedUserId)throw Error('Your account changed. Reopen messages to continue.');
-  const response=await fetch(`/api/${service}?${new URLSearchParams(query)}`,{method:body?'POST':'GET',headers:{Authorization:`Bearer ${session.access_token}`,...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined,cache:'no-store',signal:AbortSignal.timeout(Math.min(60000,Math.max(1000,timeoutMs)))});
+  const response=await fetchResponse(`/api/${service}?${new URLSearchParams(query)}`,{method:body?'POST':'GET',headers:{Authorization:`Bearer ${session.access_token}`,...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined,cache:'no-store',signal:AbortSignal.timeout(Math.min(60000,Math.max(1000,timeoutMs)))});
   const result=await response.json().catch(()=>({}));
   if((await window.LockdAccount.getSession())?.user?.id!==callerId)throw Error('Your account changed. Reload this page to continue.');
   if(!response.ok) throw Error(result.message || 'This action could not be completed. Please retry.');
@@ -21,7 +24,7 @@ export async function storageRequest(bucket,path,{method='GET',data,mime='applic
       transfer.onerror=transfer.ontimeout=()=>reject(Error('The upload stopped. Please try again.'));transfer.send(data);
     });
   }
-  const response=await fetch(`${config.supabase.url}/storage/v1/object/${bucket}/${path}`,{method,headers:{apikey:config.supabase.publishableKey,Authorization:`Bearer ${session.access_token}`,...(data?{'Content-Type':mime,'x-upsert':'false'}:{})},body:data,cache:'no-store',signal:AbortSignal.timeout(30000)});
+  const response=await fetchResponse(`${config.supabase.url}/storage/v1/object/${bucket}/${path}`,{method,headers:{apikey:config.supabase.publishableKey,Authorization:`Bearer ${session.access_token}`,...(data?{'Content-Type':mime,'x-upsert':'false'}:{})},body:data,cache:'no-store',signal:AbortSignal.timeout(30000)});
   if(!response.ok) throw Error('The private file could not be transferred. Please retry.');
   return response;
 }
