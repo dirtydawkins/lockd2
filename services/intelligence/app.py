@@ -315,8 +315,11 @@ def check_daraja():
 def check_paystack():
     try:
         return check_payment_connection(app, 'paystack', paystack)
-    except (persona.IntegrationUnavailable, persona.InvalidProviderResult):
-        return JSONResponse({'detail': 'Paystack test authorization is unavailable'}, status_code=503)
+    except (persona.IntegrationUnavailable, persona.InvalidProviderResult) as error:
+        reason = ('not_configured' if not paystack.configured() else
+                  'credentials_rejected' if getattr(error, 'status_code', None) in (401, 403) else
+                  'rate_limited' if getattr(error, 'status_code', None) == 429 else 'provider_unavailable')
+        return JSONResponse({'detail': 'Paystack test authorization is unavailable', 'reason': reason}, status_code=503)
 
 
 @app.post('/v1/verification/credit', dependencies=[Depends(authorize)])

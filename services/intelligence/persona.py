@@ -40,7 +40,12 @@ def request_json(method, url, headers, body=None):
             return json.loads(raw), dict(response.headers)
     except InvalidProviderResult:
         raise
-    except (HTTPError, OSError, ValueError):
+    except HTTPError as error:
+        unavailable = IntegrationUnavailable()
+        # Status only, never a provider body, URL query, secret or personal data.
+        unavailable.status_code = error.code
+        raise unavailable from None
+    except (OSError, ValueError):
         raise IntegrationUnavailable() from None
 
 
