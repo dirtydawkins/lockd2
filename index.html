@@ -28,18 +28,13 @@
     <script src="./discovery.js" defer></script><script src="./discovery-map.mjs" type="module"></script><link rel="stylesheet" href="./discovery-map.css">
     <link rel="stylesheet" href="./place-picker.css"><link rel="stylesheet" href="./location-privacy.css"><script type="module" src="./privacy-preferences.mjs"></script><script type="module" src="./discovery-locations.mjs"></script>
     <link rel="stylesheet" href="./marketplace-refinement.css">
-  <script type="module" src="./unified-search.mjs"></script><script type="module" src="./messaging-onboarding.mjs"></script></head>
+  <script type="module" src="./unified-search.mjs"></script><script type="module" src="./messaging-onboarding.mjs"></script>    <link rel="stylesheet" href="./brand-refinement.css">
+</head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
 
     <header class="site-header" id="top">
-      <a class="brand" href="#top" aria-label="LOCKD home">
-        <svg class="brand-mark" viewBox="0 0 34 34" aria-hidden="true">
-          <path d="M7 5.5h15.5L28 11v17.5H7z" fill="none" stroke="currentColor" stroke-width="1.6" />
-          <path d="M22.5 5.5V11H28M12 16.5v7h10v-7z" fill="none" stroke="currentColor" stroke-width="1.6" />
-        </svg>
-        <span class="brand-word">lockd<span class="brand-period">.</span></span>
-      </a>
+      <a class="brand" href="#top" aria-label="LOCKD home"><img class="brand-image" src="./assets/brand/lockd.svg" alt="LOCKD" width="1330" height="317"></a>
 
       <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
         <span></span><span></span>
@@ -162,11 +157,12 @@
       <section class="discovery-feed section-shell" id="discover-feed" aria-labelledby="discovery-feed-title">
         <div class="discovery-feed-heading">
           <div><p class="eyebrow"><span class="eyebrow-rule"></span> BY LOCATION</p><h2 id="discovery-feed-title">Rentals near you.</h2></div>
-          <p>Choose a town or area to see matching rentals. Sharing your location is optional.</p>
+          <p>Stays, cars, devices and experiences around your location.</p>
         </div>
         <div class="discovery-location-bar">
-          <div><span class="discovery-overline">YOUR AREA</span><p id="discovery-location-label">Anywhere</p></div>
-          <button class="text-button" id="open-location-picker" type="button" aria-haspopup="dialog">Choose a location</button>
+          <button class="discovery-context-part" id="open-location-picker" type="button" aria-haspopup="dialog" aria-label="Choose a location"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg><span><small>Where</small><span id="discovery-location-label">Anywhere</span></span></button>
+          <button class="discovery-context-part" type="button" data-discovery-dates aria-label="Choose rental dates"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v16H4z M4 10h16 M8 2v6 M16 2v6"/></svg><span><small>When</small><span data-discovery-date-label>Choose dates</span></span></button>
+          <button class="discovery-context-part" type="button" data-discovery-party aria-label="Choose guests or quantity"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4"/><path d="M4 22v-3a8 6 0 0 1 16 0v3Z"/></svg><span><small>Your plans</small><span data-discovery-party-label>1 rental</span></span></button>
           <button class="discovery-clear-location" id="clear-location" type="button" hidden>Clear</button>
         </div>
         <form class="discovery-filters" id="discovery-filters">
@@ -332,10 +328,7 @@
     </dialog>
 
     <footer class="site-footer">
-      <a class="brand brand-footer" href="#top" aria-label="LOCKD home">
-        <svg class="brand-mark" viewBox="0 0 34 34" aria-hidden="true"><path d="M7 5.5h15.5L28 11v17.5H7z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M22.5 5.5V11H28M12 16.5v7h10v-7z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
-        <span class="brand-word">lockd<span class="brand-period">.</span></span>
-      </a>
+      <a class="brand brand-footer" href="#top" aria-label="LOCKD home"><img class="brand-image" src="./assets/brand/lockd.svg" alt="LOCKD" width="1330" height="317"></a>
       <p class="footer-line">Your next move, locked in.</p>
       <div class="footer-bottom">
         <span>© <span id="year">2026</span> LOCKD</span>
