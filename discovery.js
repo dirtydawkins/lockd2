@@ -32,6 +32,8 @@
   let locationCleared = readAreaCookie()?.anywhere===true;
   const isPointLocation = (area=location) => area && Number.isFinite(area.latitude) && Number.isFinite(area.longitude);
   let activeController = null;
+  const mapIsActive = () => feed.dataset.discoveryView === "map" || (!feed.dataset.discoveryView && new URLSearchParams(window.location.search).get("discoveryView") === "map");
+  const boundedSignal = signal => signal ? AbortSignal.any([signal, AbortSignal.timeout(12000)]) : AbortSignal.timeout(12000);
   let lastFeed = null;
   let pageState = {};
   const pageButtons = { nearby: "#load-more-nearby", available: "#load-more-available", recent: "#load-more-recent" };
@@ -82,7 +84,6 @@
         if(nextLocation?.id){let recent=[];try{recent=JSON.parse(localStorage.getItem("lockd:recent-places:v1")||'[]');}catch{}if(!Array.isArray(recent))recent=[];localStorage.setItem("lockd:recent-places:v1",JSON.stringify([{id:nextLocation.id,label:nextLocation.label},...recent.filter(item=>item?.id!==nextLocation.id)].slice(0,4)));}else localStorage.removeItem('lockd:recent-places:v1');
       } catch { /* The selected area still works for this page when storage is unavailable. */ }
     }
-    window.dispatchEvent(new CustomEvent("lockd:discovery-change", {detail: discoveryState()}));
     const globalLocation = $("#idea-location");
     if (globalLocation) globalLocation.value = nextLocation?.label || "";
     document.querySelectorAll('[data-location-label]').forEach(el=>el.textContent=nextLocation?.label?.split(',')[0]||'Anywhere');
@@ -122,7 +123,7 @@
     params.delete("category");
     if (listFilters.category) params.set("category", listFilters.category);
     if (market) params.set("market", market);
-    const response = await fetch(`/api/listings?${params}`, { headers: { Accept: "application/json" }, cache: "no-store", signal });
+    const response = await fetch(`/api/listings?${params}`, { headers: { Accept: "application/json" }, cache: "no-store", signal: boundedSignal(signal) });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.message || "Listings could not be loaded right now.");
     return { items: Array.isArray(data.items) ? data.items : [], hasMore: data.hasMore === true, publicationTimestampReliable: data.publicationTimestampReliable === true };
@@ -152,7 +153,7 @@
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify(payload),
       cache: "no-store",
-      signal,
+      signal: boundedSignal(signal),
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
@@ -363,6 +364,7 @@
     }
     if (updateUrl) updateShareUrl();
     window.dispatchEvent(new CustomEvent("lockd:discovery-change", {detail: discoveryState()}));
+    if (mapIsActive()) return;
     lastFeed = { values: { ...values }, location: location ? { ...location } : null, radiusKm: radiusOptions[radiusIndex] };
     pageState = {};
     Object.values(pageButtons).forEach((selector) => { $(selector).hidden = true; $(selector).disabled = false; });
@@ -378,28 +380,9 @@
     if (hasStart && hasEnd) drawSkeletons($("#available-listings"));
     $("#discovery-shelves").replaceChildren();
 
-    const recentTask = requestList(values, { dates: false, newest: true, signal });
-    const nearbyTask = !location ? Promise.resolve(null) : isPointLocation()
-      ? requestNearby(values, { radiusKm: radiusOptions[radiusIndex], signal })
-      : requestList(values, { dates: false, signal });
-    const availableTask = !(hasStart && hasEnd) ? Promise.resolve(null) : isPointLocation()
-      ? requestNearby(values, { dates: true, radiusKm: radiusOptions[radiusIndex], signal })
-      : requestList(values, { dates: true, signal });
-    const categoryTasks = location && !values.category ? marketGroups.map(async (group) => {
-      if (isPointLocation() && !(await nearbyTask)?.items?.length) return { group, items: [] };
-      const result = isPointLocation()
-        ? await requestNearby(values, { category: group.category || "", market: group.market, radiusKm: radiusOptions[radiusIndex], signal })
-        : await requestList(values, { category: group.category || "", market: group.market, signal });
-      return { group, items: result.items.slice(0, 4) };
-    }) : [];
-    const categoryResultsTask=Promise.allSettled(categoryTasks);
-
-    const [recentResult, nearbyResult, availableResult] = await Promise.allSettled([recentTask, nearbyTask, availableTask]);
-    if (run !== pageRun) return;
-    const recent = recentResult.status === "fulfilled" ? recentResult.value : null;
-    const nearby = nearbyResult.status === "fulfilled" ? nearbyResult.value : null;
-    const available = availableResult.status === "fulfilled" ? availableResult.value : null;
-    const failures = [recentResult, nearbyResult, availableResult].filter((result) => result.status === "rejected").map((result) => result.reason);
+    function renderRecent(recentResult) {
+      if (run !== pageRun) return;
+      const recent = recentResult.status === "fulfilled" ? recentResult.value : null;
     recentRow.hidden = !recent || recent.items.length === 0;
     if (recent?.items.length) {
       renderGrid($("#recent-listings"), recent.items.slice(0, 6));
@@ -412,6 +395,10 @@
     }
     if (recentResult.status === "rejected") emptyMessage($("#recent-listings"), recentResult.reason?.message || "Published rentals could not be loaded. Try again.");
 
+    }
+    function renderNearby(nearbyResult) {
+      if (run !== pageRun) return;
+      const nearby = nearbyResult.status === "fulfilled" ? nearbyResult.value : null;
     if (location && nearby) {
       nearRow.hidden = false;
       const host = $("#nearby-listings");
@@ -438,6 +425,10 @@
       $(pageButtons.nearby).hidden = true;
     } else nearRow.hidden = true;
 
+    }
+    function renderAvailable(availableResult) {
+      if (run !== pageRun) return;
+      const available = availableResult.status === "fulfilled" ? availableResult.value : null;
     if (hasStart && hasEnd) {
       const availableHost = $("#available-listings");
       $("#available-row").hidden = false;
@@ -454,6 +445,30 @@
       }
     } else $("#available-row").hidden = true;
 
+    }
+    const progressive = (task, render) => task.then(value => { render({status:"fulfilled", value}); return value; }, reason => { render({status:"rejected", reason}); throw reason; });
+    const recentTask = progressive(requestList(values, { dates: false, newest: true, signal }), renderRecent);
+    const nearbyTask = progressive(!location ? Promise.resolve(null) : isPointLocation()
+      ? requestNearby(values, { radiusKm: radiusOptions[radiusIndex], signal })
+      : requestList(values, { dates: false, signal }), renderNearby);
+    const availableTask = progressive(!(hasStart && hasEnd) ? Promise.resolve(null) : isPointLocation()
+      ? requestNearby(values, { dates: true, radiusKm: radiusOptions[radiusIndex], signal })
+      : requestList(values, { dates: true, signal }), renderAvailable);
+    const categoryTasks = location && !values.category ? marketGroups.map(async (group) => {
+      if (isPointLocation() && !(await nearbyTask)?.items?.length) return { group, items: [] };
+      const result = isPointLocation()
+        ? await requestNearby(values, { category: group.category || "", market: group.market, radiusKm: radiusOptions[radiusIndex], signal })
+        : await requestList(values, { category: group.category || "", market: group.market, signal });
+      return { group, items: result.items.slice(0, 4) };
+    }) : [];
+    const categoryResultsTask=Promise.allSettled(categoryTasks);
+
+    const [recentResult, nearbyResult, availableResult] = await Promise.allSettled([recentTask, nearbyTask, availableTask]);
+    if (run !== pageRun) return;
+    const recent = recentResult.status === "fulfilled" ? recentResult.value : null;
+    const nearby = nearbyResult.status === "fulfilled" ? nearbyResult.value : null;
+    const available = availableResult.status === "fulfilled" ? availableResult.value : null;
+    const failures = [recentResult, nearbyResult, availableResult].filter((result) => result.status === "rejected").map((result) => result.reason);
     if (failures.length) {
       const migrationPending = failures.some((error) => error?.code === "nearby_search_not_configured");
       setStatus(migrationPending
@@ -596,6 +611,7 @@
   $(pageButtons.nearby).addEventListener("click", () => loadMore("nearby"));
   $(pageButtons.available).addEventListener("click", () => loadMore("available"));
   $(pageButtons.recent).addEventListener("click", () => loadMore("recent"));
+  window.addEventListener("lockd:discovery-view", event => { if(event.detail?.view === "map"){activeController?.abort();pageRun++;}else loadFeed(); });
   window.addEventListener("popstate", () => { fillFromUrl(); loadFeed(); });
 
   function discoveryState() { return {location:location?{...location}:null,filters:{...filtersState({includeDates:true})}}; }

@@ -55,6 +55,7 @@
           chat.textContent = owner ? 'Message renter' : 'Message lister';
           card.append(chat);
         }
+        if (!owner) { const view=document.createElement('a');view.href='checkout.html?booking='+encodeURIComponent(b.id);view.className='text-button';view.textContent='View reservation';card.append(view); }
         if (!owner && b.status === "completed") { const review=document.createElement("a"); review.href="reviews.html?booking="+encodeURIComponent(b.id);review.textContent="Leave a review";review.dataset.lockdReviewsEntry="";review.hidden=document.documentElement.dataset.lockdReviews!=="enabled";card.append(review); }
         if (b.trust_policy_id) {
           const requirements = document.createElement('p');
@@ -209,6 +210,7 @@
         message.textContent = `Request recorded: ${item.id}. ${item.status === "pending_owner" ? "Awaiting the required verification and approvals. Manage this request in your account." : "Awaiting payment setup; this is not a confirmed rental."} Hold ends ${new Date(item.expires_at).toLocaleString()}.`;
         btn.textContent = "Request recorded";
         btn.dataset.sent = "true";
+        location.assign("checkout.html?booking="+encodeURIComponent(item.id));
       } catch (e) {
         message.textContent = e.message;
         if (e.status >= 400 && e.status < 500) {

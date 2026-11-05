@@ -298,7 +298,12 @@ module.exports = async function handler(req, res) {
     const orderedRows = rankedIds
       ? rankedIds.map((id) => rows.find((row) => row.id === id)).filter(Boolean)
       : rows.slice(0, limit);
-    const items = await Promise.all(orderedRows.map(async (row) => ({
+    const photoGroups = orderedRows.map(row => (Array.isArray(row.images) ? row.images : []).slice(0, slug ? 12 : 1));
+    const photos = await signImages(config, photoGroups.flat());
+    let photoOffset = 0;
+    const items = orderedRows.map((row, index) => {
+      const images = photos.slice(photoOffset, photoOffset += photoGroups[index].length).filter(Boolean);
+      return ({
       id: row.id,
       slug: row.slug,
       title: row.title,
@@ -306,7 +311,7 @@ module.exports = async function handler(req, res) {
       market_category: row.market_category,
       summary: row.summary,
       description: row.description,
-      images: (await signImages(config, Array.isArray(row.images) ? row.images : [], { limit: slug ? 12 : 1 })).filter(Boolean),
+      images,
       image_alt: row.image_alt,
       location_label: row.location_label,
       price_amount: row.price_amount,
@@ -321,7 +326,7 @@ module.exports = async function handler(req, res) {
       requires_approval: Boolean(row.requires_approval),
       checkout_enabled: Boolean(row.checkout_enabled),
       published_at: row.published_at || null,
-    })));
+    }); });
     if (slug) return send(res, 200, { item: items[0] || null });
     return send(res, 200, { items, page, hasMore, publicationTimestampReliable, ...(rankedTotal === null ? {} : { total: rankedTotal }) });
   } catch {

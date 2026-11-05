@@ -20,6 +20,7 @@ import peleza
 import daraja
 import paystack
 import payments
+import checkout
 
 logger = logging.getLogger("lockd.intelligence")
 
@@ -35,7 +36,7 @@ async def lifespan(application):
             logger.warning(json.dumps({'event': provider + '_' + environment + '_authorization',
                                        'verified': getattr(application.state, provider + '_authorization_verified'),
                                        'payments_enabled': False}))
-    payment_worker = asyncio.create_task(reconcile_payments()) if paystack.reconciliation_enabled() else None
+    payment_worker = asyncio.create_task(reconcile_payments()) if (paystack.reconciliation_enabled() or checkout.configured()) else None
     try:
         yield
     finally:
@@ -49,7 +50,7 @@ async def reconcile_payments():
     """Recover durable jobs while Render is awake; this is not an always-on SLA."""
     while True:
         try:
-            result = await asyncio.to_thread(payments.reconcile_one)
+            result = await asyncio.to_thread(checkout.reconcile_one if checkout.configured() else payments.reconcile_one)
             if result['state'] != 'idle':
                 logger.info(json.dumps({'event': 'test_payment_reconciliation', 'state': result['state']}))
         except Exception:
@@ -353,3 +354,56 @@ def credit_request(body: CreditInput):
         return {'state': outcome if applied else 'not_applied', 'environment': 'sandbox', 'booking_authorized': False}
     except persona.IntegrationUnavailable:
         return JSONResponse({'detail': 'Credit request unavailable'}, status_code=503)
+
+
+class CheckoutStart(BaseModel):
+    model_config = ConfigDict(extra='forbid', strict=True)
+    booking_id: str
+    customer_id: str
+    email: str
+    request_key: str
+
+
+class CheckoutVerify(BaseModel):
+    model_config = ConfigDict(extra='forbid', strict=True)
+    booking_id: str
+    customer_id: str
+    reference: str
+
+
+@app.post('/v1/checkout/start', dependencies=[Depends(authorize)])
+def start_checkout(body: CheckoutStart):
+    from uuid import UUID
+    try:
+        booking, customer, key = str(UUID(body.booking_id)), str(UUID(body.customer_id)), str(UUID(body.request_key))
+        if len(body.email) > 254 or '@' not in body.email or any(ord(c)<32 for c in body.email):
+            raise ValueError()
+        return checkout.start(booking, customer, body.email, key)
+    except ValueError:
+        return JSONResponse({'detail': 'Check reservation details'}, status_code=400)
+    except (persona.IntegrationUnavailable, persona.InvalidProviderResult):
+        return JSONResponse({'detail': 'Checkout unavailable'}, status_code=503)
+
+
+@app.post('/v1/checkout/verify', dependencies=[Depends(authorize)])
+def verify_checkout(body: CheckoutVerify):
+    from uuid import UUID
+    try:
+        UUID(body.booking_id)
+        customer = str(UUID(body.customer_id))
+        return checkout.verify(body.reference, customer)
+    except ValueError:
+        return JSONResponse({'detail': 'Check reservation details'}, status_code=400)
+    except (persona.IntegrationUnavailable, persona.InvalidProviderResult):
+        return JSONResponse({'detail': 'Payment status unavailable'}, status_code=503)
+
+
+@app.post('/webhooks/checkout/paystack')
+async def checkout_webhook(request: Request):
+    try:
+        raw = await request.body()
+        return await asyncio.to_thread(checkout.receive, raw, request.headers.get('x-paystack-signature', ''))
+    except persona.InvalidProviderResult:
+        return JSONResponse({'detail': 'Invalid payment event'}, status_code=401)
+    except persona.IntegrationUnavailable:
+        return JSONResponse({'detail': 'Payment events unavailable'}, status_code=503)

@@ -134,7 +134,7 @@
   }
 
   async function accountFetch(url,options) {
-    try{return await fetch(url,options);}
+    try{return await fetch(url,{...options,signal:options?.signal||AbortSignal.timeout(15000)});}
     catch{throw new Error('LOCKD could not be reached. Check your connection and try again.');}
   }
   function headers(token, extra = {}) {
@@ -159,7 +159,7 @@
       else if (normalized.includes("provider is not enabled") || normalized.includes("unsupported provider")) message = "This sign-in option is unavailable right now. Try email instead.";
       else if (/schema cache|does not exist|could not find the table|could not find the function/.test(normalized)) message = "LOCKD account storage is still being configured. Please try again later.";
       else if (response.status >= 500) message = "The account service is temporarily unavailable. Please try again shortly.";
-      throw new Error(String(message).slice(0, 300));
+      const error=new Error(String(message).slice(0,300));error.status=response.status;error.code=data.error_code||data.code;throw error;
     }
     return data;
   }
@@ -183,9 +183,9 @@
         const refreshed = await authRequest("token", { body: { refresh_token: session.refresh_token }, query: "?grant_type=refresh_token" });
         storeSession(refreshed);
       } catch (error) {
-        clearSession();
-        if (/temporarily unavailable|too many attempts/i.test(error.message)) throw error;
-        return null;
+        // A network outage or provider throttle must not delete a valid refresh token.
+        if ([400,401,403].includes(error.status)) { clearSession(); return null; }
+        throw error;
       }
     }
     return session;

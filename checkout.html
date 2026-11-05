@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+ <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+ <meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#f7f4ef">
+ <title>Your reservation — LOCKD</title>
+ <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+ <link rel="stylesheet" href="./styles.css"><link rel="stylesheet" href="./account.css"><link rel="stylesheet" href="./brand-refinement.css"><link rel="stylesheet" href="./checkout.css">
+ <script src="./app.js" defer></script><script src="./account-service.js" defer></script>
+ <script src="./checkout.mjs" type="module"></script><script src="./privacy-preferences.mjs" type="module"></script>
+</head>
+<body class="checkout-page account-page">
+ <a class="skip-link" href="#main">Skip to reservation</a>
+ <header class="site-header"><a class="brand" href="index.html" aria-label="LOCKD home"><img class="brand-image" src="./assets/brand/lockd.svg" alt="LOCKD" width="1330" height="317"></a><a class="text-button" href="account.html#bookings">Your reservations</a></header>
+ <main class="checkout-main" id="main">
+  <a class="checkout-back" href="account.html#bookings">Back to reservations</a>
+  <p class="eyebrow">YOUR RESERVATION</p><h1>Review your booking.</h1>
+  <p id="checkout-status" role="status" aria-live="polite">Loading your reservation…</p>
+  <section id="checkout-content" class="checkout-layout" hidden>
+   <article class="checkout-details"><h2 id="checkout-title"></h2><p id="checkout-dates"></p><p id="checkout-quantity"></p>
+    <div class="checkout-state"><span id="checkout-state"></span><p id="checkout-note"></p><p id="checkout-expiry"></p></div>
+    <details id="checkout-conditions" hidden><summary>Rental conditions</summary><p></p></details>
+    <div class="checkout-links"><a id="checkout-listing" class="text-button" hidden>View rental</a><a id="checkout-message" class="text-button" hidden>Message lister</a><a id="checkout-support" class="text-button" hidden>Get help</a></div>
+   </article>
+   <aside class="checkout-summary" aria-label="Price summary"><h2>Price summary</h2><dl id="checkout-prices"></dl><p class="checkout-deposit">The refundable deposit is separate from the rental charge.</p>
+    <button id="checkout-pay" class="button button-dark" type="button" hidden>Secure my booking</button>
+    <button id="checkout-refresh" class="text-button" type="button">Check status</button><button id="checkout-cancel" class="text-button" type="button" hidden>Cancel request</button>
+   </aside>
+  </section>
+  <a id="checkout-signin" class="button button-dark" hidden>Sign in</a>
+ </main>
+</body></html>

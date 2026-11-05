@@ -1,0 +1,28 @@
+import {privateRequest,node,status} from './private-client.mjs';
+const $=selector=>document.querySelector(selector), id=new URL(location.href).searchParams.get('booking');
+const feedback=$('#checkout-status'),pay=$('#checkout-pay'),refresh=$('#checkout-refresh'),cancel=$('#checkout-cancel');
+let reservation,requestKey=crypto.randomUUID(),busy=false;
+const labels={pending_owner:'Awaiting approval',awaiting_payment:'Ready for payment',confirmed:'Confirmed',active:'Rental in progress',completed:'Completed',cancelled:'Cancelled',expired:'Request expired',rejected:'Request declined',disputed:'Under review',pending:'Request received'};
+function render(data){
+ reservation=data.booking;const b=reservation,attempt=data.attempt;
+ $('#checkout-content').hidden=false;$('#checkout-title').textContent=b.title||'Your rental';
+ const date=value=>new Intl.DateTimeFormat('en',{day:'numeric',month:'short',year:'numeric'}).format(new Date(value+'T12:00:00'));
+ $('#checkout-dates').textContent=`${date(b.startDate)} – ${date(b.endDate)}`;$('#checkout-quantity').textContent=`Quantity: ${b.quantity}`;
+ $('#checkout-state').textContent=labels[b.status]||'Request received';
+ const isTest=attempt?.environment==='test';
+ $('#checkout-note').textContent=b.paymentStatus==='paid'?'Payment verified.':b.status==='expired'?'The hold has ended. Check new dates on the rental’s page.':b.status==='pending_owner'?'We’ll keep this reservation here while the required approvals are completed.':attempt?.state==='review_required'?'This payment needs a review. Contact support before making another payment.':attempt?.state==='failed'?'Payment was not completed. Check the status before trying again.':isTest?'This reservation has not been paid.':b.status==='awaiting_payment'?(data.canPay?'Review the total, then continue to payment.':'No payment has been taken. You can check for updates here.'):'Your latest reservation status is shown here.';
+ $('#checkout-expiry').textContent=['awaiting_payment','pending_owner'].includes(b.status)&&b.expiresAt?`Held until ${new Date(b.expiresAt).toLocaleString()}.`:'';
+ const currency=b.currency||'KES',money=value=>new Intl.NumberFormat('en-KE',{style:'currency',currency}).format(Number(value));
+ $('#checkout-prices').replaceChildren(...[['Rental charge',b.rentalAmount],['Refundable deposit',b.depositAmount],['Total',b.totalAmount]].map(([label,value])=>{const row=node('div',undefined,label==='Total'?{class:'checkout-total'}:{});row.append(node('dt',label),node('dd',value===null?'Not recorded':money(value)));return row;}));
+ $('#checkout-conditions').hidden=!b.conditions;$('#checkout-conditions p').textContent=b.conditions||'';
+ pay.hidden=!data.canPay||isTest;pay.textContent=attempt?.state==='pending'?'Continue payment':'Secure my booking';
+ cancel.hidden=!['pending_owner','awaiting_payment'].includes(b.status)||b.paymentStatus!=='unpaid'||['initializing','pending','review_required'].includes(attempt?.state);
+ if(b.listingSlug){$('#checkout-listing').href='rental.html?slug='+encodeURIComponent(b.listingSlug);$('#checkout-listing').hidden=false;}if(b.listingId){$('#checkout-message').href='messages.html?listing='+encodeURIComponent(b.listingId)+'&booking='+encodeURIComponent(b.id);$('#checkout-message').hidden=document.documentElement.dataset.lockdMessaging!=='enabled';}
+ $('#checkout-support').href='trust.html?booking='+encodeURIComponent(b.id);$('#checkout-support').hidden=false;
+}
+async function update(verify=false){if(busy)return;busy=true;refresh.disabled=pay.disabled=cancel.disabled=true;status(feedback,'Checking your reservation…');try{if(verify)await privateRequest('bookings',{view:'checkout'},{action:'verify',bookingId:id});const data=await privateRequest('bookings',{view:'checkout',booking:id});render(data);status(feedback,'');}catch(error){status(feedback,error.message,true);}finally{busy=false;refresh.disabled=pay.disabled=cancel.disabled=false;}}
+refresh.addEventListener('click',()=>update(true));
+pay.addEventListener('click',async()=>{if(busy)return;busy=true;pay.disabled=true;status(feedback,'Opening payment…');try{const result=await privateRequest('bookings',{view:'checkout'},{action:'start',bookingId:id,requestKey},null,{timeoutMs:16000});if(result.url&&/^https:\/\/checkout\.paystack\.com\/[A-Za-z0-9_-]+$/.test(result.url)){location.assign(result.url);return;}status(feedback,'Your payment is being checked. Use Check status before trying again.');}catch(error){status(feedback,error.message,true);}finally{busy=false;pay.disabled=false;}});
+cancel.addEventListener('click',async()=>{if(!reservation||busy)return;if(!confirm('Cancel this reservation request?'))return;busy=true;cancel.disabled=true;try{const session=await window.LockdAccount.getSession();const response=await fetch('/api/bookings',{method:'PATCH',headers:{Authorization:'Bearer '+session.access_token,'Content-Type':'application/json'},body:JSON.stringify({bookingId:id,action:'cancel'}),signal:AbortSignal.timeout(12000)});const data=await response.json();if(!response.ok)throw Error(data.message||'This request could not be cancelled.');busy=false;await update();}catch(error){status(feedback,error.message,true);}finally{busy=false;cancel.disabled=false;}});
+async function boot(){if(!/^[0-9a-f-]{36}$/i.test(id||'')){status(feedback,'Choose a reservation from your account.');return;}try{const session=await window.LockdAccount.getSession();if(!session){status(feedback,'Sign in to view your reservation.');const link=$('#checkout-signin');link.href=window.LockdAccount.authLink({returnTo:'/checkout.html?booking='+encodeURIComponent(id)});link.hidden=false;return;}await update(new URL(location.href).searchParams.has('reference'));}catch(error){status(feedback,error.message,true);}}
+void boot();

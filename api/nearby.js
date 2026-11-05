@@ -127,8 +127,10 @@ module.exports = async function handler(req, res) {
     if (!listingResponse.ok) return send(res, 502, { error: "catalogue_unavailable", message: "Nearby listing details could not be loaded right now." });
     const records = await listingResponse.json();
     if (!Array.isArray(records)) return send(res, 502, { error: "catalogue_unavailable", message: "Nearby listing details returned an unexpected response." });
-    const items = await Promise.all(ranked.map(async (match) => {
-      const row = records.find((record) => record.id === match.listing_id);
+    const covers = await signImages(config, records.map(row => row.images?.[0]));
+    const indexed = new Map(records.map((row,index) => [row.id,{...row, signedCover:covers[index]}]));
+    const items = ranked.map((match) => {
+      const row = indexed.get(match.listing_id);
       if (!row || row.listing_status !== "published" || row.approval_status !== "approved") return null;
       return {
         id: row.id,
@@ -138,7 +140,7 @@ module.exports = async function handler(req, res) {
         market_category: row.market_category,
         summary: row.summary,
         description: row.description,
-        images: (await signImages(config, Array.isArray(row.images) ? row.images : [], { limit: 1 })).filter(Boolean),
+        images: [row.signedCover].filter(Boolean),
         image_alt: row.image_alt,
         location_label: row.location_label,
         price_amount: row.price_amount,
@@ -150,7 +152,7 @@ module.exports = async function handler(req, res) {
         published_at: row.published_at || null,
         distance_km: Math.max(0, Number(match.distance_km)),
       };
-    }));
+    });
     const safeItems = items.filter((item) => item && Number.isFinite(item.distance_km));
     return send(res, 200, { items: safeItems, page, hasMore: (page + 1) * pageSize < total, total, radiusKm });
   } catch {

@@ -40,6 +40,7 @@ async function signOne(config, value, token = null) {
     method: "POST",
     headers,
     body: JSON.stringify({ expiresIn: 3600 }),
+    signal: AbortSignal.timeout(6000),
   });
   if (!response.ok) return null;
   const data = await response.json().catch(() => ({}));
@@ -49,16 +50,21 @@ async function signOne(config, value, token = null) {
 async function signImages(config, values, { token = null, limit = Infinity } = {}) {
   if (!Array.isArray(values)) return [];
   const selected = values.slice(0, limit);
-  const result = new Array(selected.length);
-  let cursor = 0;
-  const workers = Array.from({ length: Math.min(8, selected.length) }, async () => {
-    while (cursor < selected.length) {
-      const index = cursor++;
-      result[index] = await signOne(config, selected[index], token);
-    }
-  });
-  await Promise.all(workers);
-  return result;
+  const paths = selected.map(value => storagePath(value, config));
+  const unique = [...new Set(paths.filter(Boolean))];
+  if (!unique.length) return selected.map(() => null);
+  // One caller-scoped Storage request for the whole result set. Never cache
+  // private signed URLs across requests or fall back to public object URLs.
+  const response = await fetch(`${config.url}/storage/v1/object/sign/lockd-listings`, {
+    method: "POST",
+    headers: { ...config.headers, ...(token ? { Authorization: `Bearer ${token}` } : {}), "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ expiresIn: 3600, paths: unique }),
+    signal: AbortSignal.timeout(6000),
+  }).catch(() => null);
+  if (!response?.ok) return selected.map(() => null);
+  const data = await response.json().catch(() => []);
+  const signed = new Map((Array.isArray(data) ? data : []).filter(item => unique.includes(item.path) && !item.error).map(item => [item.path, signedUrl(config, item.signedURL || item.signedUrl)]));
+  return paths.map(path => signed.get(path) || null);
 }
 
 module.exports = { storagePath, signedUrl, signOne, signImages };

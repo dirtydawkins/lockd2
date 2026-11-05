@@ -39,6 +39,7 @@ function date(s) {
 }
 safeErrors.add("The price changed. Review the current total.");
 module.exports = async (req, res) => {
+  if (req.query?.view === "checkout") return require("../lib/checkout-api")(req,res);
   const send = (code, data) => {
     res.setHeader("Cache-Control", "no-store");
     return res.status(code).json(data);
@@ -136,6 +137,8 @@ module.exports = async (req, res) => {
         headers,
         signal: AbortSignal.timeout(8000),
       });
+      if (!identity.ok && ![401,403].includes(identity.status))
+        return send(503, { message: "Your account could not be checked right now. Please try again." });
       if (!identity.ok)
         return send(401, {
           message: "Your session has expired. Sign in again.",
