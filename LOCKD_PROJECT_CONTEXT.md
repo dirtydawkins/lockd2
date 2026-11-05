@@ -18,6 +18,9 @@ Latest user decisions, 1 November 2026. Preserve these across subsequent work.
 
 This document is development context, not customer-facing copy. Markdown and test artifacts are excluded by `.vercelignore`.
 
+- Latest 5 November continuation overrides earlier pending-access notes: browser access restored; migrations 0025/0026/0027 applied successfully and privilege/private-avatar checks passed. The approved private Render/Vercel token is configured and authenticated; the user explicitly confirmed keeping it. No Paystack secret was created or replaced. Actual Paystack test authorization rejects the saved key; Daraja authorization passes, no payments processed.
+- User supplied new location/search/Messages concepts, then explicitly approved the existing landing page. Preserve that homepage composition. Refine interior pages and the native location picker; keep messages private, human-facing and integrated with the existing account. No fake conversations, avatars, unread counts or popular locations. Add relevant actual profile/settings features; photo storage is private and account-scoped. See UI_ACCOUNT_RELEASE_20261105.md for current implementation, actual tests and remaining dependencies.
+
 - Preserve the hero and search identity; refine selected layouts and remove buzzwords and customer-facing integration diagnostics (including connected/not connected).
 
 - Latest terminology override: use Lister/Listers, not Host/Hosts, for everyone offering stays, items, cars and experiences. Use Become a lister, Message lister and Lister dashboard; customers are Renters. Existing database owner/host identifiers are internal compatibility details and do not create separate accounts.

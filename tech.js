@@ -293,7 +293,7 @@
     if (controller) controller.abort();
     controller = new AbortController();
     status.dataset.kind = "loading";
-    status.textContent = "Loading published LOCKD rentals…";
+    status.textContent = "Finding rentals…";
     loadMore.hidden = true;
     const dateFrom = filterFields.startDate.value;
     const dateTo = filterFields.endDate.value;
@@ -334,15 +334,15 @@
       hasMore = data.hasMore === true;
       const totalLabel = Number.isInteger(data.total) ? data.total : loadedListings.length;
       const countSuffix = Number.isInteger(data.total) ? "" : hasMore ? "+" : "";
-      count.textContent = `${totalLabel}${countSuffix} published LOCKD ${totalLabel === 1 ? "rental" : "rentals"}`;
+      count.textContent = `${totalLabel}${countSuffix} ${totalLabel === 1 ? "rental" : "rentals"}`;
       if (!loadedListings.length) {
         status.dataset.kind = "empty";
         status.textContent = Object.keys(filters).some((key) => !["sort", "quantity"].includes(key))
-          ? "No published LOCKD technology rentals match these filters yet. Clear a filter or try another category."
-          : "No published LOCKD technology rentals are available to show yet. Check back after listers publish approved listings.";
+          ? "No rentals match these filters. Try another category or clear a filter."
+          : "No technology rentals here yet. Try another category or check back soon.";
       } else {
         status.dataset.kind = "loaded";
-        status.textContent = "Published, approved LOCKD listings only. Check each listing’s terms and availability.";
+        status.textContent = "Check each rental’s details and available dates.";
       }
       loadMore.hidden = !hasMore;
       await renderPersonal();

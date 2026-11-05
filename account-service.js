@@ -125,7 +125,7 @@
         throw new Error("LOCKD account services are not configured for this deployment yet.");
       }
       const parsed = new URL(data.supabase.url);
-      if (parsed.protocol !== "https:") throw new Error("LOCKD account services require a secure Supabase connection.");
+      if (parsed.protocol !== "https:") throw new Error("Account services are unavailable right now. Please try again.");
       config = { ...data, supabase: { url: parsed.origin, publishableKey: data.supabase.publishableKey } };
       return config;
     })();
@@ -152,7 +152,7 @@
       else if (normalized.includes("email not confirmed") || normalized.includes("email_not_confirmed")) message = "Verify your email before signing in. You can request another verification email below.";
       else if (normalized.includes("already registered") || normalized.includes("user already exists")) message = "Try signing in or request a password reset for this email.";
       else if (response.status === 429 || normalized.includes("rate limit")) message = "Too many attempts. Please wait a little before trying again.";
-      else if (normalized.includes("provider is not enabled") || normalized.includes("unsupported provider")) message = "This sign-in provider is not enabled in the LOCKD Supabase project yet.";
+      else if (normalized.includes("provider is not enabled") || normalized.includes("unsupported provider")) message = "This sign-in option is unavailable right now. Try email instead.";
       else if (/schema cache|does not exist|could not find the table|could not find the function/.test(normalized)) message = "LOCKD account storage is still being configured. Please try again later.";
       else if (response.status >= 500) message = "The account service is temporarily unavailable. Please try again shortly.";
       throw new Error(String(message).slice(0, 300));
@@ -362,7 +362,7 @@
         type: "error",
         message: cancelled
           ? "Sign-in was cancelled. Choose another sign-in method whenever you’re ready."
-          : "Sign-in could not be completed. Try again or use email and password. If the problem continues, check the provider settings in Supabase.",
+          : "Sign-in could not be completed. Please try again or use email and password.",
       };
     }
 
@@ -387,7 +387,7 @@
         const knownMessage = /provider is not enabled|too many attempts|temporarily unavailable/i.test(error.message || "");
         throw new Error(knownMessage
           ? error.message
-          : "Sign-in could not be completed. Start again from LOCKD, or check that this provider is configured in Supabase.");
+          : "Sign-in could not be completed. Return to LOCKD and try again.");
       }
       storeSession(data);
       sessionStorage.removeItem(pkceKey);
@@ -463,17 +463,54 @@
     return rows[0];
   }
 
-  async function saveProfile(profile) {
+  async function saveProfile(profile, expectedUserId = null) {
     const active = await getSession();
     if (!active?.user?.id) throw new Error("Sign in to update your profile.");
-    const payload = {
-      display_name: typeof profile.display_name === "string" ? profile.display_name.trim().slice(0, 100) || null : null,
-      preferred_currency: ["KES", "USD", "EUR", "GBP"].includes(profile.preferred_currency) ? profile.preferred_currency : "KES",
-      preferred_language: ["en", "sw"].includes(profile.preferred_language) ? profile.preferred_language : "en",
-      discovery_location: typeof profile.discovery_location === "string" ? profile.discovery_location.trim().replace(/\s+/g, " ").slice(0, 120) || null : null,
-    };
-    await supabaseRequest(`lockd_user_profiles?user_id=eq.${active.user.id}`, { method: "PATCH", body: payload, prefer: "return=minimal" });
-    return getProfile(active.user);
+    if(expectedUserId&&active.user.id!==expectedUserId)throw new Error("Your account changed. Reopen your profile to continue.");
+    const payload = {};
+    if(Object.hasOwn(profile,'display_name'))payload.display_name=typeof profile.display_name==='string'?profile.display_name.trim().slice(0,100)||null:null;
+    if(Object.hasOwn(profile,'preferred_currency')){if(!['KES','USD','EUR','GBP'].includes(profile.preferred_currency))throw new Error('Choose a supported currency.');payload.preferred_currency=profile.preferred_currency;}
+    if(Object.hasOwn(profile,'preferred_language')){if(!['en','sw'].includes(profile.preferred_language))throw new Error('Choose a supported language.');payload.preferred_language=profile.preferred_language;}
+    if(Object.hasOwn(profile,'discovery_location'))payload.discovery_location=typeof profile.discovery_location==='string'?profile.discovery_location.trim().replace(/\s+/g,' ').slice(0,120)||null:null;
+    if(Object.hasOwn(profile,'avatar_url')){if(profile.avatar_url!==null&&profile.avatar_url!==`lockd-avatars/${active.user.id}/avatar.webp`)throw new Error('Choose a valid profile photo.');payload.avatar_url=profile.avatar_url;}
+    if(!Object.keys(payload).length)return getProfile(active.user);
+    await supabaseRequest(`lockd_user_profiles?user_id=eq.${active.user.id}`, { method: "PATCH", body: payload, token:active.access_token, prefer: "return=minimal" });
+    if((await getSession())?.user?.id!==active.user.id)throw new Error('Your account changed. Reopen your profile to continue.');
+    const updated=await getProfile(active.user);emit('lockd:profile-change',{userId:active.user.id});return updated;
+  }
+
+  async function profilePhotoUrl(profile, expectedUserId = null) {
+    const active=await getSession();if(!active||expectedUserId&&active.user.id!==expectedUserId)return null;
+    const path=`${active.user.id}/avatar.webp`;
+    if(profile?.avatar_url===`lockd-avatars/${path}`){
+      const response=await fetch(`${config.supabase.url}/storage/v1/object/sign/lockd-avatars/${path}`,{method:'POST',headers:headers(active.access_token,{'Content-Type':'application/json'}),body:JSON.stringify({expiresIn:3600}),cache:'no-store'});
+      if(!response.ok)return null;const data=await response.json();if((await getSession())?.user?.id!==active.user.id)return null;
+      try{const raw=data.signedURL||data.signedUrl;const url=new URL(raw.startsWith('/object/')?'/storage/v1'+raw:raw,config.supabase.url+'/storage/v1/');return url.origin===new URL(config.supabase.url).origin&&url.pathname==='/storage/v1/object/sign/lockd-avatars/'+path?url.href:null;}catch{return null;}
+    }
+    try{const url=new URL(profile?.avatar_url);return url.protocol==='https:'&&/(^|\.)googleusercontent\.com$/.test(url.hostname)?url.href:null;}catch{return null;}
+  }
+
+  async function saveProfilePhoto(file) {
+    const active=await getSession();if(!active)throw new Error('Sign in to change your photo.');
+    if(!file||!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>8*1024*1024)throw new Error('Choose a JPG, PNG or WebP photo smaller than 8 MB.');
+    let bitmap;try{bitmap=await createImageBitmap(file);}catch{throw new Error('That photo could not be opened. Please choose another.');}
+    if(!bitmap.width||!bitmap.height||bitmap.width*bitmap.height>40000000){bitmap.close();throw new Error('Choose a smaller photo.');}
+    const canvas=document.createElement('canvas');canvas.width=512;canvas.height=512;const context=canvas.getContext('2d'),size=Math.min(bitmap.width,bitmap.height);
+    if(!context){bitmap.close();throw new Error('Your browser could not prepare the photo.');}
+    context.drawImage(bitmap,(bitmap.width-size)/2,(bitmap.height-size)/2,size,size,0,0,512,512);bitmap.close();
+    const image=await new Promise(resolve=>canvas.toBlob(resolve,'image/webp',.84));canvas.width=canvas.height=0;
+    if(!image||image.type!=='image/webp'||image.size>524288)throw new Error('Your browser could not prepare a suitable photo. Please try another.');
+    if((await getSession())?.user?.id!==active.user.id)throw new Error('Your account changed. Reopen your profile to continue.');
+    const response=await fetch(`${config.supabase.url}/storage/v1/object/lockd-avatars/${active.user.id}/avatar.webp`,{method:'POST',headers:headers(active.access_token,{'Content-Type':'image/webp','x-upsert':'true','cache-control':'max-age=0'}),body:image,cache:'no-store'});
+    if(!response.ok)throw new Error('Your photo could not be saved. Please try again.');
+    return saveProfile({avatar_url:`lockd-avatars/${active.user.id}/avatar.webp`},active.user.id);
+  }
+
+  async function removeProfilePhoto() {
+    const active=await getSession();if(!active)throw new Error('Sign in to remove your photo.');
+    const response=await fetch(`${config.supabase.url}/storage/v1/object/lockd-avatars`,{method:'DELETE',headers:headers(active.access_token,{'Content-Type':'application/json'}),body:JSON.stringify({prefixes:[`${active.user.id}/avatar.webp`]}),cache:'no-store'});
+    if(!response.ok&&response.status!==404)throw new Error('Your photo could not be removed. Please try again.');
+    return saveProfile({avatar_url:null},active.user.id);
   }
 
   async function listSavedListings() {
@@ -572,7 +609,7 @@
 
   window.LockdAccount = {
     init, getConfig: () => init(), getSession, signUp, signIn, signOut, resendVerification,
-    requestPasswordReset, updatePassword, startOAuth, completeCallback, getProfile, saveProfile,
+    requestPasswordReset, updatePassword, startOAuth, completeCallback, getProfile, saveProfile, profilePhotoUrl, saveProfilePhoto, removeProfilePhoto,
     listSavedListings, saveFavorite, removeFavorite, refreshFavoriteIds, ensureFavoriteIds,
     createFavoriteButton, listDeletionRequests,
     requestDeletion, safeReturnTo, setPendingAuth, getPendingAuth, clearPendingAuth, authLink,

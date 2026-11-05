@@ -161,8 +161,8 @@
         </div>
         <div class="discovery-location-bar">
           <button class="discovery-context-part" id="open-location-picker" type="button" aria-haspopup="dialog" aria-label="Choose a location"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg><span><small>Where</small><span id="discovery-location-label">Anywhere</span></span></button>
-          <button class="discovery-context-part" type="button" data-discovery-dates aria-label="Choose rental dates"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v16H4z M4 10h16 M8 2v6 M16 2v6"/></svg><span><small>When</small><span data-discovery-date-label>Choose dates</span></span></button>
-          <button class="discovery-context-part" type="button" data-discovery-party aria-label="Choose guests or quantity"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4"/><path d="M4 22v-3a8 6 0 0 1 16 0v3Z"/></svg><span><small>Your plans</small><span data-discovery-party-label>1 rental</span></span></button>
+          <button class="discovery-context-part" type="button" data-discovery-dates hidden aria-label="Choose rental dates"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v16H4z M4 10h16 M8 2v6 M16 2v6"/></svg><span><small>When</small><span data-discovery-date-label>Choose dates</span></span></button>
+          <button class="discovery-context-part" type="button" data-discovery-party hidden aria-label="Choose guests or quantity"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4"/><path d="M4 22v-3a8 6 0 0 1 16 0v3Z"/></svg><span><small>Your plans</small><span data-discovery-party-label>1 rental</span></span></button>
           <button class="discovery-clear-location" id="clear-location" type="button" hidden>Clear</button>
         </div>
         <form class="discovery-filters" id="discovery-filters">
@@ -315,16 +315,17 @@
 
     <dialog class="location-dialog" id="location-dialog" aria-labelledby="location-dialog-title">
       <div class="location-sheet-grip" data-sheet-grip aria-hidden="true"><span></span></div>
-      <div class="location-picker-heading"><h2 id="location-dialog-title">Where to?</h2><button type="button" class="location-dialog-close" data-dialog-close aria-label="Close location options">×</button></div>
+      <div class="location-picker-heading"><h2 id="location-dialog-title"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#location"></use></svg>Where to?</h2><button type="button" class="location-dialog-close" data-dialog-close aria-label="Close location options">×</button></div>
+      <p class="location-picker-lede">Find rentals and experiences near you.</p>
       <form class="manual-location-form" id="manual-location-form">
-        <label for="manual-location-input">Town or neighbourhood</label>
-        <div class="location-search-row"><input id="manual-location-input" type="search" placeholder="Search a place" autocomplete="off" maxlength="80"><button class="text-button" id="manual-location-search" type="button">Search</button></div>
+        <label class="visually-hidden" for="manual-location-input">City, town or neighbourhood</label>
+        <div class="location-search-row"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#search"></use></svg><input id="manual-location-input" type="search" placeholder="City, town or neighbourhood" autocomplete="off" maxlength="80"><button class="text-button" id="manual-location-search" type="button">Search</button></div>
         <div id="manual-place-results" class="place-results" aria-label="Matching places"></div>
       </form>
+      <button class="location-current" id="use-current-location" type="button"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#near"></use></svg><span><strong>Use my current location</strong><small>Find rentals near me</small></span><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#chevron"></use></svg></button>
       <section id="recent-locations" hidden><h3>Recent places</h3><div id="recent-location-choices"></div></section>
-      <button class="text-button location-current" id="use-current-location" type="button">Use my current location</button>
       <p class="location-dialog-status" id="location-dialog-status" role="status" aria-live="polite"></p>
-      <div class="location-picker-footer"><button class="text-button" id="location-anywhere" type="button">Anywhere</button><small><a href="https://www.geoapify.com/" target="_blank" rel="noopener">Geoapify</a> · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap</a></small></div>
+      <div class="location-picker-footer"><button id="location-anywhere" type="button"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#location"></use></svg><span><strong>Anywhere</strong><small>Explore all rentals and experiences</small></span><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#chevron"></use></svg></button><small><a href="https://www.geoapify.com/" target="_blank" rel="noopener">Geoapify</a> · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap</a></small></div>
     </dialog>
 
     <footer class="site-footer">

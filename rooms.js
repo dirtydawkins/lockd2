@@ -131,7 +131,7 @@
 
   async function load(filters, requireDates, append = false) {
     status.dataset.kind = "loading";
-    status.textContent = append ? "Loading more published stays…" : "Searching published stays…";
+    status.textContent = append ? "Finding more stays…" : "Finding stays…";
     if (!append) {
       page = 0;
       loadedCount = 0;
@@ -171,24 +171,24 @@
       hasMore = data.hasMore === true;
       loadMoreButton.hidden = !hasMore;
       if (!listings.length) {
-        count.textContent = `${loadedCount} published ${loadedCount === 1 ? "stay" : "stays"}`;
+        count.textContent = `${loadedCount} ${loadedCount === 1 ? "stay" : "stays"}`;
         if (append && loadedCount) {
           status.dataset.kind = "loaded";
-          status.textContent = "You’ve reached the end of the published stays.";
+          status.textContent = "You’ve seen all matching stays.";
           return;
         }
         status.dataset.kind = "empty";
         status.textContent = filters.startDate
-          ? "No published stays match this location and date search. Try different dates or another area."
-          : "There are no published stays to show yet. Check back after owners publish approved room listings.";
+          ? "No stays match your search. Try different dates or another area."
+          : "No stays here yet. Try another area or check back soon.";
         return;
       }
       listings.forEach((listing) => grid.append(makeCard(listing, filters)));
       loadedCount += listings.length;
-      count.textContent = `${loadedCount}${hasMore ? "+" : ""} published ${loadedCount === 1 ? "stay" : "stays"}`;
+      count.textContent = `${loadedCount}${hasMore ? "+" : ""} ${loadedCount === 1 ? "stay" : "stays"}`;
       status.dataset.kind = "loaded";
       status.textContent = filters.startDate
-        ? "These published stays passed the calendar check for your selected dates. This check is not a reservation."
+        ? "These stays match your dates. Choose one to review the details and rental options."
         : "Choose dates to check the listing calendars before viewing a stay.";
     } catch (error) {
       if (!append) count.textContent = "";

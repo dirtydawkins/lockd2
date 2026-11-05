@@ -2,57 +2,73 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co; img-src 'self' blob:; object-src 'none'; frame-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co; img-src 'self' blob: https://hqlrzbyhccoptjgyslhy.supabase.co; object-src 'none'; frame-src 'none'; base-uri 'self'; form-action 'self'">
   <title>Messages — LOCKD</title><link rel="icon" href="favicon.svg"><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="account.css"><link rel="stylesheet" href="messages.css">
-  <script src="account-service.js" defer></script><script src="messages.mjs" type="module"></script>
+  <script src="account-service.js" defer></script><script src="messages.mjs" type="module"></script><script src="profile-avatar.mjs" type="module"></script>
     <link rel="stylesheet" href="./brand-refinement.css">
 </head>
 <body class="account-page messages-page">
   <a href="#main" class="skip-link">Skip to messages</a>
-  <header class="site-header"><a class="brand" href="index.html"><img class="brand-image" src="./assets/brand/lockd.svg" alt="LOCKD" width="1330" height="317"></a><nav aria-label="Account navigation"><a href="account.html">Your account</a> · <a href="owners.html#owner-workspace">Lister workspace</a> · <a href="rentals.html">Explore rentals</a></nav></header>
+  <header class="site-header"><a class="brand" href="index.html" aria-label="LOCKD home"><img class="brand-image" src="./assets/brand/lockd.svg" alt="LOCKD" width="1330" height="317"></a><a class="own-profile-photo" data-own-profile-photo href="account.html#personal" aria-label="Your profile" hidden></a><details class="messages-nav-menu"><summary aria-label="Account menu"><span></span><span></span><span></span></summary><nav aria-label="Account menu"><a href="account.html">Your account</a><a href="account.html#bookings">Reservations</a><a href="account.html#saved">Saved rentals</a><a href="owners.html#owner-workspace">Lister workspace</a><a href="privacy.html">Privacy</a></nav></details><a class="header-cta" href="rentals.html">Explore Rentals</a></header>
+  <div class="messages-shell">
+  <nav class="messages-account-nav" aria-label="Account navigation">
+    <a href="account.html"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#account"></use></svg>Your account</a>
+    <a href="account.html#bookings"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#calendar"></use></svg>Reservations</a>
+    <a href="messages.html" aria-current="page"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#message"></use></svg>Messages</a>
+    <a href="account.html#saved"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#heart"></use></svg>Saved rentals</a>
+    <a href="owners.html#owner-workspace"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#stay"></use></svg>Your listings</a>
+    <a href="account.html#personal"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#account"></use></svg>Personal details</a>
+    <a href="owners.html" class="messages-create-listing">Create a listing <span aria-hidden="true">+</span></a>
+  </nav>
   <main id="main" class="messages-main">
-    <div class="messages-heading"><div><p class="eyebrow">A LITTLE CLOSER TO YOUR NEXT PLAN</p><h1>Messages.</h1><p class="messages-lede">Make plans. Share details. Stay in touch.</p></div><a class="text-button" href="account.html">Your account</a></div>
+    <div class="messages-heading"><div><h1>Messages</h1><p class="messages-lede">Keep in touch with listers and renters.</p></div><button class="button button-burgundy message-new" id="new-message" type="button" hidden><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#compose"></use></svg><span>New message</span></button></div>
     <p id="messages-status" role="status" aria-live="polite">Opening your messages…</p>
+    <section id="messages-access" class="messages-access" hidden aria-labelledby="messages-access-title"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#message"></use></svg><h2 id="messages-access-title">Your conversations, together.</h2><p>Use your LOCKD account to talk about rentals, share details and make plans.</p><a id="messages-signin" class="button button-burgundy" href="account.html?returnTo=%2Fmessages.html">Continue to your account</a></section>
+    <button id="retry-inbox" class="text-button" type="button" hidden>Try again</button>
     <div id="message-workspace" class="message-workspace is-locked" hidden>
       <aside class="message-inbox" aria-label="Inbox">
         <div class="message-inbox-heading"><h2>Inbox</h2><button class="text-button" id="refresh-inbox" type="button">Refresh</button></div>
-        <label class="account-field">Search conversations<input type="search" id="conversation-search" placeholder="Lister, renter or rental name" autocomplete="off"></label>
-        <div id="conversations"></div>
-        <details class="message-device-details"><summary>Devices &amp; privacy</summary>
-          <p>Message protection works automatically with your LOCKD account.</p>
+        <label class="conversation-search-field"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#search"></use></svg><span class="visually-hidden">Search conversations</span><input type="search" id="conversation-search" placeholder="Search conversations" autocomplete="off" maxlength="100"></label>
+        <div class="conversation-filters" role="group" aria-label="Filter conversations"><button type="button" data-inbox-filter="all" aria-pressed="true">All</button><button type="button" data-inbox-filter="rental" aria-pressed="false">Rentals</button><button type="button" data-inbox-filter="booking" aria-pressed="false">Bookings</button><button type="button" data-inbox-filter="unread" aria-pressed="false">Unread</button></div>
+        <div id="conversations" aria-live="polite"></div>
+        <details class="inbox-utilities"><summary>Settings &amp; privacy</summary>
+        <details class="message-device-details"><summary>Your devices</summary>
+          <p>Your messages are protected automatically. Only you and the person you’re messaging can read them, unless you choose to include messages in a report.</p>
           <details><summary>Your security code</summary><p id="own-fingerprint"></p></details>
-          <details><summary>Use messages on another browser</summary><p>Create a connection request on the new browser, then open that file here. Compare its code with the new browser before continuing.</p><input type="file" id="device-link-request" accept=".json" aria-label="Connection request from your new browser"><p id="device-link-code"></p><label class="account-consent"><input type="checkbox" id="device-link-confirm"><span>I checked that the code matches my new browser.</span></label><button type="button" class="text-button" id="create-device-transfer">Create connection file</button><p class="account-field-note">Open that connection file on the new browser. Keep both files private; connection requests expire after 10 minutes.</p></details>
+          <details><summary>Add another browser</summary><p>On your new browser, open Messages and choose “Connect this browser”. Open its request file here and check that both browsers show the same code.</p><input type="file" id="device-link-request" accept=".json" aria-label="Request file from your new browser"><p id="device-link-code"></p><label class="account-consent"><input type="checkbox" id="device-link-confirm"><span>The code matches my new browser.</span></label><button type="button" class="text-button" id="create-device-transfer">Save approval file</button><p class="account-field-note">Open the approval file on your new browser. Keep these files private and finish within 10 minutes.</p></details>
           <details><summary>Remove message access</summary><p>This removes the account’s current message key. You may lose access to old messages unless another approved browser still has the original access.</p><label class="account-consent"><input type="checkbox" id="remove-access-confirm"><span>I understand that old messages may become unreadable.</span></label><button class="text-button" type="button" id="revoke-device">Remove message access</button></details>
           <details><summary>How privacy works</summary><p>Messages are protected on your device. LOCKD can review only the messages you choose to include in a report. Contact codes are remembered automatically; unexpected changes are flagged before sending.</p><p>Keep your browser and LOCKD account secure. Approved browsers currently share one message identity and cannot be removed separately. Someone with your unlocked message access could read past messages. Losing every approved browser can make old messages unreadable.</p></details>
         </details>
         <details><summary>Reports you’ve sent</summary><div id="my-message-reports"></div></details>
+        </details>
       </aside>
-      <section class="message-thread" aria-labelledby="thread-title">
+      <section class="message-thread" aria-labelledby="thread-title" data-empty>
         <button type="button" id="back-to-inbox" class="text-button message-back">All messages</button>
         <section id="message-device" class="message-device" hidden>
-          <p class="eyebrow">YOUR CONVERSATIONS, WITH YOU</p><h2>Use messages on this browser.</h2>
-          <p>Your private message history is linked to another browser. Connect it here to pick up where you left off.</p>
-          <button type="button" class="button button-dark" id="create-link-request">Create connection request</button><p id="connection-request-code"></p>
-          <label class="account-field">Open the connection file from your other browser<input type="file" id="accept-device-transfer" accept=".lockd,.asc,.txt" /></label>
+          <h2>Bring your conversations here.</h2>
+          <p>For your privacy, approve this browser from one you already use for LOCKD messages. You’re still using the same account.</p>
+          <button type="button" class="button button-dark" id="create-link-request">Connect this browser</button><p id="connection-request-code"></p>
+          <label class="account-field">Open the approval file from your other browser<input type="file" id="accept-device-transfer" accept=".lockd,.asc,.txt" /></label>
           <p id="connection-status" role="status"></p><button type="button" id="retry-message-access" class="text-button">Try again</button>
           <details><summary>No longer have the other browser?</summary><p>Your account can start a new message identity, but old messages may become unreadable. Use “Remove message access” under Devices &amp; privacy after reviewing that choice.</p></details>
         </section>
         <div class="message-thread-content">
-          <header class="message-thread-header"><div><h2 id="thread-title">Messages</h2><div class="message-context-links" id="message-context"></div></div>
+          <header class="message-thread-header"><div><h2 id="thread-title" tabindex="-1">Messages</h2><div class="message-context-links" id="message-context"></div></div>
             <details id="contact-check" class="conversation-options" hidden><summary>Conversation options</summary>
-              <details id="security-details"><summary>Compare security codes</summary><p>Check this code with your contact by phone or another trusted way. Matching codes help make sure you’re speaking to the right person.</p><p id="peer-fingerprint"></p><label class="account-consent"><input type="checkbox" id="fingerprint-compared"><span>I checked the full code with my contact and it matches.</span></label><button class="text-button" type="button" id="verify-contact">Codes match</button></details>
+              <details id="security-details"><summary>Verify this contact</summary><p>For extra reassurance, compare this code with your contact in person or another way you trust.</p><p id="peer-fingerprint"></p><label class="account-consent"><input type="checkbox" id="fingerprint-compared"><span>I checked the full code with my contact and it matches.</span></label><button class="text-button" type="button" id="verify-contact">Codes match</button></details>
               <button class="text-button" type="button" id="block-contact">Block contact</button>
             </details>
           </header>
           <div id="contact-reminder" class="contact-reminder" hidden><p>Your contact’s security code changed. Check with them before sending again.</p><button class="text-button" type="button" id="confirm-contact">Compare codes</button></div>
           <div class="message-tools"><label class="account-field"><span class="visually-hidden">Search messages</span><input type="search" id="message-search" placeholder="Search this conversation" maxlength="100"></label><button class="text-button" id="older-messages" type="button" hidden>Earlier messages</button><button class="text-button" id="report-messages" type="button" hidden>Report selected</button></div>
           <p id="sync-status" class="account-field-note" role="status"></p>
-          <div id="message-history" class="message-history" aria-label="Conversation history"><p class="message-empty">Choose a conversation from your inbox.</p></div>
+          <div id="message-history" class="message-history" aria-label="Conversation history"><div class="thread-welcome"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#message"></use></svg><h3>A place for your plans.</h3><p>Choose a conversation to get started.</p></div></div>
           <form id="message-compose" class="message-compose" hidden><label for="message-text" class="visually-hidden">Message</label><textarea id="message-text" name="text" rows="2" maxlength="8000" placeholder="Write a message…"></textarea><button type="submit" class="button button-dark">Send</button><div class="message-attachment-control"><label class="attachment-picker">Attach a photo or PDF<input class="visually-hidden" type="file" id="chat-file" accept=".pdf,.jpg,.jpeg,.png,.webp"></label><span id="attachment-name"></span><button id="remove-attachment" class="text-button" type="button" hidden>Remove</button></div><p id="compose-status" role="status"></p></form>
-          <p class="message-safety">Keep payments in your rental workflow. Messages don’t confirm payments or bookings.</p>
+          <p class="message-safety">Keep payments and reservations on LOCKD.</p>
         </div>
       </section>
     </div>
+    <dialog id="new-message-dialog" aria-labelledby="new-message-title"><div class="new-message-heading"><h2 id="new-message-title">Start a conversation.</h2><button type="button" data-dialog-close aria-label="Close new message">×</button></div><p>Find a rental or lister, then choose what you’d like to ask about.</p><form id="message-target-form" role="search"><label for="message-target-query" class="visually-hidden">Search rentals or listers</label><input id="message-target-query" type="search" placeholder="Search rentals or listers" maxlength="80" autocomplete="off"><button type="submit" class="button button-burgundy">Search</button></form><button id="message-target-back" class="text-button" type="button" hidden>Back to search</button><p id="message-target-status" role="status" aria-live="polite"></p><div id="message-target-results"></div></dialog>
     <dialog id="report-dialog" aria-labelledby="report-title"><form id="report-form" class="account-form"><h2 id="report-title">Report a concern.</h2><p id="report-description">Only the messages shown here will be shared with LOCKD for review. Attachments are not included. We can’t read the rest of your conversation.</p><div id="report-preview"></div><label class="account-field">What happened?<select name="category"><option value="fraud">Suspected fraud</option><option value="off_platform_payment">Off-platform payment request</option><option value="harassment">Harassment</option><option value="threats">Threats</option><option value="attachment">Suspicious attachment</option><option value="listing">Misleading listing information</option><option value="unsafe">Unsafe behaviour</option><option value="other">Something else</option></select></label><label class="account-consent"><input type="checkbox" required name="disclose"><span id="report-consent-label">I agree to share these messages with LOCKD for this report.</span></label><button class="button button-dark" type="submit">Send report</button><button class="text-button" id="close-report" type="button">Cancel</button><p role="status"></p></form></dialog>
-  </main>
+  </main></div>
 </body></html>

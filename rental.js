@@ -302,7 +302,7 @@
       approvalNote.hidden = false;
       approvalNote.textContent = config.supportEmail
         ? "Owner confirmation is required before a booking can be completed."
-        : "Owner confirmation is required. The enquiry contact is not configured yet.";
+        : "This rental needs lister approval. Enquiries are currently unavailable.";
     }
     if (record.requires_approval && config.supportEmail && enquiryLink) {
       const subject = encodeURIComponent(`Rental enquiry: ${record.title}`);
@@ -332,7 +332,7 @@
     if (record.delivery_available !== null && record.delivery_available !== undefined) addFact(facts, "Delivery", record.delivery_available ? "Available" : "Not available");
     if (record.requires_approval) addFact(facts, "Booking process", "Owner confirmation required");
     else if (record.checkout_enabled) addFact(facts, "Booking process", "This listing is marked checkout-enabled, but LOCKD checkout is not live yet");
-    else addFact(facts, "Booking process", "Availability check only; no online checkout is configured");
+    else addFact(facts, "Booking process", "Online reservations are currently unavailable");
     if (["technology", "play", "camera", "phone", "laptop", "audio", "creative"].includes(record.category) || record.market_category) {
       try {
         const key = "lockd:tech:recent:v1";
@@ -387,7 +387,7 @@
         }
         throw new Error(data.message || "This rental could not be loaded.");
       }
-      if (!data.item) throw new Error("This rental is no longer published or could not be found.");
+      if (!data.item) throw new Error("This rental is no longer listed or could not be found.");
       let config = {};
       try {
         const configResponse = await fetch("/api/config", { headers: { Accept: "application/json" }, cache: "no-store" });
@@ -450,7 +450,7 @@
       setMessage("Choose a valid date range and quantity.", "error");
       return;
     }
-    setMessage("Checking the published availability calendar…", "loading");
+    setMessage("Checking your dates…", "loading");
     const submit = form.querySelector("button[type=submit]");
     submit.disabled = true;
     try {

@@ -13,6 +13,16 @@
   let activeUser = null;
   let profile = null;
   let needsProfileName = false;
+  let photoRender = 0;
+
+  async function renderProfilePhoto() {
+    const current=++photoRender,userId=activeUser?.id,name=profile?.display_name||activeUser?.user_metadata?.full_name||'';
+    const targets=$$('[data-profile-photo]');targets.forEach(target=>{target.replaceChildren(document.createTextNode(name.trim().slice(0,1).toLocaleUpperCase()));});
+    $('#remove-profile-photo').hidden=!profile?.avatar_url;
+    if(!userId)return;
+    const url=await account.profilePhotoUrl(profile,userId);if(!url||current!==photoRender||activeUser?.id!==userId)return;
+    targets.forEach(target=>{const image=document.createElement('img');image.src=url;image.alt='';image.width=96;image.height=96;image.referrerPolicy='no-referrer';image.addEventListener('error',()=>image.remove(),{once:true});target.append(image);});
+  }
 
   function setStatus(message = "", kind = "info") {
     status.textContent = message;
@@ -58,7 +68,7 @@
   }
 
   function showSection(name) {
-    const selected = ["overview", "saved", "bookings", "personal", "security", "preferences"].includes(name) ? name : "overview";
+    const selected = ["overview", "saved", "bookings", "personal", "security", "preferences", "privacy"].includes(name) ? name : "overview";
     $$("[data-account-section]").forEach((button) => {
       if (button.dataset.accountSection === selected) button.setAttribute("aria-current", "page");
       else button.removeAttribute("aria-current");
@@ -89,6 +99,8 @@
     showDashboard(user);
     const accountState = await loadDashboardData();
     if (accountState.needsProfileName) return;
+    const selected=window.location.hash.slice(1);showSection(selected);
+    if(selected==='bookings')document.querySelector('#account-dashboard [data-account-panel="bookings"] [data-load-bookings="customer"]')?.click();
     await continuePendingAuthentication();
   }
 
@@ -126,6 +138,9 @@
       $("#profile-currency").value = profile.preferred_currency || "KES";
       $("#profile-language").value = profile.preferred_language || "en";
       $("#profile-location").value = profile.discovery_location || "";
+      await renderProfilePhoto();
+      const methods=[...new Set((activeUser.identities||[]).map(identity=>identity.provider).filter(provider=>['email','google'].includes(provider)))];
+      $('#account-login-methods').textContent=methods.length?methods.map(method=>method==='google'?'Google':'Email').join(' · '):'Your existing LOCKD sign-in';
       if (needsProfileName) {
         showSection("personal");
         setStatus("Add a display name to finish setting up your LOCKD account.", "info");
@@ -375,6 +390,7 @@
     button.disabled = true;
     try {
       profile = await account.saveProfile({ display_name: displayName });
+      $('#account-dashboard-title').textContent=`Welcome${displayName?`, ${displayName.split(/\s+/)[0]}`:' back'}.`;await renderProfilePhoto();
       const completedOnboarding = needsProfileName;
       needsProfileName = false;
       $("#profile-name").required = false;
@@ -396,16 +412,25 @@
     const button = event.currentTarget.querySelector("button[type=submit]");
     button.disabled = true;
     try {
-      await account.saveProfile({
+      profile = await account.saveProfile({
         preferred_currency: $("#profile-currency").value,
         preferred_language: $("#profile-language").value,
         discovery_location: $("#profile-location").value,
-        display_name: $("#profile-name").value || profile?.display_name || "",
       });
       setStatus("Your preferences were saved.", "success");
     } catch (error) { setStatus(error.message || "Your preferences could not be saved.", "error"); }
     finally { button.disabled = false; }
   });
+
+  async function changePhoto(remove=false) {
+    const input=$('#profile-photo-file'),button=$('#remove-profile-photo'),message=$('#profile-photo-status'),file=input.files[0];
+    if(input.disabled||!remove&&!file)return;input.disabled=button.disabled=true;message.textContent=remove?'Removing your photo…':'Saving your photo…';
+    try{profile=remove?await account.removeProfilePhoto():await account.saveProfilePhoto(file);await renderProfilePhoto();message.textContent=remove?'Photo removed.':'Photo saved.';}
+    catch(error){message.textContent=error.message||'Your photo could not be changed. Please try again.';}
+    finally{input.value='';input.disabled=button.disabled=false;}
+  }
+  $('#profile-photo-file').addEventListener('change',()=>void changePhoto());
+  $('#remove-profile-photo').addEventListener('click',()=>void changePhoto(true));
 
   $("#password-form").addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -438,7 +463,7 @@
   $("#account-signout").addEventListener("click", async () => {
     const button = $("#account-signout");
     button.disabled = true;
-    try { await account.signOut(); showAuth("You have signed out.", "success"); }
+    try { await account.signOut(); activeUser=null;profile=null;photoRender++;$$('[data-profile-photo]').forEach(target=>target.replaceChildren());showAuth("You have signed out.", "success"); }
     catch (error) { setStatus(error.message || "Sign out could not reach the account service.", "error"); showAuth(status.textContent, "error"); }
     finally { button.disabled = false; }
   });
@@ -486,7 +511,7 @@
     if (!event.detail?.user) showAuth("Your LOCKD session ended. Sign in again to continue.", "info");
   });
   window.addEventListener("lockd:saved-change", (event) => updateSavedCount(event.detail?.ids?.length || 0));
-  window.addEventListener("hashchange", () => showSection(window.location.hash.slice(1)));
+  window.addEventListener("hashchange", () => {const selected=window.location.hash.slice(1);showSection(selected);if(selected==='bookings'&&activeUser)document.querySelector('#account-dashboard [data-account-panel="bookings"] [data-load-bookings="customer"]')?.click();});
 
   setAuthMode("signin");
   restoreAccount();

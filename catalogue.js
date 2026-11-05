@@ -100,7 +100,7 @@
     const startDate = document.querySelector("#bundle-start")?.value || "";
     const endDate = document.querySelector("#bundle-end")?.value || "";
     if (!bundle.items.length) {
-      output.textContent = "Add at least one published rental to check availability.";
+      output.textContent = "Add a rental to check availability.";
       return;
     }
     if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate) || !/^\d{4}-\d{2}-\d{2}$/.test(endDate) || endDate <= startDate) {
@@ -340,7 +340,7 @@
     if (!bundle.items.length) {
       const empty = document.createElement("p");
       empty.className = "bundle-empty-state";
-      empty.textContent = "Choose a published rental and add it here to start your bundle.";
+      empty.textContent = "Choose a rental to start your bundle.";
       lines.append(empty);
     }
     bundle.items.forEach((item) => {
@@ -471,7 +471,7 @@
     }
     const run = ++requestRun;
     status.dataset.kind = "loading";
-    status.textContent = "Loading published rentals…";
+    status.textContent = "Finding rentals…";
     loadMoreButton.hidden = true;
     const retryButton = document.querySelector("#catalogue-retry");
     if (retryButton) retryButton.hidden = true;
@@ -509,9 +509,9 @@
       const resultCount = document.querySelector("#result-count");
       const totalLabel = Number.isInteger(data.total) ? data.total : items.length;
       const countSuffix = Number.isInteger(data.total) ? "" : hasMore ? "+" : "";
-      if (resultCount) resultCount.textContent = `${totalLabel}${countSuffix} published ${totalLabel === 1 ? "rental" : "rentals"}`;
+      if (resultCount) resultCount.textContent = `${totalLabel}${countSuffix} ${totalLabel === 1 ? "rental" : "rentals"}`;
       const vehicleCount = document.querySelector("#vehicle-result-count");
-      if (vehicleCount) vehicleCount.textContent = category === "drive" ? (items.length ? `${totalLabel}${countSuffix} published ${totalLabel === 1 ? "vehicle" : "vehicles"}` : "") : "";
+      if (vehicleCount) vehicleCount.textContent = category === "drive" ? (items.length ? `${totalLabel}${countSuffix} ${totalLabel === 1 ? "vehicle" : "vehicles"}` : "") : "";
       if (items.length === 0) {
         status.dataset.kind = "empty";
         status.textContent = `No listings matched your search. Try a different location, category, date, or price range${category === "drive" ? ", or browse the drive edit below" : ""}.`;
@@ -519,7 +519,7 @@
         status.dataset.kind = "loaded";
         status.textContent = filterState.startDate && filterState.endDate
           ? "Published listings with calendar capacity for the selected dates. Check availability again before contacting the lister."
-          : "Only published, approved listings appear here. Choose dates to check calendar capacity.";
+          : "Choose dates to check availability.";
       }
       loadMoreButton.hidden = !hasMore;
     } catch (error) {
@@ -569,7 +569,7 @@
     const destinationNote = document.querySelector("#destination-filter-note");
     if (destinationNote) {
       destinationNote.hidden = !locationQuery || isDrive;
-      destinationNote.textContent = locationQuery ? `Showing published LOCKD listings in ${locationQuery}.` : "";
+      destinationNote.textContent = locationQuery ? `Rentals in ${locationQuery}.` : "";
     }
     document.querySelectorAll("[data-filter]").forEach((link) => {
       const isCurrent = (link.dataset.filter === "all" && !category) || link.dataset.filter === category;

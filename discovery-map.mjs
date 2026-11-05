@@ -5,6 +5,7 @@ function icon(name){const svg=document.createElementNS('http://www.w3.org/2000/s
 async function loadRenderer(){if(!document.querySelector('link[data-maplibre]')){const css=document.createElement('link');css.rel='stylesheet';css.href='/assets/vendor/maplibre/maplibre-gl.css';css.dataset.maplibre='';document.head.append(css);}if(!sdkPromise)sdkPromise=import('/assets/vendor/maplibre/maplibre-gl.mjs').catch(error=>{sdkPromise=null;throw error;});return sdkPromise;}
 async function boot(){
  if(!feed||!window.LockdDiscovery)return;const config=await window.LockdAccount.getConfig();if(config.maps?.enabled===false)return;
+ document.querySelectorAll('[data-discovery-dates],[data-discovery-party]').forEach(control=>control.hidden=false);
  const state=()=>window.LockdDiscovery.getState(),filterForm=document.querySelector('#discovery-filters'),category=document.querySelector('#discovery-category');
  const tools=node('div',undefined,{class:'discovery-tools'}),chips=node('div',undefined,{class:'discovery-category-chips',role:'group','aria-label':'Rental categories'});
  for(const [value,title,graphic]of [['','All','grid'],['stay','Stays','stay'],['drive','Cars','drive'],['technology','Technology','device'],['experience','Experiences','experience']]){if(![...category.options].some(option=>option.value===value))continue;const button=action(title,()=>{category.value=value;category.dispatchEvent(new Event('change',{bubbles:true}));},'discovery-category-chip');button.prepend(icon(graphic));button.dataset.category=value;chips.append(button);}

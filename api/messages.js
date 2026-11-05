@@ -1,4 +1,5 @@
 const {endpoint,uuid,text}=require('../lib/private-rpc');
+const {signImages}=require('./listing-images');
 const validId=x=>uuid.test(x||'');
 module.exports=endpoint((method,q,b)=>{
   if(method==='GET') {
@@ -23,4 +24,8 @@ module.exports=endpoint((method,q,b)=>{
   if(b.action==='reportConcern' && validId(b.conversationId) && validId(b.clientId) && validId(b.deviceId) && ['fraud','off_platform_payment','harassment','threats','attachment','listing','unsafe','other'].includes(b.category) && Array.isArray(b.ids) && b.ids.length>=1 && b.ids.length<=30 && b.ids.every(validId)) return {rpc:'report_lockd_conversation',args:{p_conversation_id:b.conversationId,p_client_id:b.clientId,p_category:b.category,p_ids:b.ids,p_device:b.deviceId}};
   if(b.action==='reviewReport' && validId(b.id) && ['under_review','additional_information_required','escalated','resolved','dismissed'].includes(b.status) && text(b.reason,2000,10)) return {rpc:'review_lockd_message_report',args:{p_report_id:b.id,p_status:b.status,p_reason:b.reason}};
   return null;
-},300000);
+},300000,async(result,{config,token,action})=>{
+  if(action.rpc!=='my_lockd_conversations'||!Array.isArray(result))return result;
+  const images=await signImages(config,result.map(item=>item.image),{token,limit:100}).catch(()=>[]);
+  return result.map((item,index)=>({...item,image:images[index]||null}));
+});
