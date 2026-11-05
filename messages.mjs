@@ -8,10 +8,11 @@ import {dialogUI} from './dialog-ui.mjs';
 const $=selector=>document.querySelector(selector),notice=$('#messages-status');
 const threadWelcome=$('#message-history').firstElementChild.cloneNode(true);
 let user=null,capabilities=null,identity=null,privateKey=null,device=null,peer=null,conversations=[],active=null,connectionEpoch=0;
-let inboxFilter='all',listingImageOrigin=null;
+let inboxFilter='all',listingImageOrigin=null,inboxSignature=null;
 function request(service,query={},body){if(!user)throw Error('Open your account to continue.');return privateRequest(service,query,body,user.id);}
 let devices=[],messages=new Map(),decrypted=new Map(),selected=new Set(),pendingReport=null,epoch=0;
-let realtime=null,channel=null,poll=null,loading=null,outbox=[],allEarlierLoaded=false;
+let realtime=null,channel=null,poll=null,loading=null,outbox=[],allEarlierLoaded=false,inboxPending=null,refreshPending=null;
+const sending=new Set();
 const objectURLs=new Set();
 const reading=new Set(),readOnDevice=new Set();
 const drafts=new Map();let syncCursor=null,pendingConversation=null;
@@ -29,6 +30,7 @@ function showAccountAccess(){
 }
 function lock(message='Sign in to open your messages.'){
  epoch++;connectionEpoch++;privateKey=null;decrypted.clear();selected.clear();pendingReport=null;drafts.clear();syncCursor=null;
+ inboxPending=null;refreshPending=null;inboxSignature=null;
  if(channel&&realtime)void realtime.removeChannel(channel);channel=null;realtime?.disconnect();realtime=null;clearInterval(poll);poll=null;
  for(const url of objectURLs)URL.revokeObjectURL(url);objectURLs.clear();reading.clear();readOnDevice.clear();
  $('#message-workspace').hidden=true;$('#message-history').replaceChildren(threadWelcome.cloneNode(true));$('.message-thread').setAttribute('data-empty','');$('#message-text').value='';clearAttachment();$('#report-dialog').close();$('#new-message-dialog').close();$('#message-target-results').replaceChildren();$('#report-preview').replaceChildren();status(notice,message);
@@ -36,16 +38,23 @@ function lock(message='Sign in to open your messages.'){
 }
 async function getDevices(conversationId=null){return await request('messages',{view:'devices',...(conversationId?{conversationId}:{})});}
 async function inbox(){
- conversations=await request('messages');renderInbox();
+ if(inboxPending)return inboxPending;
+ const accountId=user?.id,connection=connectionEpoch;
+ const task=(async()=>{const items=await request('messages');if(user?.id!==accountId||connection!==connectionEpoch)return;
+  const signature=JSON.stringify([Math.floor(Date.now()/300000),items.map(item=>({...item,image:item.image?.split('?')[0]||null}))]);
+  const unchanged=signature===inboxSignature;inboxSignature=signature;conversations=items;
+  if(!unchanged||!$('#conversations').children.length)renderInbox();
+ })();inboxPending=task;
+ try{return await task;}finally{if(inboxPending===task)inboxPending=null;}
 }
 function renderInbox(){
- const list=$('#conversations');list.replaceChildren();
+ const list=$('#conversations'),focusedId=document.activeElement?.closest('[data-conversation-id]')?.dataset.conversationId;list.replaceChildren();
  const term=$('#conversation-search').value.trim().toLocaleLowerCase();
  if(!conversations.length){const empty=node('div',undefined,{class:'inbox-empty'});empty.append(node('h3','No conversations yet.'),node('p','Message a lister from a rental or reservation. Your conversations will appear here.'),node('a','Explore rentals',{href:'rentals.html',class:'text-button'}));list.append(empty);}
  for(const item of conversations){
   if((inboxFilter==='rental'&&item.booking_id)||(inboxFilter==='booking'&&!item.booking_id)||(inboxFilter==='unread'&&!Number(item.unread)))continue;
   if(term&&![item.participant_name,item.title].some(value=>String(value||'').toLocaleLowerCase().includes(term)))continue;
-  const link=action('',()=>open(item.id).catch(error),'conversation-link');link.setAttribute('aria-current',String(active?.id===item.id));
+  const link=action('',()=>open(item.id).catch(error),'conversation-link');link.dataset.conversationId=item.id;link.setAttribute('aria-current',String(active?.id===item.id));
   const copy=node('span',undefined,{class:'conversation-copy'});copy.append(node('strong',item.title||item.participant_name||'Rental conversation'));
   if(item.participant_name)copy.append(node('span',item.participant_name,{class:'conversation-person'}));
   copy.append(node('span',`${item.booking_id?'Reservation':'Rental enquiry'}${item.blocked?' · Blocked':''}`,{class:'conversation-preview'}));
@@ -55,6 +64,7 @@ function renderInbox(){
   link.append(listingArtwork(item),copy,meta);list.append(link);
  }
  if(conversations.length&&!list.children.length)list.append(node('p','No conversations match. Try another name or filter.'));
+ if(focusedId)list.querySelector(`[data-conversation-id="${CSS.escape(focusedId)}"]`)?.focus({preventScroll:true});
 }
 $('#conversation-search').addEventListener('input',renderInbox);
 document.querySelectorAll('[data-inbox-filter]').forEach(button=>button.addEventListener('click',()=>{inboxFilter=button.dataset.inboxFilter;document.querySelectorAll('[data-inbox-filter]').forEach(control=>control.setAttribute('aria-pressed',String(control===button)));renderInbox();}));
@@ -93,19 +103,20 @@ async function startRealtime(){
 }
 async function subscribe(){
  if(!realtime)await startRealtime();
- if(!realtime){status($('#sync-status'),'Messages refresh automatically. You can also use Refresh.');return;}
+ if(!realtime){status($('#sync-status'),'');return;}
  if(channel)await realtime.removeChannel(channel);
  const context=active.id;
  channel=realtime.channel('lockd-conversation-'+context)
  .on('postgres_changes',{event:'INSERT',schema:'public',table:'lockd_encrypted_messages',filter:'conversation_id=eq.'+context},()=>{if(active?.id===context)void sync().catch(error);})
  .on('postgres_changes',{event:'*',schema:'public',table:'lockd_message_receipts',filter:'recipient_id=eq.'+peer?.user_id},()=>{if(active?.id===context)void sync().catch(error);})
- .subscribe(state=>{if(active?.id!==context)return;status($('#sync-status'),state==='SUBSCRIBED'?'New messages will appear here.':'Trying again… You can refresh your messages.');});
+ .subscribe(state=>{if(active?.id!==context)return;status($('#sync-status'),state==='SUBSCRIBED'?'':state==='CHANNEL_ERROR'||state==='TIMED_OUT'?'Trying to refresh. Your messages are still here.':'');});
 }
 async function open(id){
  const item=conversations.find(c=>c.id===id);if(!item)return;
  if(!privateKey){pendingConversation=id;await connectMessages();return;}
  if(active)drafts.set(active.id,$('#message-text').value);
  const current=++epoch;active=item;messages.clear();decrypted.clear();selected.clear();allEarlierLoaded=false;syncCursor=null;
+ peer=null;$('#message-compose').hidden=true;$('#conversation-availability').hidden=true;status($('#compose-status'),'');renderInbox();
  $('.message-thread').removeAttribute('data-empty');
  $('#message-workspace').classList.add('has-open-thread');
  $('#message-text').value=drafts.get(id)||'';clearAttachment();$('#message-search').value='';$('#report-dialog').close();pendingReport=null;
@@ -125,6 +136,8 @@ async function open(id){
  $('#contact-reminder').hidden=!peer||(typeof pin==='string'?pin:pin?.current)===peer?.fingerprint;
  $('#fingerprint-compared').checked=false;$('#verify-contact').disabled=!peer;$('#block-contact').textContent=item.blocked?'Unblock contact':'Block contact';
  $('#message-compose').hidden=!peer || item.blocked;
+ const availability=$('#conversation-availability');availability.hidden=Boolean(peer)&&!item.blocked;
+ availability.textContent=item.blocked?'You blocked this conversation. You can unblock it in Conversation options.':!peer?'Your contact has not opened messages yet. You can write to them when they do.':'';
  await inbox();await sync(true);if(current!==epoch)return;await subscribe();
 }
 async function verifiedPeer(){
@@ -194,7 +207,7 @@ function render({prepend=false}={}){
   if(query && !payload?.text.toLocaleLowerCase().includes(query))continue;
   const date=new Date(row.created_at).toLocaleDateString();if(day!==date){container.append(node('p',date,{class:'message-day'}));day=date;}
   const element=node('article',undefined,{class:'message-row','data-self':String(row.sender_id===user.id),'data-message-id':row.id});
-  element.append(node('p',payload?.text||'This message is private. Check the contact’s security code or restore your recovery file to read it.'));
+  element.append(node('p',payload?(payload.text||'Attachment'):'This message can’t be opened on this browser. Check Settings & privacy.'));
   const footer=node('footer');footer.append(node('time',new Date(row.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}),{datetime:row.created_at}));
   if(row.sender_id===user.id)footer.append(node('span',row.read_at?'Read':row.delivered_at?'Delivered':'Sent'));
   if(payload){
@@ -228,21 +241,25 @@ function render({prepend=false}={}){
   const element=node('article',undefined,{class:'message-row','data-self':'true'});element.append(node('p',item.failed?'Message not sent. Your draft is saved in this browser.':'Sending your message…'));
   element.append(action('Retry',()=>sendOutbox(item).catch(error)));container.append(element);
  }
- if(!container.children.length)container.append(node('p',query?'No loaded messages match this search. Earlier history is not searched until loaded.':'No messages yet.'));
+ if(!container.children.length)container.append(node('p',query?'No matches here. Try loading earlier messages.':'No messages yet.'));
  $('#report-messages').hidden=!selected.size;
  container.scrollTop=prepend?top+(container.scrollHeight-height):nearBottom?container.scrollHeight:top;
  if(focusIndex>=0)container.querySelector(`[data-message-id="${CSS.escape(focusedRow.dataset.messageId)}"]`)?.querySelectorAll('button,input,summary')[focusIndex]?.focus({preventScroll:true});
  acknowledgeVisible();
 }
 async function sendOutbox(item){
- if(!privateKey)return;
+ if(!privateKey||sending.has(item.clientId))return;
+ if(active?.id!==item.conversationId)throw Error('Open this conversation to send your saved message.');
+ const accountId=user.id,context=active.id,current=epoch;sending.add(item.clientId);
  try{
   await verifiedPeer();
+  if(user?.id!==accountId||epoch!==current||active?.id!==context)throw Error('Your message is saved. Open this conversation to try again.');
   const result=await request('messages',{}, {action:'send',...item});
-  outbox=outbox.filter(x=>x.clientId!==item.clientId);await stored(user.id,'outbox',outbox);
+  if(user?.id!==accountId)return;
+  outbox=outbox.filter(x=>x.clientId!==item.clientId);await stored(accountId,'outbox',outbox);
   if(active?.id===item.conversationId){messages.set(result.id,result);await sync();render();}
-  status($('#compose-status'),'Message sent.');
- }catch(err){item.failed=true;await stored(user.id,'outbox',outbox);render();throw err;}
+  if(active?.id===context)status($('#compose-status'),'');
+ }catch(err){if(user?.id===accountId){item.failed=true;await stored(accountId,'outbox',outbox);render();}throw err;}finally{sending.delete(item.clientId);}
 }
 async function connectMessages(){
  try{
@@ -252,7 +269,7 @@ async function connectMessages(){
   if(result.state==='disabled'){$('#message-workspace').hidden=true;status(notice,'Messaging is unavailable right now. Please try again later.');return;}
   const config=await window.LockdAccount.getConfig();listingImageOrigin=new URL(config.supabase.url).origin;
   $('#messages-access').hidden=true;$('#retry-inbox').hidden=true;$('#new-message').hidden=true;
-  $('#message-workspace').hidden=false;await inbox();await myReports();
+  $('#message-workspace').hidden=false;await inbox();
   $('.message-attachment-control').hidden=capabilities.attachmentsEnabled!==true;
   if(result.state==='another_device'){
    device=result.active;$('#message-device').hidden=false;$('#message-workspace').classList.add('is-locked','has-open-thread');status(notice,'Approve this browser from one you already use for messages.');return;
@@ -305,10 +322,12 @@ $('#chat-file').addEventListener('change',()=>{$('#attachment-name').textContent
 $('#remove-attachment').addEventListener('click',()=>{clearAttachment();$('#attachment-name').textContent='';$('#remove-attachment').hidden=true;});
 $('#message-text').addEventListener('keydown',event=>{if(event.key==='Enter'&&!event.shiftKey&&!event.isComposing){event.preventDefault();if(!$('#message-compose button').disabled)$('#message-compose').requestSubmit();}});
 async function refreshMessages(){
- await inbox();
- if(active&&!peer){const known=await getDevices(active.id);if(known.some(item=>item.user_id!==user.id&&!item.revoked_at)){await open(active.id);return;}}
- await sync();
- if(notice.dataset.kind==='error')status(notice,'');
+ if(refreshPending)return refreshPending;
+ const connection=connectionEpoch,accountId=user?.id;
+ const task=(async()=>{await inbox();if(connection!==connectionEpoch||accountId!==user?.id)return;
+  if(active&&!peer){const known=await getDevices(active.id);if(known.some(item=>item.user_id!==user.id&&!item.revoked_at)){await open(active.id);return;}}
+  await sync();if(notice.dataset.kind==='error')status(notice,'');
+ })();refreshPending=task;try{return await task;}finally{if(refreshPending===task)refreshPending=null;}
 }
 $('#refresh-inbox').addEventListener('click',()=>refreshMessages().catch(error));
 $('#back-to-inbox').addEventListener('click',()=>{$('#message-workspace').classList.remove('has-open-thread');($('#conversations [aria-current=true]')||$('#conversations button'))?.focus();});
@@ -352,6 +371,7 @@ $('#report-form').addEventListener('submit',async event=>{
  }catch(err){status(message,err.message,true);}finally{button.disabled=false;}
 });
 async function myReports(){const items=await request('messages',{view:'reports'}),target=$('#my-message-reports');target.replaceChildren(...(items.length?items.map(r=>node('p',`${r.id.slice(0,8)} · ${pretty(r.category)} · ${pretty(r.status)}`)):[node('p','No reports submitted.')]));}
+$('#message-reports-panel').addEventListener('toggle',()=>{if($('#message-reports-panel').open&&user){$('#my-message-reports').replaceChildren(node('p','Loading your reports…'));void myReports().catch(()=>$('#my-message-reports').replaceChildren(node('p','Reports could not be loaded. Close and reopen this section to try again.')));}});
 window.addEventListener('online',()=>{if(privateKey)void sync().catch(error);});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&privateKey)void sync().catch(error);});
 window.addEventListener('pagehide',()=>lock());

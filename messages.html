@@ -39,7 +39,7 @@
           <details><summary>Remove message access</summary><p>This removes the account’s current message key. You may lose access to old messages unless another approved browser still has the original access.</p><label class="account-consent"><input type="checkbox" id="remove-access-confirm"><span>I understand that old messages may become unreadable.</span></label><button class="text-button" type="button" id="revoke-device">Remove message access</button></details>
           <details><summary>How privacy works</summary><p>Messages are protected on your device. LOCKD can review only the messages you choose to include in a report. Contact codes are remembered automatically; unexpected changes are flagged before sending.</p><p>Keep your browser and LOCKD account secure. Approved browsers currently share one message identity and cannot be removed separately. Someone with your unlocked message access could read past messages. Losing every approved browser can make old messages unreadable.</p></details>
         </details>
-        <details><summary>Reports you’ve sent</summary><div id="my-message-reports"></div></details>
+        <details id="message-reports-panel"><summary>Reports you’ve sent</summary><div id="my-message-reports"></div></details>
         </details>
       </aside>
       <section class="message-thread" aria-labelledby="thread-title" data-empty>
@@ -62,6 +62,7 @@
           <div id="contact-reminder" class="contact-reminder" hidden><p>Your contact’s security code changed. Check with them before sending again.</p><button class="text-button" type="button" id="confirm-contact">Compare codes</button></div>
           <div class="message-tools"><label class="account-field"><span class="visually-hidden">Search messages</span><input type="search" id="message-search" placeholder="Search this conversation" maxlength="100"></label><button class="text-button" id="older-messages" type="button" hidden>Earlier messages</button><button class="text-button" id="report-messages" type="button" hidden>Report selected</button></div>
           <p id="sync-status" class="account-field-note" role="status"></p>
+          <p id="conversation-availability" class="account-field-note" role="status" hidden></p>
           <div id="message-history" class="message-history" aria-label="Conversation history"><div class="thread-welcome"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#message"></use></svg><h3>A place for your plans.</h3><p>Choose a conversation to get started.</p></div></div>
           <form id="message-compose" class="message-compose" hidden><label for="message-text" class="visually-hidden">Message</label><textarea id="message-text" name="text" rows="2" maxlength="8000" placeholder="Write a message…"></textarea><button type="submit" class="button button-dark">Send</button><div class="message-attachment-control"><label class="attachment-picker">Attach a photo or PDF<input class="visually-hidden" type="file" id="chat-file" accept=".pdf,.jpg,.jpeg,.png,.webp"></label><span id="attachment-name"></span><button id="remove-attachment" class="text-button" type="button" hidden>Remove</button></div><p id="compose-status" role="status"></p></form>
           <p class="message-safety">Keep payments and reservations on LOCKD.</p>
