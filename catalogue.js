@@ -616,13 +616,13 @@
     loadListings();
   }
 
+  for(const selector of ['#catalogue-start-date','#catalogue-end-date'])document.querySelector(selector)?.addEventListener('input',()=>document.querySelector('#catalogue-end-date')?.setCustomValidity(''));
   if (searchForm) searchForm.addEventListener("submit", (event) => {
     event.preventDefault();
     readFormState({ querySortDefault: true });
     if ((filterState.startDate && !filterState.endDate) || (!filterState.startDate && filterState.endDate) || (filterState.startDate && filterState.endDate && filterState.endDate <= filterState.startDate)) {
       document.querySelector("#catalogue-end-date")?.setCustomValidity("Choose an end date after the start date.");
       document.querySelector("#catalogue-end-date")?.reportValidity();
-      document.querySelector("#catalogue-end-date")?.addEventListener("input", (event) => event.currentTarget.setCustomValidity(""), { once: true });
       return;
     }
     document.querySelector("#catalogue-end-date")?.setCustomValidity("");
@@ -635,6 +635,7 @@
     filterKeys.forEach((key) => { filterState[key] = ""; });
     filterState.quantity = "1"; filterState.sort = "newest";
     if (searchForm) searchForm.reset();
+    document.querySelector('#catalogue-end-date')?.setCustomValidity('');
     if (sortSelect) sortSelect.value = "newest";
     saveSearchState();
   });
