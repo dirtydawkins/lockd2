@@ -546,6 +546,7 @@
   }
 
   function syncSearchUi() {
+    document.querySelector('#catalogue-end-date')?.setCustomValidity('');
     const current = new URLSearchParams(window.location.search);
     category = current.get("category") || "";
     query = current.get("q") || "";

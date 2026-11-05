@@ -316,10 +316,13 @@ def check_paystack():
     try:
         return check_payment_connection(app, 'paystack', paystack)
     except (persona.IntegrationUnavailable, persona.InvalidProviderResult) as error:
+        provider_status = getattr(error, 'status_code', None)
         reason = ('not_configured' if not paystack.configured() else
-                  'credentials_rejected' if getattr(error, 'status_code', None) in (401, 403) else
-                  'rate_limited' if getattr(error, 'status_code', None) == 429 else 'provider_unavailable')
-        return JSONResponse({'detail': 'Paystack test authorization is unavailable', 'reason': reason}, status_code=503)
+                  'credentials_rejected' if provider_status == 401 else
+                  'access_denied' if provider_status == 403 else
+                  'rate_limited' if provider_status == 429 else 'provider_unavailable')
+        return JSONResponse({'detail': 'Paystack test authorization is unavailable', 'reason': reason,
+                             'provider_status': provider_status if type(provider_status) is int and 400 <= provider_status <= 599 else None}, status_code=503)
 
 
 @app.post('/v1/verification/credit', dependencies=[Depends(authorize)])
