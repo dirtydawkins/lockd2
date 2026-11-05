@@ -32,8 +32,9 @@ class NoRedirect(HTTPRedirectHandler):
 def request_json(method, url, headers, body=None):
     """Fixed-origin callers only; bound time, body and redirects. Never echo errors."""
     data = None if body is None else json.dumps(body).encode()
+    request_headers = {'User-Agent': 'LOCKD/1.0 (+https://lockd2.vercel.app)', **headers}
     try:
-        with build_opener(NoRedirect).open(Request(url, data=data, headers=headers, method=method), timeout=3) as response:
+        with build_opener(NoRedirect).open(Request(url, data=data, headers=request_headers, method=method), timeout=3) as response:
             raw = response.read(262145)
             if len(raw) > 262144:
                 raise InvalidProviderResult()
