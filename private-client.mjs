@@ -1,9 +1,9 @@
-export async function privateRequest(service,query={},body,expectedUserId=null) {
+export async function privateRequest(service,query={},body,expectedUserId=null,{timeoutMs=15000}={}) {
   const session=await window.LockdAccount.getSession();
   if(!session) throw Error('Sign in to continue.');
   const callerId=expectedUserId||session.user.id;
   if(expectedUserId&&session.user?.id!==expectedUserId)throw Error('Your account changed. Reopen messages to continue.');
-  const response=await fetch(`/api/${service}?${new URLSearchParams(query)}`,{method:body?'POST':'GET',headers:{Authorization:`Bearer ${session.access_token}`,...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined,cache:'no-store',signal:AbortSignal.timeout(15000)});
+  const response=await fetch(`/api/${service}?${new URLSearchParams(query)}`,{method:body?'POST':'GET',headers:{Authorization:`Bearer ${session.access_token}`,...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined,cache:'no-store',signal:AbortSignal.timeout(Math.min(60000,Math.max(1000,timeoutMs)))});
   const result=await response.json().catch(()=>({}));
   if((await window.LockdAccount.getSession())?.user?.id!==callerId)throw Error('Your account changed. Reload this page to continue.');
   if(!response.ok) throw Error(result.message || 'This action could not be completed. Please retry.');

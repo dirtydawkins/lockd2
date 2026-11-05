@@ -8,6 +8,8 @@ from documents.financial import money, amount, parse, rental_assessment
 from documents.safety import identify, UnsafeDocument
 from documents.fields import classify
 from decimal import Decimal
+from documents.comparison import comparisons, compare_names, name_tokens
+from documents.jobs import isolated
 
 count = 0
 def check(name, run):
@@ -63,4 +65,38 @@ def kra_removed():
     for file in ['api/documents.js', 'verification.html', 'verification.mjs', 'services/intelligence/documents/fields.py']:
         assert 'kra_certificate' not in (root / file).read_text(encoding='utf-8')
 check('KRA is absent from active intake, UI and classification', kra_removed)
+
+def comparison_boundaries():
+    result = comparisons(None, {}, [])
+    assert result['comparisons'] == [] and result['identity_provider_compared'] is False
+    assert result['automatic_rejection'] is False and result['booking_authorized'] is False
+    assert result['account_numbers_compared'] is False
+    assert compare_names('', '') == 'insufficient_information'
+    assert compare_names('L.', 'L.') == 'insufficient_information'
+    assert name_tokens(None) == [] and name_tokens('x' * 401) == []
+check('Missing names, initials and unrelated account numbers cannot become identity decisions', comparison_boundaries)
+
+def password_boundaries():
+    sql = (root / 'supabase/migrations/20261102_0025_lockd_statement_unlock.sql').read_text(encoding='utf-8')
+    for term in ('user_id=auth.uid()', 'unlock_attempts>=5', 'lease_until>now()', 'lockd_require_verification_sandbox', "purpose='processing'", 'p_lease', '30 seconds'):
+        assert term in sql, term
+    assert 'p_password' not in sql
+    api = (root / 'lib/statement-unlock.js').read_text(encoding='utf-8')
+    assert 'claim_lockd_statement_unlock' in api and "'/auth/v1/user'" in api
+    assert "body.password=''" in api and 'console.' not in api
+    jobs = (root / 'services/intelligence/documents/jobs.py').read_text(encoding='utf-8')
+    assert "flags.append('--password-pipe')" in jobs and "str(failure) == 'encrypted_pdf'" in jobs
+    ui = (root / 'verification-workflow.mjs').read_text(encoding='utf-8')
+    assert "password.value=''" in ui and "type:'password'" in ui
+    assert "node('pre',JSON.stringify" not in ui
+check('Statement unlock uses owner-scoped leases and an ephemeral password pipe without raw review JSON', password_boundaries)
+
+def isolated_boundary():
+    # The actual source file is invalid evidence; no financial document is invented.
+    try:
+        isolated(Path(__file__).read_bytes(), method='bank')
+    except UnsafeDocument:
+        return
+    raise AssertionError('Isolated parser did not preserve document rejection')
+check('Actual isolated worker preserves a rejected file instead of masking it as an outage', isolated_boundary)
 print(f'{count} verification checks passed; genuine financial documents and provider credentials are still required for integration tests.')

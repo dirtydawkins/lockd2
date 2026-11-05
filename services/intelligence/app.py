@@ -6,17 +6,20 @@ import os
 import time
 import asyncio
 from contextlib import asynccontextmanager
+from contextlib import suppress
 from collections import deque
 from typing import Annotated
 from uuid import uuid4
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, ConfigDict
+from fastapi.exceptions import RequestValidationError
+from pydantic import BaseModel, ConfigDict, SecretStr
 import persona
 import peleza
 import daraja
 import paystack
+import payments
 
 logger = logging.getLogger("lockd.intelligence")
 
@@ -32,11 +35,37 @@ async def lifespan(application):
             logger.warning(json.dumps({'event': provider + '_' + environment + '_authorization',
                                        'verified': getattr(application.state, provider + '_authorization_verified'),
                                        'payments_enabled': False}))
-    yield
+    payment_worker = asyncio.create_task(reconcile_payments()) if paystack.reconciliation_enabled() else None
+    try:
+        yield
+    finally:
+        if payment_worker:
+            payment_worker.cancel()
+            with suppress(asyncio.CancelledError):
+                await payment_worker
+
+
+async def reconcile_payments():
+    """Recover durable jobs while Render is awake; this is not an always-on SLA."""
+    while True:
+        try:
+            result = await asyncio.to_thread(payments.reconcile_one)
+            if result['state'] != 'idle':
+                logger.info(json.dumps({'event': 'test_payment_reconciliation', 'state': result['state']}))
+        except Exception:
+            logger.warning(json.dumps({'event': 'test_payment_reconciliation_unavailable'}))
+        await asyncio.sleep(60)
 
 app = FastAPI(title="LOCKD intelligence", docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
 VERSION = "rules-1"
 requests_in_window = deque(maxlen=120)
+
+
+@app.exception_handler(RequestValidationError)
+async def invalid_request(_request, _error):
+    # Pydantic's default errors may echo input, including an ephemeral password.
+    return JSONResponse({'detail': 'Invalid request details'}, status_code=422,
+                        headers={'Cache-Control': 'no-store'})
 
 
 def check_payment_connection(application, provider, adapter):
@@ -70,7 +99,7 @@ class BodyLimitMiddleware:
             nonlocal size
             message = await receive()
             size += len(message.get("body", b""))
-            limit = 262144 if scope.get('path') == '/webhooks/persona' else 8192
+            limit = 262144 if scope.get('path') in ('/webhooks/persona', '/webhooks/paystack') else 8192
             if size > limit:
                 raise BodyTooLarge()
             return message
@@ -86,7 +115,7 @@ async def guard_and_log(request: Request, call_next):
             return JSONResponse({"detail": error.detail}, status_code=error.status_code,
                                 headers={"Cache-Control": "no-store", "X-Request-ID": correlation})
     length = request.headers.get("content-length", "0")
-    limit = 262144 if request.url.path == '/webhooks/persona' else 8192
+    limit = 262144 if request.url.path in ('/webhooks/persona', '/webhooks/paystack') else 8192
     if not length.isdecimal() or int(length) > limit:
         return JSONResponse({"detail": "Request too large"}, status_code=413)
     try:
@@ -187,6 +216,31 @@ def reconcile_persona():
     except (persona.IntegrationUnavailable, persona.InvalidProviderResult):
         return JSONResponse({'detail': 'Identity reconciliation unavailable'}, status_code=503)
 
+
+@app.post('/webhooks/paystack')
+async def paystack_webhook(request: Request):
+    if not paystack.reconciliation_enabled():
+        return JSONResponse({'detail': 'Payment event processing unavailable'}, status_code=503)
+    raw = await request.body()
+    if not paystack.verify_webhook(raw, request.headers.get('x-paystack-signature', '')):
+        return JSONResponse({'detail': 'Invalid signature'}, status_code=401)
+    try:
+        # Durable receipt first; worker retrieves the authoritative provider status.
+        result = await asyncio.to_thread(payments.receive, raw)
+        return JSONResponse(result, status_code=200)
+    except persona.InvalidProviderResult:
+        return JSONResponse({'detail': 'Invalid event'}, status_code=400)
+    except persona.IntegrationUnavailable:
+        return JSONResponse({'detail': 'Event storage unavailable'}, status_code=503)
+
+
+@app.post('/v1/jobs/paystack/reconcile', dependencies=[Depends(authorize)])
+def reconcile_paystack():
+    try:
+        return payments.reconcile_one()
+    except (persona.IntegrationUnavailable, persona.InvalidProviderResult):
+        return JSONResponse({'detail': 'Payment reconciliation unavailable'}, status_code=503)
+
 @app.get('/v1/integrations', dependencies=[Depends(authorize)])
 def integration_capabilities():
     from documents.jobs import configured
@@ -196,7 +250,9 @@ def integration_capabilities():
             'daraja_sandbox_credentials_present': daraja.configured(),
             'daraja_sandbox_authorization_verified': getattr(app.state,'daraja_authorization_verified',False),
             'paystack_test_credentials_present': paystack.configured(),
-            'paystack_test_authorization_verified': getattr(app.state,'paystack_authorization_verified',False), 'live_enabled': False}}
+            'paystack_test_authorization_verified': getattr(app.state,'paystack_authorization_verified',False),
+            'test_reconciliation_configured': paystack.reconciliation_enabled(),
+            'checkout_enabled': False, 'live_enabled': False}}
 
 @app.post('/v1/jobs/documents/process', dependencies=[Depends(authorize)])
 def process_document():
@@ -213,6 +269,31 @@ def expire_document():
         return delete_one()
     except persona.IntegrationUnavailable:
         return JSONResponse({'detail': 'Document retention unavailable'}, status_code=503)
+
+
+class StatementUnlock(BaseModel):
+    model_config = ConfigDict(extra='forbid', strict=True)
+    document_id: str
+    lease: str
+    password: SecretStr
+
+
+@app.post('/v1/documents/unlock', dependencies=[Depends(authorize)])
+def unlock_statement(body: StatementUnlock):
+    from uuid import UUID
+    from documents.jobs import unlock_statement as unlock
+    try:
+        document_id, lease = str(UUID(body.document_id)), str(UUID(body.lease))
+        password = body.password.get_secret_value()
+        if not 1 <= len(password.encode('utf-8')) <= 1024 or '\x00' in password:
+            raise ValueError()
+        return unlock(document_id, lease, password)
+    except ValueError:
+        return JSONResponse({'detail': 'Choose a valid statement and password'}, status_code=400)
+    except (persona.IntegrationUnavailable, persona.InvalidProviderResult):
+        return JSONResponse({'detail': 'Statement processing unavailable'}, status_code=503)
+    finally:
+        password = None
 
 
 class CreditInput(BaseModel):

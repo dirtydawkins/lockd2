@@ -1,6 +1,7 @@
 // Capability-gated foundation: no financial collection or setup UI for ordinary visitors.
 import {privateRequest,node,label,action,status} from './private-client.mjs';
 import {uploadForm} from './document-upload.mjs';
+import {fieldTitle,fieldDetails,reviewEvidence,correctionDetails} from './verification-review.mjs';
 const names={identity:'Identity',address:'Address',financial:'Financial evidence',credit:'Credit check',fraud:'Safety review',student:'Student evidence'};
 const states={awaiting_upload:'Add your evidence',processing:'Checking your file',needs_confirmation:'Check the details',under_review:'Awaiting review',additional_information:'More information needed',verified:'Review complete',unable_to_verify:'Couldn’t verify',rejected:'Review decision',expired:'Expired',revoked:'No longer valid',withdrawn:'Withdrawn'};
 export async function mountVerificationWorkflow(){
@@ -29,7 +30,14 @@ export async function mountVerificationWorkflow(){
    }
    for(const doc of item.documents||[]){
     card.append(node('h4',doc.kind==='mpesa'?'M-Pesa statement':doc.kind==='bank'?'Bank statement':'Address evidence'));
-    const details=node('dl');for(const [key,field]of Object.entries(doc.fields||{})){details.append(node('dt',key.replaceAll('_',' ')),node('dd',String(field.value)));}card.append(details);
+    if(doc.passwordNeeded){
+     const unlock=node('form',undefined,{class:'account-form'}),password=node('input',undefined,{type:'password',autocomplete:'off',required:'',maxlength:'256'}),button=node('button','Unlock statement',{type:'submit',class:'button button-light'});
+     unlock.append(node('p','This statement needs its file password. We use it once to read the file and don’t save it.'),label('Statement password',password),button);
+     unlock.addEventListener('submit',async event=>{event.preventDefault();button.disabled=true;const value=password.value;password.value='';try{const result=await privateRequest('documents',{module:'verification',view:'unlock'},{documentId:doc.id,password:value},userId,{timeoutMs:60000});await refresh();status(message,result.state==='screened'?'Statement read. Check the details before submitting.':result.state==='password_required'?'The file is still locked. Check its password and try again.':'Refresh to check the statement’s progress.',result.state!=='screened');}catch(error){status(message,error.message,true);}finally{button.disabled=false;}});
+     card.append(unlock);continue;
+    }
+    if(doc.state!=='screened'){card.append(node('p',doc.state==='processing'?'Checking your file.':'We couldn’t read this file. You can add another copy or ask for help.'));continue;}
+    card.append(fieldDetails(doc.fields));
     if(doc.summary&&/^[A-Z]{3}$/.test(doc.summary.currency||'')){const summary=doc.summary,unit=summary.currency;
      for(const [key,title]of [['total_incoming','Money received'],['total_outgoing','Money sent'],['net_transaction_flow','Net flow']])if(summary[key]!==null)card.append(node('p',`${title}: ${unit} ${summary[key]}`));
      card.append(node('p','These figures describe the statement, not your income or a credit score.'));
@@ -39,7 +47,7 @@ export async function mountVerificationWorkflow(){
     const form=node('form',undefined,{class:'account-form'}),controls=[];
     form.append(node('h4','Check your details'),node('p','Correct any reading errors. The original reading is kept for review.'));
     const fields=new Map((item.documents||[]).flatMap(doc=>Object.entries(doc.fields||{})));
-    for(const [name,field]of fields){if(!['account_holder','service_address','issue_date','due_date','billing_period','statement_start','statement_end','currency','institution'].includes(name))continue;const input=node('input',undefined,{name,maxlength:'1000'});input.value=field.value;form.append(label(name.replaceAll('_',' '),input));controls.push(input);}
+    for(const [name,field]of fields){if(!['account_holder','service_address','issue_date','due_date','billing_period','statement_start','statement_end','currency','institution'].includes(name))continue;const input=node('input',undefined,{name,maxlength:'1000'});input.value=field.value;form.append(label(fieldTitle(name),input));controls.push(input);}
     form.append(node('button','Send for review',{type:'submit',class:'button button-dark'}));
     form.addEventListener('submit',async event=>{event.preventDefault();const button=form.querySelector('button');button.disabled=true;try{await request({}, {action:'submit',caseId:item.id,version:item.version,fields:Object.fromEntries(controls.map(input=>[input.name,input.value.trim()]))});await refresh();status(message,'Submitted for review.');}catch(error){status(message,error.message,true);}finally{button.disabled=false;}});card.append(form);
    }
@@ -72,8 +80,8 @@ export async function mountVerificationWorkflow(){
    const detail=await request({view:'review',id:item.id}),panel=node('article',undefined,{class:'evidence-item'}),form=node('form',undefined,{class:'account-form'}),decision=node('select'),reason=node('textarea',undefined,{required:'',minlength:'10',maxlength:'2000',rows:'3'});
    for(const value of ['additional_information','verified','unable_to_verify','rejected'])decision.append(node('option',states[value],{value}));
    panel.append(node('h3','Review evidence'),node('p',detail.case.purpose));
-   for(const doc of detail.documents){panel.append(node('h4',doc.kind),node('pre',JSON.stringify({fields:doc.analysis?.fields,summary:doc.analysis?.financial?.summary,findings:doc.analysis?.findings},null,2)));}
-   panel.append(node('h4','Customer corrections'),node('pre',JSON.stringify(detail.corrections,null,2)));
+   for(const doc of detail.documents){panel.append(node('h4',doc.kind==='mpesa'?'M-Pesa statement':doc.kind==='bank'?'Bank statement':'Supporting evidence'),reviewEvidence(doc,text=>status(message,text,true)));}
+   panel.append(node('h4','Customer corrections'),correctionDetails(detail.corrections));
    form.append(label('Decision',decision),label('Reason and supporting evidence',reason),node('button','Record review',{type:'submit',class:'button button-dark'}));
    form.addEventListener('submit',async event=>{event.preventDefault();try{await request({}, {action:'transition',caseId:item.id,version:detail.case.version,transition:decision.value,reason:reason.value});panel.replaceChildren(node('p','Review recorded.'));await refresh();}catch(error){status(message,error.message,true);}});panel.append(form);admin.append(panel);
   }));

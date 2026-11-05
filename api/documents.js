@@ -21,4 +21,4 @@ const operations=endpoint((method,q,b)=>{
     return {rpc:'review_lockd_address_case',args:{p_case_id:b.caseId,p_version:b.version,p_decision:b.decision,p_reason:b.reason}};
   return null;
 });
-module.exports=(req,res)=>req.query?.module==='verification'?require('../lib/verification-api')(req,res):req.method==='GET'&&req.query?.view==='file'?documentFile(req,res):operations(req,res);
+module.exports=(req,res)=>req.query?.module==='verification'?(req.query?.view==='unlock'?require('../lib/statement-unlock')(req,res):require('../lib/verification-api')(req,res)):req.method==='GET'&&req.query?.view==='file'?documentFile(req,res):operations(req,res);

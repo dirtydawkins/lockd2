@@ -59,10 +59,14 @@ def isolated(data, photo_only=False, method=None, password=None):
     try:
         item = json.loads(raw)
         if result.returncode == 2:
+            if item.get('error_code') == 'encrypted_pdf':
+                raise UnsafeDocument('encrypted_pdf')
             raise UnsafeDocument("unsafe_file")
         if result.returncode or item.get("version") != "documents-rules-1":
             raise IntegrationUnavailable()
         return item
+    except UnsafeDocument:
+        raise
     except (ValueError, TypeError):
         raise IntegrationUnavailable() from None
 
@@ -73,6 +77,10 @@ def process_one(rpc=database_rpc, downloader=storage, scanner=scan, analyzer=iso
     job = rpc("claim_lockd_document_job", {})
     if job is None:
         return {"state": "idle"}
+    return process_job(job, rpc, downloader, scanner, analyzer)
+
+
+def process_job(job, rpc=database_rpc, downloader=storage, scanner=scan, analyzer=isolated, password=None):
     result, error = None, None
     try:
         raw = downloader("GET", job["path"])
@@ -81,11 +89,14 @@ def process_one(rpc=database_rpc, downloader=storage, scanner=scan, analyzer=iso
         # Always before native image/PDF parsing. Never treat absent scan as clean.
         scanner(raw)
         if job.get('method') in ('mpesa', 'bank'):
-            result = analyzer(raw, method=job['method'])
+            result = analyzer(raw, method=job['method'], **({'password': password} if password is not None else {}))
         elif job.get('method') == 'utility':
             result = analyzer(raw, photo_only=True)
         else:
             result = analyzer(raw)
+        from .comparison import comparisons
+        context = rpc('lockd_document_comparison_context', {'p_document_id': job['document_id'], 'p_lease': job['lease_token']})
+        result['cross_document'] = comparisons(job['document_id'], result.get('fields', {}), context)
         result["address_match"] = compare(job["declared_address"], result.get("fields", {}).get("service_address", {}).get("value", ""))
         if job.get('method') in ('mpesa', 'bank'):
             from .financial import rental_assessment
@@ -93,12 +104,24 @@ def process_one(rpc=database_rpc, downloader=storage, scanner=scan, analyzer=iso
                 result['financial'].get('summary'), job.get('booking_obligation'), job.get('booking_currency'))
     except ScannerUnavailable:
         error = "scanner_unavailable"
-    except UnsafeDocument:
-        error = "unsafe_file"
+    except UnsafeDocument as failure:
+        error = 'password_required' if str(failure) == 'encrypted_pdf' and job.get('method') in ('mpesa','bank') else 'unsafe_file'
     except (IntegrationUnavailable, subprocess.TimeoutExpired, OSError):
         error = "analysis_unavailable"
+    finally:
+        password = None
     applied = rpc("finish_lockd_document_job", {"p_document_id": job["document_id"], "p_lease_token": job["lease_token"], "p_result": result, "p_error": error})
-    return {"state": "screened" if applied and error is None else "not_applied" if not applied else "review_or_retry", "booking_authorized": False}
+    return {"state": "screened" if applied and error is None else "not_applied" if not applied else 'password_required' if error == 'password_required' else "review_or_retry", "booking_authorized": False}
+
+
+def unlock_statement(document_id, lease, password):
+    if not configured():
+        raise IntegrationUnavailable()
+    job = database_rpc('lockd_statement_unlock_context', {'p_document_id': document_id, 'p_lease': lease})
+    try:
+        return process_job(job, password=password)
+    finally:
+        password = None
 
 
 def delete_one(rpc=database_rpc, delete=storage):

@@ -25,7 +25,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r requirements-documents.txt pglast==8.7 httpx==0.28.1
-      - run: python -m compileall -q app.py persona.py peleza.py daraja.py paystack.py documents
+      - run: python -m compileall -q app.py persona.py peleza.py daraja.py paystack.py payments.py documents
       - run: python ../../scripts/parse-marketplace-sql.py
       - run: python ../../scripts/check-verification.py
       - run: python ../../scripts/check-payment-integrations.py
