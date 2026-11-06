@@ -25,9 +25,9 @@
     <script src="./photo-fallbacks.js" defer></script>
     <script src="./rental-pricing.js" defer></script>
     <script src="./catalogue.js" defer></script>
-  <link rel="stylesheet" href="./marketplace-refinement.css"><script type="module" src="./lister-discovery.mjs"></script><script type="module" src="./messaging-onboarding.mjs"></script>    <link rel="stylesheet" href="./brand-refinement.css">
+  <link rel="stylesheet" href="./marketplace-refinement.css"><script type="module" src="./lister-discovery.mjs"></script><script type="module" src="./messaging-onboarding.mjs"></script>    <link rel="stylesheet" href="./brand-refinement.css"><link rel="stylesheet" href="./rental-search.css">
 </head>
-  <body>
+  <body class="rental-search-page">
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header" id="top">
       <a class="brand" href="index.html#top" aria-label="LOCKD home"><img class="brand-image" src="./assets/brand/lockd.svg" alt="LOCKD" width="1330" height="317"></a>
@@ -65,11 +65,11 @@
       </section>
 
       <section class="catalogue-intro" id="catalogue-intro" aria-labelledby="catalogue-title">
-        <p class="eyebrow"><span class="eyebrow-rule"></span> Stay. Drive. Play. Explore.</p>
+        <p class="eyebrow"><span class="eyebrow-rule"></span> Search LOCKD</p>
         <div class="catalogue-heading-row">
           <div>
-            <h1 id="catalogue-title">Find your<br><em>next rental.</em></h1>
-            <p class="catalogue-lede" id="catalogue-description">Find stays, cars, equipment and experiences from LOCKD listers.</p>
+            <h1 id="catalogue-title">Find a rental.</h1>
+            <p class="catalogue-lede" id="catalogue-description">Find stays, cars, gadgets and experiences in one place.</p>
             <p class="destination-filter-note" id="destination-filter-note" hidden></p>
           </div>
           <p class="catalogue-count" id="result-count" aria-live="polite"></p>
@@ -79,17 +79,15 @@
       <section class="catalogue-controls" aria-label="Search and filter rentals">
         <form class="catalogue-search" id="catalogue-search-form" role="search">
           <div class="catalogue-search-main">
-            <label class="visually-hidden" for="catalogue-category">Search category</label>
-            <select id="catalogue-category" name="category" aria-label="All categories">
-              <option value="">All categories</option><option value="stay">Accommodation</option><option value="drive">Cars &amp; Mobility</option><option value="experience">Experiences</option><option value="technology">Technology</option><option value="play">Gaming</option><option value="camera">Cameras</option><option value="phone">Phones</option><option value="laptop">Computers</option><option value="audio">Audio</option><option value="creative">Creative equipment</option><option value="other">Other rentals</option>
-            </select>
-            <label class="visually-hidden" for="catalogue-search">Search listings</label>
-            <input id="catalogue-search" type="search" name="q" list="catalogue-suggestions" placeholder="Search by name, model or type" autocomplete="off">
+            <label class="rental-search-field rental-query" for="catalogue-search"><span>What are you looking for?</span><span class="rental-input-wrap"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#search"></use></svg><input id="catalogue-search" type="search" name="q" list="catalogue-suggestions" placeholder="Try a camera, car or place to stay" autocomplete="off"></span></label>
             <datalist id="catalogue-suggestions"></datalist>
-            <label class="visually-hidden" for="catalogue-location">Destination or location</label>
-            <input id="catalogue-location" type="search" name="location" placeholder="City or area" autocomplete="off">
-            <button type="submit" class="button button-dark">Search</button>
+            <label class="rental-search-field rental-category" for="catalogue-category"><span>Category</span><span class="rental-input-wrap"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#grid"></use></svg><select id="catalogue-category" name="category" aria-label="Category">
+              <option value="">All categories</option><option value="stay">Accommodation</option><option value="drive">Cars &amp; Mobility</option><option value="experience">Experiences</option><option value="technology">Technology</option><option value="play">Gaming</option><option value="camera">Cameras</option><option value="phone">Phones</option><option value="laptop">Computers</option><option value="audio">Audio</option><option value="creative">Creative equipment</option><option value="other">Other rentals</option>
+            </select></span></label>
+            <label class="rental-search-field rental-location" for="catalogue-location"><span>Where?</span><span class="rental-input-wrap"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#location"></use></svg><input id="catalogue-location" type="search" name="location" placeholder="City or area" autocomplete="off"></span></label>
+            <button type="submit" class="button button-burgundy">Search rentals <svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#arrow"></use></svg></button>
           </div>
+          <details class="rental-more-filters" id="catalogue-more-filters"><summary>Dates &amp; filters</summary>
           <div class="catalogue-search-optional">
             <label>Min price<input id="catalogue-min-price" name="minPrice" type="number" min="0" step="100" inputmode="numeric" placeholder="Any"></label>
             <label>Max price<input id="catalogue-max-price" name="maxPrice" type="number" min="0" step="100" inputmode="numeric" placeholder="Any"></label>
@@ -98,7 +96,7 @@
             <label>To<input id="catalogue-end-date" name="endDate" type="date"></label>
             <label>Quantity<input id="catalogue-quantity" name="quantity" type="number" min="1" max="20" value="1" inputmode="numeric"></label>
             <button type="button" class="catalogue-clear" id="catalogue-clear">Clear filters</button>
-          </div>
+          </div></details>
         </form>
         <label class="sort-control" for="catalogue-sort">Sort
           <select id="catalogue-sort" name="sort">
@@ -121,12 +119,12 @@
 
       <nav class="catalogue-categories" aria-label="Rental categories" id="catalogue-categories">
         <a href="rentals.html" data-filter="all">All rentals</a>
-        <a href="rooms.html" data-filter="stay">Book a Room</a>
-        <a href="rentals.html?category=drive" data-filter="drive">Cars &amp; Mobility</a>
-        <a href="rentals.html?category=play" data-filter="play">Play</a>
-        <a href="rentals.html?category=technology" data-filter="technology">Technology</a>
+        <a href="rooms.html" data-filter="stay"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#stay"></use></svg>Book a Room</a>
+        <a href="rentals.html?category=drive" data-filter="drive"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#car"></use></svg>Cars &amp; Mobility</a>
+        <a href="rentals.html?category=play" data-filter="play"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#gaming"></use></svg>Play</a>
+        <a href="rentals.html?category=technology" data-filter="technology"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#device"></use></svg>Technology</a>
         <a href="tech.html">Tech &amp; Gadgets</a>
-        <a href="rentals.html?category=experience" data-filter="experience">Experiences</a>
+        <a href="rentals.html?category=experience" data-filter="experience"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#experience"></use></svg>Experiences</a>
         <a href="rentals.html?category=camera" data-filter="camera">Cameras</a>
         <a href="rentals.html?category=audio" data-filter="audio">Audio</a>
       </nav>

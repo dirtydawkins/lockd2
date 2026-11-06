@@ -1,4 +1,4 @@
-"""Private Paystack test authorization using a read-only integration endpoint."""
+"""Read-only Paystack authorization and separately gated test reconciliation."""
 import os
 import re
 import hashlib
@@ -12,14 +12,24 @@ REFERENCE = re.compile(r'lockd_test_[a-f0-9]{32}')
 STATUSES = frozenset(('abandoned', 'failed', 'ongoing', 'pending', 'processing', 'queued', 'reversed', 'success'))
 
 
-def configured():
+def environment():
+    value = os.getenv('PAYSTACK_ENVIRONMENT')
+    return value if value in ('test', 'live') else None
+
+
+def authorization_configured():
     key = os.getenv('PAYSTACK_SECRET_KEY', '')
-    return (os.getenv('PAYSTACK_ENVIRONMENT') == 'test'
-            and re.fullmatch(r'sk_test_[A-Za-z0-9]{1,256}', key) is not None)
+    mode = environment()
+    return mode is not None and re.fullmatch(r'sk_' + mode + r'_[A-Za-z0-9]{1,256}', key) is not None
+
+
+def configured():
+    # The older reconciliation ledger is test-only, even after a live key is added.
+    return environment() == 'test' and authorization_configured()
 
 
 def check_connection():
-    if not configured():
+    if not authorization_configured():
         raise IntegrationUnavailable()
     body, _ = request_json('GET', ORIGIN + '/integration/payment_session_timeout',
                            {'Authorization': 'Bearer ' + os.environ['PAYSTACK_SECRET_KEY'],
@@ -30,7 +40,7 @@ def check_connection():
     timeout = data.get('payment_session_timeout') if isinstance(data, dict) else None
     if type(timeout) is not int or timeout < 0:
         raise InvalidProviderResult()
-    return {'environment': 'test', 'authorization_verified': True,
+    return {'environment': environment(), 'authorization_verified': True,
             'payment_processed': False, 'booking_authorized': False}
 
 

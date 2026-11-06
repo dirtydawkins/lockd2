@@ -36,8 +36,25 @@ assert paystack.ORIGIN == 'https://api.paystack.co'
 assert '/integration/payment_session_timeout' in literals
 assert 'GET' in literals
 assert not any(method in literals for method in ('POST', 'PUT', 'PATCH', 'DELETE'))
-assert 'test' in literals
-print('PASS Paystack uses its fixed read-only endpoint and requires a test key')
+print('PASS Paystack authorization uses its fixed read-only endpoint')
+
+# Only validate configuration boundaries: these values are never sent to a provider.
+for mode, prefix in (('live', 'test'), ('test', 'live'), ('invalid', 'live')):
+    with patch.dict(os.environ, {'PAYSTACK_ENVIRONMENT': mode, 'PAYSTACK_SECRET_KEY': 'sk_' + prefix + '_boundary'}, clear=True):
+        assert not paystack.authorization_configured()
+        try:
+            paystack.check_connection()
+        except IntegrationUnavailable:
+            pass
+        else:
+            raise AssertionError('Mismatched payment environment accepted')
+with patch.dict(os.environ, {'PAYSTACK_ENVIRONMENT': 'live', 'PAYSTACK_SECRET_KEY': 'sk_live_boundary', 'PAYSTACK_TEST_RECONCILIATION_ENABLED': 'true'}, clear=True):
+    assert paystack.authorization_configured()
+    assert not paystack.configured() and not paystack.reconciliation_enabled()
+    assert not paystack.verify_webhook(b'', '')
+    import checkout
+    assert not checkout.configured()
+print('PASS mode/key mismatch is rejected and a live key cannot activate test reconciliation or checkout')
 
 async def check_routes():
     # No lifespan: these requests intentionally cannot contact providers.
@@ -96,4 +113,4 @@ assert 'grant execute' in sql and 'to service_role' in sql
 assert 'payload_sha256' in sql and 'for update skip locked' in sql
 assert not any(token in sql.lower() for token in ('authorization_code', 'card_number', 'raw_payload'))
 print('PASS sandbox ledger, durable leases and disabled webhook/verification boundaries')
-print('6 read-only payment checks passed; no payment was created or provider response fabricated.')
+print('7 read-only payment checks passed; no payment was created or provider response fabricated.')

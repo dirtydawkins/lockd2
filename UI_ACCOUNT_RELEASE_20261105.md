@@ -75,3 +75,10 @@ The user’s latest “enable everything” authorizes activation of configured 
 - Existing encrypted send, receipts, report/block, retry and device-approval controls remain in place. No call/video controls or example conversations were added.
 - Local JavaScript checks, `git diff --check` and all 15 read-only checks passed. Browser rollout verification is recorded after deployment.
 - The user reports both merchants approved for live payments. A fresh authenticated backend check still found Daraja sandbox and Paystack test credentials, both authorized successfully; no payment was processed. Live credentials remain a separate requirement before collection is enabled.
+
+## 6 November: rental search and live credential verification
+
+- Messages commit `79cc65a` passed CI 42172498945 and Vercel production `dpl_CVwoGpviNpezd1PT6JMDfhGCfTUk` reached READY. The inbuilt browser restored the existing Google account and opened the real empty inbox. New-message controls and dismissal/focus restoration were checked. No example conversations were added.
+- Refined `rentals.html` with labelled search, category and location fields, a compact search action, category icons and expandable dates/price filters in `rental-search.css`. Existing category queries, server results, shared URLs and reservation links remain intact. Browser checks covered 1440px desktop and 390px mobile, query/location URL preservation, clear filters and invalid date feedback. No records were created.
+- The private Paystack connection checker now supports explicitly matching live or test keys through the existing read-only integration endpoint. Live credentials cannot activate the older test reconciliation ledger or checkout by themselves. Seven payment checks and the disabled-checkout rejection checks passed without transactions or fabricated provider responses.
+- The user entered a replacement key directly into Render. Its saved mode and actual authorization must be checked after the new backend deployment before enabling any collection. Live charging, refunds, payouts and a positive real-inventory booking remain unverified.

@@ -26,9 +26,9 @@ logger = logging.getLogger("lockd.intelligence")
 
 @asynccontextmanager
 async def lifespan(application):
-    for provider, environment, adapter in (('daraja', 'sandbox', daraja), ('paystack', 'test', paystack)):
+    for provider, environment, adapter in (('daraja', 'sandbox', daraja), ('paystack', paystack.environment(), paystack)):
         setattr(application.state, provider + '_authorization_verified', False)
-        if adapter.configured():
+        if (adapter.authorization_configured() if provider == 'paystack' else adapter.configured()):
             try:
                 await asyncio.to_thread(check_payment_connection, application, provider, adapter)
             except (persona.IntegrationUnavailable, persona.InvalidProviderResult):
@@ -251,7 +251,10 @@ def integration_capabilities():
             'daraja_sandbox_credentials_present': daraja.configured(),
             'daraja_sandbox_authorization_verified': getattr(app.state,'daraja_authorization_verified',False),
             'paystack_test_credentials_present': paystack.configured(),
-            'paystack_test_authorization_verified': getattr(app.state,'paystack_authorization_verified',False),
+            'paystack_test_authorization_verified': paystack.configured() and getattr(app.state,'paystack_authorization_verified',False),
+            'paystack_environment': paystack.environment(),
+            'paystack_credentials_present': paystack.authorization_configured(),
+            'paystack_authorization_verified': getattr(app.state,'paystack_authorization_verified',False),
             'test_reconciliation_configured': paystack.reconciliation_enabled(),
             'checkout_enabled': False, 'live_enabled': False}}
 
@@ -318,11 +321,11 @@ def check_paystack():
         return check_payment_connection(app, 'paystack', paystack)
     except (persona.IntegrationUnavailable, persona.InvalidProviderResult) as error:
         provider_status = getattr(error, 'status_code', None)
-        reason = ('not_configured' if not paystack.configured() else
+        reason = ('not_configured' if not paystack.authorization_configured() else
                   'credentials_rejected' if provider_status == 401 else
                   'access_denied' if provider_status == 403 else
                   'rate_limited' if provider_status == 429 else 'provider_unavailable')
-        return JSONResponse({'detail': 'Paystack test authorization is unavailable', 'reason': reason,
+        return JSONResponse({'detail': 'Paystack authorization is unavailable', 'reason': reason,
                              'provider_status': provider_status if type(provider_status) is int and 400 <= provider_status <= 599 else None}, status_code=503)
 
 

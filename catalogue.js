@@ -561,6 +561,8 @@
       if (field) field.value = filterState[filterKeys[index]] || (filterKeys[index] === "quantity" ? "1" : "");
     });
     if (sortSelect) sortSelect.value = filterState.sort;
+    const extraFilters=document.querySelector('#catalogue-more-filters');
+    if(extraFilters)extraFilters.open=['minPrice','maxPrice','currency','startDate','endDate'].some(key=>filterState[key])||Number(filterState.quantity||1)>1;
     const isDrive = category === "drive";
     document.querySelector("#vehicle-hero").hidden = !isDrive;
     document.querySelector("#catalogue-intro").hidden = isDrive;
@@ -618,10 +620,12 @@
   }
 
   for(const selector of ['#catalogue-start-date','#catalogue-end-date'])document.querySelector(selector)?.addEventListener('input',()=>document.querySelector('#catalogue-end-date')?.setCustomValidity(''));
+  searchForm?.addEventListener('invalid',event=>{if(event.target.closest('#catalogue-more-filters'))document.querySelector('#catalogue-more-filters').open=true;},true);
   if (searchForm) searchForm.addEventListener("submit", (event) => {
     event.preventDefault();
     readFormState({ querySortDefault: true });
     if ((filterState.startDate && !filterState.endDate) || (!filterState.startDate && filterState.endDate) || (filterState.startDate && filterState.endDate && filterState.endDate <= filterState.startDate)) {
+      if(document.querySelector('#catalogue-more-filters'))document.querySelector('#catalogue-more-filters').open=true;
       document.querySelector("#catalogue-end-date")?.setCustomValidity("Choose an end date after the start date.");
       document.querySelector("#catalogue-end-date")?.reportValidity();
       return;
