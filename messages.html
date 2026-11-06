@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co; img-src 'self' blob: https://hqlrzbyhccoptjgyslhy.supabase.co; object-src 'none'; frame-src 'none'; base-uri 'self'; form-action 'self'">
-  <title>Messages — LOCKD</title><link rel="icon" href="favicon.svg"><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="account.css"><link rel="stylesheet" href="messages.css">
+  <title>Messages — LOCKD</title><link rel="icon" href="favicon.svg"><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="account.css">
   <script src="account-service.js" defer></script><script src="messages.mjs" type="module"></script><script src="profile-avatar.mjs" type="module"></script>
-    <link rel="stylesheet" href="./brand-refinement.css">
+    <link rel="stylesheet" href="./brand-refinement.css"><link rel="stylesheet" href="./messages.css">
 </head>
 <body class="account-page messages-page">
   <a href="#main" class="skip-link">Skip to messages</a>
-  <header class="site-header"><a class="brand" href="index.html" aria-label="LOCKD home"><img class="brand-image" src="./assets/brand/lockd.svg" alt="LOCKD" width="1330" height="317"></a><a class="own-profile-photo" data-own-profile-photo href="account.html#personal" aria-label="Your profile" hidden></a><details class="messages-nav-menu"><summary aria-label="Account menu"><span></span><span></span><span></span></summary><nav aria-label="Account menu"><a href="account.html">Your account</a><a href="account.html#bookings">Reservations</a><a href="account.html#saved">Saved rentals</a><a href="owners.html#owner-workspace">Lister workspace</a><a href="privacy.html">Privacy</a></nav></details><a class="header-cta" href="rentals.html">Explore Rentals</a></header>
+  <header class="site-header"><a class="brand" href="index.html" aria-label="LOCKD home"><img class="brand-image" src="./assets/brand/lockd.svg" alt="LOCKD" width="1330" height="317"></a><nav class="messages-primary-nav" aria-label="Marketplace"><a href="rentals.html">Explore</a><a href="rooms.html">Stays</a><a href="rentals.html?category=drive">Cars</a><a href="rentals.html?category=play">Gaming</a><a href="tech.html">Tech &amp; Gadgets</a><a href="rentals.html?category=experience">Experiences</a></nav><a class="own-profile-photo" data-own-profile-photo href="account.html#personal" aria-label="Your profile" hidden></a><details class="messages-nav-menu"><summary aria-label="Account menu"><span></span><span></span><span></span></summary><nav aria-label="Account menu"><a href="account.html">Your account</a><a href="account.html#bookings">Reservations</a><a href="account.html#saved">Saved rentals</a><a href="owners.html#owner-workspace">Lister workspace</a><a href="privacy.html">Privacy</a></nav></details><a class="header-cta" href="rentals.html">Explore Rentals</a></header>
   <div class="messages-shell">
   <nav class="messages-account-nav" aria-label="Account navigation">
     <a href="account.html"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#account"></use></svg>Your account</a>
@@ -27,9 +27,9 @@
     <button id="retry-inbox" class="text-button" type="button" hidden>Try again</button>
     <div id="message-workspace" class="message-workspace is-locked" hidden>
       <aside class="message-inbox" aria-label="Inbox">
-        <div class="message-inbox-heading"><h2>Inbox</h2><button class="text-button" id="refresh-inbox" type="button">Refresh</button></div>
+        <div class="message-inbox-heading"><h2 class="visually-hidden">Inbox</h2><button class="message-icon-button" id="refresh-inbox" type="button" aria-label="Refresh conversations" title="Refresh conversations"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5M19 9a7.5 7.5 0 0 0-13-3L4 8m1 7a7.5 7.5 0 0 0 13 3l2-2"/></svg></button></div>
         <label class="conversation-search-field"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#search"></use></svg><span class="visually-hidden">Search conversations</span><input type="search" id="conversation-search" placeholder="Search conversations" autocomplete="off" maxlength="100"></label>
-        <div class="conversation-filters" role="group" aria-label="Filter conversations"><button type="button" data-inbox-filter="all" aria-pressed="true">All</button><button type="button" data-inbox-filter="rental" aria-pressed="false">Rentals</button><button type="button" data-inbox-filter="booking" aria-pressed="false">Bookings</button><button type="button" data-inbox-filter="unread" aria-pressed="false">Unread</button></div>
+        <div class="conversation-filters" role="group" aria-label="Filter conversations"><button type="button" data-inbox-filter="all" aria-pressed="true">All</button><button type="button" data-inbox-filter="rental" aria-pressed="false"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#car"></use></svg>Rentals</button><button type="button" data-inbox-filter="booking" aria-pressed="false"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#calendar"></use></svg>Bookings</button><button type="button" data-inbox-filter="unread" aria-pressed="false"><span class="unread-dot" aria-hidden="true"></span>Unread</button></div>
         <div id="conversations" aria-live="polite"></div>
         <details class="inbox-utilities"><summary>Settings &amp; privacy</summary>
         <details class="message-device-details"><summary>Your devices</summary>
@@ -43,7 +43,7 @@
         </details>
       </aside>
       <section class="message-thread" aria-labelledby="thread-title" data-empty>
-        <button type="button" id="back-to-inbox" class="text-button message-back">All messages</button>
+        <button type="button" id="back-to-inbox" class="text-button message-back"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#arrow"></use></svg>All messages</button>
         <section id="message-device" class="message-device" hidden>
           <h2>Bring your conversations here.</h2>
           <p>For your privacy, approve this browser from one you already use for LOCKD messages. You’re still using the same account.</p>
@@ -53,18 +53,20 @@
           <details><summary>No longer have the other browser?</summary><p>Your account can start a new message identity, but old messages may become unreadable. Use “Remove message access” under Devices &amp; privacy after reviewing that choice.</p></details>
         </section>
         <div class="message-thread-content">
-          <header class="message-thread-header"><div><h2 id="thread-title" tabindex="-1">Messages</h2><div class="message-context-links" id="message-context"></div></div>
-            <details id="contact-check" class="conversation-options" hidden><summary>Conversation options</summary>
+          <header class="message-thread-header"><div class="thread-contact"><h2 id="thread-title" tabindex="-1">Messages</h2><p id="thread-person"></p><div class="message-context-links" id="message-context"></div></div>
+            <button id="toggle-message-search" type="button" class="message-icon-button" aria-label="Search this conversation" aria-expanded="false" aria-controls="thread-search-field"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#search"></use></svg></button>
+            <details id="contact-check" class="conversation-options" hidden><summary aria-label="Conversation options" title="Conversation options"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="12" cy="19" r="1.7"/></svg><span class="visually-hidden">Conversation options</span></summary><div class="conversation-options-panel">
               <details id="security-details"><summary>Verify this contact</summary><p>For extra reassurance, compare this code with your contact in person or another way you trust.</p><p id="peer-fingerprint"></p><label class="account-consent"><input type="checkbox" id="fingerprint-compared"><span>I checked the full code with my contact and it matches.</span></label><button class="text-button" type="button" id="verify-contact">Codes match</button></details>
               <button class="text-button" type="button" id="block-contact">Block contact</button>
-            </details>
+            </div></details>
           </header>
+          <div id="message-booking" class="message-booking" hidden></div>
           <div id="contact-reminder" class="contact-reminder" hidden><p>Your contact’s security code changed. Check with them before sending again.</p><button class="text-button" type="button" id="confirm-contact">Compare codes</button></div>
-          <div class="message-tools"><label class="account-field"><span class="visually-hidden">Search messages</span><input type="search" id="message-search" placeholder="Search this conversation" maxlength="100"></label><button class="text-button" id="older-messages" type="button" hidden>Earlier messages</button><button class="text-button" id="report-messages" type="button" hidden>Report selected</button></div>
+          <div class="message-tools"><label class="account-field" id="thread-search-field" hidden><span class="visually-hidden">Search messages</span><input type="search" id="message-search" placeholder="Search this conversation" maxlength="100"></label><button class="text-button" id="older-messages" type="button" hidden>Earlier messages</button><button class="text-button" id="report-messages" type="button" hidden>Report selected</button></div>
           <p id="sync-status" class="account-field-note" role="status"></p>
           <p id="conversation-availability" class="account-field-note" role="status" hidden></p>
           <div id="message-history" class="message-history" aria-label="Conversation history"><div class="thread-welcome"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#message"></use></svg><h3>A place for your plans.</h3><p>Choose a conversation to get started.</p></div></div>
-          <form id="message-compose" class="message-compose" hidden><label for="message-text" class="visually-hidden">Message</label><textarea id="message-text" name="text" rows="2" maxlength="8000" placeholder="Write a message…"></textarea><button type="submit" class="button button-dark">Send</button><div class="message-attachment-control"><label class="attachment-picker">Attach a photo or PDF<input class="visually-hidden" type="file" id="chat-file" accept=".pdf,.jpg,.jpeg,.png,.webp"></label><span id="attachment-name"></span><button id="remove-attachment" class="text-button" type="button" hidden>Remove</button></div><p id="compose-status" role="status"></p></form>
+          <form id="message-compose" class="message-compose" hidden><label for="message-text" class="visually-hidden">Message</label><textarea id="message-text" name="text" rows="1" maxlength="8000" placeholder="Write a message…"></textarea><button type="submit" class="button button-dark" aria-label="Send message"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m4 3 17 9-17 9 3-9-3-9Zm3 9h14"/></svg></button><div class="message-attachment-control"><label class="attachment-picker">Attach a photo or PDF<input class="visually-hidden" type="file" id="chat-file" accept=".pdf,.jpg,.jpeg,.png,.webp"></label><span id="attachment-name"></span><button id="remove-attachment" class="text-button" type="button" hidden>Remove</button></div><p id="compose-status" role="status"></p></form>
           <p class="message-safety">Keep payments and reservations on LOCKD.</p>
         </div>
       </section>
