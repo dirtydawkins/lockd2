@@ -17,6 +17,7 @@ function visibleThreads() {
 }
 function updatePerspective() {
   const listing = perspective === 'listing';
+  document.dispatchEvent(new CustomEvent('lockd:workspace',{detail:perspective}));
   document.querySelectorAll('[data-lister-tool]').forEach(link => { link.hidden = !listing; });
   document.querySelectorAll('[data-customer-tool]').forEach(link => { link.hidden = listing; });
   $('#inbox-perspectives').hidden = !user || !(hasListerWorkspace || listing || conversations.some(item => item.owner_id === user.id));

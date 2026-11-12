@@ -78,7 +78,7 @@
     if (selected === "security") loadDeletionRequestState();
     const current = new URL(window.location.href);
     const route = new URL(current.pathname, current.origin);
-    if (selected === "bookings" && current.searchParams.get("view") === "listing")
+    if (current.searchParams.get("view") === "listing")
       route.searchParams.set("view", "listing");
     route.hash = selected;
     window.history.replaceState(null, "", route.pathname + route.search + route.hash);

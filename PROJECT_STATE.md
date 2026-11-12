@@ -17,3 +17,7 @@ Private thread controls clear on a conversation change. Asynchronous device and 
 Public listing details and rental cards on public lister profiles link to the same listing-scoped inbox. Sign-in preserves the listing ID. The backend derives the recipient from the published listing and reuses its existing private conversation. An unavailable listing or a daily conversation limit now leaves the rest of the inbox usable.
 
 The isolated database journey in tests/messaging-direct.test.js opened a conversation before the lister registered a device, exchanged signed encrypted messages in both directions after registration, recorded reads, and denied access to a third account. Delivery requires the recipient account to have registered its public key. A two-account exchange on the production deployment remains unverified.
+
+## Account navigation
+
+Messages lives in Account on desktop and inside the mobile menu’s Account group. The same account can switch between the lister workspace and renting. Reservation and inbox links carry the current view in their URLs. Changing the reservation tab updates the account shortcuts. The navigation mode grants no additional access. Eight account and booking UI checks and 15 marketplace release checks passed.

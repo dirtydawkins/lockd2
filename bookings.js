@@ -155,6 +155,7 @@
     button.addEventListener("click", () => {
       const owner = button.dataset.loadBookings === "owner";
       const url = new URL(location.href);
+      document.dispatchEvent(new CustomEvent("lockd:workspace", {detail: owner ? "listing" : "renting"}));
       if (owner) url.searchParams.set("view", "listing");
       else url.searchParams.delete("view");
       window.history.replaceState(null, "", url.pathname + url.search + "#bookings");

@@ -38,7 +38,7 @@
         <a class="owner-nav-link" href="owners.html">Become a lister</a>
       <a href="reviews.html" data-lockd-reviews-entry hidden>Reviews</a><a class="mobile-settings-link" href="account.html#personal">Settings</a></nav>
       <a class="header-cta" href="rentals.html">Explore Rentals</a>
-    <details class="site-account-menu desktop-account-menu"><summary aria-label="Account menu"><span></span><span></span><span></span></summary><nav aria-label="Account shortcuts"><a href="account.html#bookings">Reservations</a><a href="messages.html">Messages</a><a href="account.html#saved">Saved rentals</a><a href="account.html#personal">Settings</a></nav></details></header>
+    <details class="site-account-menu desktop-account-menu"><summary aria-label="Account menu"><span></span><span></span><span></span></summary><nav aria-label="Account shortcuts"><a href="account.html#overview">My account</a><a href="account.html#bookings">Reservations</a><a href="messages.html?inbox=renting" data-account-messages>Messages</a><a href="account.html#saved">Saved rentals</a><a href="account.html#personal">Settings</a><a data-switch-workspace href="owners.html">Switch to listing</a></nav></details></header>
 
     <main class="account-main" id="main">
       <div class="account-intro" id="account-intro">
@@ -103,7 +103,7 @@
       </section>
 
       <section class="account-dashboard" id="account-dashboard" hidden aria-labelledby="account-dashboard-title">
-        <div class="account-dashboard-heading"><span class="profile-photo account-heading-photo" data-profile-photo aria-hidden="true"></span><div><p class="eyebrow">YOUR LOCKD</p><h2 id="account-dashboard-title">Welcome back.</h2><p id="account-email-label"></p></div><a class="account-link" href="owners.html">Lister dashboard</a><button class="account-link" id="account-signout" type="button">Sign out</button></div>
+        <div class="account-dashboard-heading"><span class="profile-photo account-heading-photo" data-profile-photo aria-hidden="true"></span><div><p class="eyebrow">YOUR LOCKD</p><h2 id="account-dashboard-title">Welcome back.</h2><p id="account-email-label"></p></div><a class="account-link" href="owners.html#owner-workspace">Switch to listing</a><button class="account-link" id="account-signout" type="button">Sign out</button></div>
         <nav class="account-section-nav" aria-label="Account sections">
           <button type="button" data-account-section="overview" aria-current="page">Overview</button>
           <button type="button" data-account-section="saved">Saved rentals</button>
@@ -112,7 +112,7 @@
           <button type="button" data-account-section="security">Login &amp; security</button>
           <button type="button" data-account-section="preferences">Preferences</button>
           <button type="button" data-account-section="privacy">Privacy &amp; data</button>
-          <a href="messages.html" data-lockd-messaging-entry hidden>Messages</a>
+          <a href="messages.html?inbox=renting" data-account-messages>Messages</a>
         </nav>
 
         <section class="account-section" data-account-panel="overview" aria-labelledby="overview-title">
@@ -122,9 +122,7 @@
             <button class="account-overview-card" type="button" data-go-section="saved"><span class="account-card-index">02</span><h4>Saved rentals</h4><p id="saved-overview-count">Your saved listings appear here.</p><span class="account-card-link">View saved</span></button>
             <button class="account-overview-card" type="button" data-go-section="bookings"><span class="account-card-index">03</span><h4>Bookings &amp; trips</h4><p>Check your dates, payments and booking status.</p><span class="account-card-link">View reservations</span></button>
           </div>
-          <p class="account-security-note">Your customer and lister tools use the same LOCKD sign-in. Lister listings remain managed in the <a href="owners.html">lister workspace</a>.</p>
           <p class="account-security-note"><a href="trust.html">Verification, rental updates &amp; support</a></p>
-          <p class="account-security-note" data-lockd-messaging-entry hidden><a href="messages.html">Messages</a></p>
           <p class="account-security-note" data-lockd-address-entry hidden><a href="verification.html">Address evidence</a></p>
         </section>
 
