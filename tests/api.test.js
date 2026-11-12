@@ -195,6 +195,10 @@ test("private listing images are signed only for trusted same-project storage pa
   mockFetch(t, async (url, options) => {
     const parsed = new URL(url);
     calls.push({ parsed, options });
+    if (parsed.pathname === "/storage/v1/object/sign/lockd-listings") {
+      assert.deepEqual(JSON.parse(options.body).paths, [path]);
+      return httpResponse(200, [{path, signedURL: "/object/sign/lockd-listings/" + path + "?token=signed"}]);
+    }
     if (parsed.pathname.includes("/storage/v1/object/sign/")) {
       return httpResponse(200, { signedURL: `/object/sign/lockd-listings/${path}?token=signed` });
     }
@@ -204,7 +208,7 @@ test("private listing images are signed only for trusted same-project storage pa
   assert.equal(result.statusCode, 200);
   assert.equal(result.body.item.images[0], `https://example-project.supabase.co/storage/v1/object/sign/lockd-listings/${path}?token=signed`);
   assert.equal(calls.length, 2);
-  assert.match(calls[1].parsed.pathname, /\/storage\/v1\/object\/sign\/lockd-listings\//);
+  assert.equal(calls[1].parsed.pathname, "/storage/v1/object/sign/lockd-listings");
   assert.equal(JSON.parse(calls[1].options.body).expiresIn, 3600);
 
   const config = { url: "https://example-project.supabase.co", key: "sb_publishable_test", headers: { apikey: "sb_publishable_test" } };
@@ -509,6 +513,8 @@ test("public config exposes the public Supabase client config but never other en
   const res = await invoke(config);
   assert.deepEqual(res.body, {
     supportEmail: "support@example.com",
+    approximateArea: null,
+    maps: { enabled: true, provider: "openfreemap" },
     supabase: { url: "https://example-project.supabase.co", publishableKey: "public-test-key" },
   });
   assert.equal(JSON.stringify(res.body).includes("service_role"), false);

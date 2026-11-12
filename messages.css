@@ -236,3 +236,14 @@
  #message-target-form {gap:8px}#message-target-form .button {padding-inline:12px}
 }
 @media(prefers-reduced-motion:reduce) {.messages-page * {animation:none!important;transition:none!important}}
+
+.inbox-account-label { color:var(--muted); font-size:.78rem; margin:0 0 .65rem .75rem; }
+#inbox-perspectives:not([hidden]) { display:flex; gap:3px; padding:4px; margin-bottom:1rem; border-radius:12px; background:var(--paper); }
+#inbox-perspectives a { flex:1; padding:.65rem .25rem; border-radius:9px; text-align:center; font-size:.84rem; text-decoration:none; }
+#inbox-perspectives a[aria-current=page] { background:var(--oxblood); color:white; }
+#message-settings { width:min(440px,calc(100vw - 28px)); max-height:85dvh; overflow:auto; }
+#message-settings details { padding:1rem 0; border-top:1px solid var(--line); }
+#message-settings summary { cursor:pointer; font-weight:600; }
+#message-settings details p { color:var(--muted); line-height:1.5; }
+.messages-page .site-header .site-account-menu { order:5; }
+.messages-heading #lister-booking-action { text-align:center; }

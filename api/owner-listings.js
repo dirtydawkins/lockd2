@@ -1,5 +1,5 @@
 const supabaseConfig = require("./supabase-config.js");
-const { signImages } = require("./listing-images.js");
+const { signImages, storagePath } = require("./listing-images.js");
 
 function send(res, status, payload) {
   res.setHeader("Cache-Control", "no-store");
@@ -50,6 +50,20 @@ module.exports = async function handler(req, res) {
     if (!user?.id) return send(res, 401, { error: "not_authenticated", message: "Sign in to manage your listings." });
     if (!user.email_confirmed_at) return send(res, 403, { error: "owner_verification_required", message: "Verify your email address before managing listings." });
 
+    if (req.method === "GET" && req.query?.view === "inbox-context") {
+      // Use the caller's existing private listing/profile functions, including drafts.
+      const read = async name => {
+        const response = await request(config, token, "/rest/v1/rpc/" + name, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: "{}", signal: AbortSignal.timeout(6000)
+        });
+        if (!response.ok) throw new Error("Inbox context unavailable");
+        return response.json();
+      };
+      const [listings, profile] = await Promise.all([read("my_lockd_listings"), read("my_lockd_host_profile")]);
+      return send(res, 200, { isLister: Boolean(profile?.slug || listings?.length) });
+    }
+
     if (req.method === "GET") {
       const response = await request(config, token, "/rest/v1/rpc/my_lockd_listings", {
         method: "POST",
@@ -59,12 +73,17 @@ module.exports = async function handler(req, res) {
       if (!response.ok) return send(res, response.status === 404 ? 503 : 502, { error: "owner_listings_unavailable", message: "Your listings could not be loaded. Please try again." });
       const rows = await response.json();
       if (!Array.isArray(rows)) return send(res, 502, { error: "owner_listings_unavailable", message: "Your listings could not be loaded." });
-      const items = await Promise.all(rows.map(async (item) => {
-        const imagePaths = Array.isArray(item?.images) ? item.images : [];
-        const signed = await signImages(config, imagePaths, { token });
-        const pairs = imagePaths.map((path, index) => ({ path, url: signed[index] })).filter((pair) => pair.url);
-        return { ...item, image_paths: pairs.map((pair) => pair.path), images: pairs.map((pair) => pair.url) };
-      }));
+      const groups = rows.map(item => (Array.isArray(item.images) ? item.images : [])
+        .map(value => storagePath(value, config)).filter(Boolean));
+      const urls = await signImages(config, groups.flat(), { token });
+      let offset = 0;
+      const items = rows.map((item, index) => {
+        const paths = groups[index];
+        const images = urls.slice(offset, offset + paths.length);
+        offset += paths.length;
+        // A preview can fail temporarily. Keep the original photos attached on edit.
+        return { ...item, image_paths: paths, images };
+      });
       return send(res, 200, { items });
     }
 

@@ -1,7 +1,7 @@
 import {privateRequest,node,status} from './private-client.mjs';
 const $=selector=>document.querySelector(selector), id=new URL(location.href).searchParams.get('booking');
 const feedback=$('#checkout-status'),pay=$('#checkout-pay'),refresh=$('#checkout-refresh'),cancel=$('#checkout-cancel');
-let reservation,requestKey=crypto.randomUUID(),busy=false;
+let customerId=null,reservation,requestKey=crypto.randomUUID(),busy=false;
 const labels={pending_owner:'Awaiting approval',awaiting_payment:'Ready for payment',confirmed:'Confirmed',active:'Rental in progress',completed:'Completed',cancelled:'Cancelled',expired:'Request expired',rejected:'Request declined',disputed:'Under review',pending:'Request received'};
 function render(data){
  reservation=data.booking;const b=reservation,attempt=data.attempt;
@@ -20,9 +20,37 @@ function render(data){
  if(b.listingSlug){$('#checkout-listing').href='rental.html?slug='+encodeURIComponent(b.listingSlug);$('#checkout-listing').hidden=false;}if(b.listingId){$('#checkout-message').href='messages.html?listing='+encodeURIComponent(b.listingId)+'&booking='+encodeURIComponent(b.id);$('#checkout-message').hidden=document.documentElement.dataset.lockdMessaging!=='enabled';}
  $('#checkout-support').href='trust.html?booking='+encodeURIComponent(b.id);$('#checkout-support').hidden=false;
 }
-async function update(verify=false){if(busy)return;busy=true;refresh.disabled=pay.disabled=cancel.disabled=true;status(feedback,'Checking your reservation…');try{if(verify)await privateRequest('bookings',{view:'checkout'},{action:'verify',bookingId:id});const data=await privateRequest('bookings',{view:'checkout',booking:id});render(data);status(feedback,'');}catch(error){status(feedback,error.message,true);}finally{busy=false;refresh.disabled=pay.disabled=cancel.disabled=false;}}
+async function update(verify = false) {
+  if (busy) return;
+  busy = true;
+  refresh.disabled = pay.disabled = cancel.disabled = true;
+  status(feedback, 'Checking your reservation…');
+  try {
+    const read = () => privateRequest('bookings', {view:'checkout', booking:id});
+    render(await read());
+    if (verify) {
+      try {
+        await privateRequest('bookings', {view:'checkout'}, {action:'verify', bookingId:id});
+      } catch {
+        pay.hidden = true;
+        status(feedback, 'Your reservation is saved. We couldn’t check the payment. Try Check status again.', true);
+        return;
+      }
+      render(await read());
+    }
+    status(feedback, '');
+  } catch (error) {
+    status(feedback, error.message, true);
+  } finally {
+    busy = false;
+    refresh.disabled = pay.disabled = cancel.disabled = false;
+  }
+}
 refresh.addEventListener('click',()=>update(true));
 pay.addEventListener('click',async()=>{if(busy)return;busy=true;pay.disabled=true;status(feedback,'Opening payment…');try{const result=await privateRequest('bookings',{view:'checkout'},{action:'start',bookingId:id,requestKey},null,{timeoutMs:16000});if(result.url&&/^https:\/\/checkout\.paystack\.com\/[A-Za-z0-9_-]+$/.test(result.url)){location.assign(result.url);return;}status(feedback,'Your payment is being checked. Use Check status before trying again.');}catch(error){status(feedback,error.message,true);}finally{busy=false;pay.disabled=false;}});
 cancel.addEventListener('click',async()=>{if(!reservation||busy)return;if(!confirm('Cancel this reservation request?'))return;busy=true;cancel.disabled=true;try{const session=await window.LockdAccount.getSession();const response=await fetch('/api/bookings',{method:'PATCH',headers:{Authorization:'Bearer '+session.access_token,'Content-Type':'application/json'},body:JSON.stringify({bookingId:id,action:'cancel'}),signal:AbortSignal.timeout(12000)});const data=await response.json();if(!response.ok)throw Error(data.message||'This request could not be cancelled.');busy=false;await update();}catch(error){status(feedback,error.message,true);}finally{busy=false;cancel.disabled=false;}});
-async function boot(){if(!/^[0-9a-f-]{36}$/i.test(id||'')){status(feedback,'Choose a reservation from your account.');return;}try{const session=await window.LockdAccount.getSession();if(!session){status(feedback,'Sign in to view your reservation.');const link=$('#checkout-signin');link.href=window.LockdAccount.authLink({returnTo:'/checkout.html?booking='+encodeURIComponent(id)});link.hidden=false;return;}await update(new URL(location.href).searchParams.has('reference'));}catch(error){status(feedback,error.message,true);}}
+async function boot(){if(!/^[0-9a-f-]{36}$/i.test(id||'')){refresh.hidden=true;status(feedback,'Choose a reservation from your account.');return;}try{const session=await window.LockdAccount.getSession();if(!session){status(feedback,'Sign in to view your reservation.');const link=$('#checkout-signin');link.href=window.LockdAccount.authLink({returnTo:'/checkout.html?booking='+encodeURIComponent(id)});link.hidden=false;return;}customerId=session.user.id;await update(new URL(location.href).searchParams.has('reference'));}catch(error){status(feedback,error.message,true);}}
+window.addEventListener('lockd:auth-change', event => {
+  if (customerId && event.detail?.user?.id !== customerId) location.reload();
+});
 void boot();

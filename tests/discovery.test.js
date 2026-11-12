@@ -24,7 +24,7 @@ test("geolocation is opt-in and precise coordinates are not placed in URLs or br
   assert.match(script, /navigator\.geolocation\.getCurrentPosition/);
   assert.match(script, /\$\("#use-current-location"\)\.addEventListener\("click", useCurrentLocation\)/);
   assert.match(script, /Math\.round\(position\.coords\.latitude \* 100\) \/ 100/);
-  assert.match(script, /localStorage\.setItem\(manualLocationKey, nextLocation\.label\)/);
+  assert.match(script, /\{id:area\.id,label:area\.label\}/);
   assert.doesNotMatch(script, /searchParams\.set\("(?:latitude|longitude)"/);
   assert.doesNotMatch(script, /localStorage\.setItem\([^\n]*(?:latitude|longitude)/);
   assert.match(script, /window\.location\.pathname\}\$\{window\.location\.search/);
@@ -32,8 +32,8 @@ test("geolocation is opt-in and precise coordinates are not placed in URLs or br
 
 test("location permission remains optional and manual locality matching is explicit", () => {
   assert.match(homepage, /Use my current location/);
-  assert.match(homepage, /Choose a location manually/);
-  assert.match(homepage, /Not now/);
+  assert.match(homepage, /id="manual-location-input" type="search"/);
+  assert.match(homepage, /data-dialog-close aria-label="Close location options"/);
   assert.match(script, /location_label|location: location\.label/);
   assert.match(script, /permission was declined\. Choose a town or neighbourhood manually/);
 });

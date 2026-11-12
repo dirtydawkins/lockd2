@@ -1,18 +1,31 @@
 (() => {
   const account = window.LockdAccount;
-  async function request(method, body, owner = false) {
+  const historyRequests = new WeakMap();
+  const bookingLabels = {
+    pending_owner: "Awaiting approval", awaiting_payment: "Awaiting payment", confirmed: "Confirmed",
+    active: "Rental in progress", completed: "Completed", rejected: "Declined", cancelled: "Cancelled",
+    expired: "Request expired", disputed: "Under review"
+  };
+  function formatDate(value) {
+    return new Intl.DateTimeFormat("en-KE", {day:"numeric", month:"short", year:"numeric", timeZone:"UTC"})
+      .format(new Date(value + "T12:00:00Z"));
+  }
+  async function request(method, body, owner = false, signal) {
     const session = await account.getSession();
     if (!session) throw new Error("Sign in to manage reservations.");
     const res = await fetch(`/api/bookings${owner ? "?owner=1" : ""}`, {
       method,
       cache: "no-store",
+      signal: signal || AbortSignal.timeout(15000),
       headers: {
         Authorization: `Bearer ${session.access_token}`,
         "Content-Type": "application/json",
       },
       ...(body ? { body: JSON.stringify(body) } : {}),
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
+    if ((await account.getSession())?.user?.id !== session.user?.id)
+      throw new Error("Your account changed. Reopen your reservations.");
     if (!res.ok) {
       const error = new Error(
         data.message || "Reservations could not be loaded.",
@@ -23,12 +36,22 @@
     return data;
   }
   async function renderHistory(root, owner) {
-    root.textContent = "Loading reservations…";
+    historyRequests.get(root)?.abort();
+    const controller = new AbortController();
+    historyRequests.set(root, controller);
+    const deadline = setTimeout(() => controller.abort(), 15000);
+    root.textContent = owner ? "Loading booking requests…" : "Loading your reservations…";
     try {
-      const { items } = await request("GET", null, owner);
+      const { items } = await request("GET", null, owner, controller.signal);
+      if (historyRequests.get(root) !== controller) return;
       root.replaceChildren();
       if (!items.length) {
-        root.textContent = "No reservations to show yet.";
+        const note = document.createElement("p"), link = document.createElement("a");
+        note.textContent = owner ? "Requests for your listings will appear here." : "Your reservations will appear here when you request a rental.";
+        link.href = owner ? "owners.html#owner-workspace" : "rentals.html";
+        link.className = "text-button";
+        link.textContent = owner ? "View my listings" : "Explore rentals";
+        root.append(note, link);
         return;
       }
       for (const b of items) {
@@ -37,12 +60,12 @@
         const h = document.createElement("h4");
         h.textContent = b.listing_snapshot?.title || "Rental reservation";
         const p = document.createElement("p");
-        p.textContent = `${b.start_date} – ${b.end_date} · Quantity ${b.quantity} · ${b.status.replaceAll("_", " ")} · Payment: ${b.payment_status}`;
+        p.textContent = `${formatDate(b.start_date)} – ${formatDate(b.end_date)} · Quantity ${b.quantity} · ${bookingLabels[b.status] || b.status} · Payment: ${b.payment_status}`;
         const price = document.createElement("p");
         price.textContent =
           b.total_amount != null
-            ? `${b.currency} ${b.total_amount} total · ${b.deposit_amount} refundable deposit included`
-            : "Historical price not recorded";
+            ? `${b.currency} ${b.total_amount} total${Number(b.deposit_amount) > 0 ? " (includes " + b.currency + " " + b.deposit_amount + " refundable deposit)" : ""}`
+            : "Price unavailable for this reservation";
         const ref = document.createElement("small");
         ref.textContent = `Reference ${b.id}`;
         card.append(h, p, price, ref);
@@ -59,7 +82,7 @@
         if (!owner && b.status === "completed") { const review=document.createElement("a"); review.href="reviews.html?booking="+encodeURIComponent(b.id);review.textContent="Leave a review";review.dataset.lockdReviewsEntry="";review.hidden=document.documentElement.dataset.lockdReviews!=="enabled";card.append(review); }
         if (b.trust_policy_id) {
           const requirements = document.createElement('p');
-          requirements.textContent = `Verification policy v${b.trust_requirements?.version || ''} · Owner: ${b.owner_approval} · LOCKD: ${b.platform_approval}. Required checks are revalidated before payment and handover.`;
+          requirements.textContent = `Lister approval: ${b.owner_approval || "pending"} · LOCKD approval: ${b.platform_approval || "pending"}`;
           card.append(requirements);
         }
         if (b.booking_conditions) {
@@ -75,7 +98,7 @@
           available.push(["cancel", "Cancel request"]);
         if (owner && b.status === 'pending_owner') {
           if (!b.owner_approval || b.owner_approval === 'pending') available.push(['accept','Accept request']);
-          available.push(['reject','Reject request']);
+          available.push(['reject','Decline request']);
         }
         if (!owner && b.status === 'pending_owner') {
           if (b.booking_conditions && !b.conditions_accepted_at) available.push(['accept_conditions','Accept rental conditions']);
@@ -102,7 +125,7 @@
             btn.disabled = true;
             try {
               await request("PATCH", { bookingId: b.id, action });
-              await renderHistory(root, owner);
+              if (historyRequests.get(root) === controller) await renderHistory(root, owner);
             } catch (e) {
               const err = document.createElement("p");
               err.setAttribute("role", "alert");
@@ -116,24 +139,29 @@
         root.append(card);
       }
     } catch (e) {
-      root.textContent = e.message;
+      if (historyRequests.get(root) !== controller) return;
+      root.textContent = controller.signal.aborted ? "Reservations took too long to load. Please try again." : e.message;
       const retry = document.createElement("button");
       retry.textContent = "Retry";
       retry.type = "button";
       retry.addEventListener("click", () => renderHistory(root, owner));
       root.append(retry);
+    } finally {
+      clearTimeout(deadline);
     }
   }
-  document
-    .querySelectorAll("[data-load-bookings]")
-    .forEach((button) =>
-      button.addEventListener("click", () =>
-        renderHistory(
-          document.querySelector("#booking-history"),
-          button.dataset.loadBookings === "owner",
-        ),
-      ),
-    );
+  const historyTabs = document.querySelectorAll("[data-load-bookings]");
+  for (const button of historyTabs) {
+    button.addEventListener("click", () => {
+      const owner = button.dataset.loadBookings === "owner";
+      const url = new URL(location.href);
+      if (owner) url.searchParams.set("view", "listing");
+      else url.searchParams.delete("view");
+      window.history.replaceState(null, "", url.pathname + url.search + "#bookings");
+      for (const tab of historyTabs) tab.setAttribute("aria-pressed", String(tab === button));
+      void renderHistory(document.querySelector("#booking-history"), owner);
+    });
+  }
   const box = document.querySelector("#reservation-request");
   if (box) {
     fetch("/api/bookings?capabilities=1", { cache: "no-store" })
@@ -207,7 +235,7 @@
           };
           ({ item } = await request("POST", attempted));
         }
-        message.textContent = `Request recorded: ${item.id}. ${item.status === "pending_owner" ? "Awaiting the required verification and approvals. Manage this request in your account." : "Awaiting payment setup; this is not a confirmed rental."} Hold ends ${new Date(item.expires_at).toLocaleString()}.`;
+        message.textContent = "Reservation request saved. Reference " + item.id + ".";
         btn.textContent = "Request recorded";
         btn.dataset.sent = "true";
         location.assign("checkout.html?booking="+encodeURIComponent(item.id));

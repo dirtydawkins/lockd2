@@ -76,7 +76,16 @@
     $$("[data-account-panel]").forEach((section) => { section.hidden = section.dataset.accountPanel !== selected; });
     if (selected === "saved") loadSavedListings();
     if (selected === "security") loadDeletionRequestState();
-    window.history.replaceState(null, "", `account.html#${selected}`);
+    const current = new URL(window.location.href);
+    const route = new URL(current.pathname, current.origin);
+    if (selected === "bookings" && current.searchParams.get("view") === "listing")
+      route.searchParams.set("view", "listing");
+    route.hash = selected;
+    window.history.replaceState(null, "", route.pathname + route.search + route.hash);
+    if (selected === "bookings" && activeUser) {
+      const scope = route.searchParams.get("view") === "listing" ? "owner" : "customer";
+      document.querySelector('[data-account-panel="bookings"] [data-load-bookings="' + scope + '"]')?.click();
+    }
   }
 
   function showDashboard(user) {
@@ -100,7 +109,6 @@
     const accountState = await loadDashboardData();
     if (accountState.needsProfileName) return;
     const selected=window.location.hash.slice(1);showSection(selected);
-    if(selected==='bookings')document.querySelector('#account-dashboard [data-account-panel="bookings"] [data-load-bookings="customer"]')?.click();
     await continuePendingAuthentication();
   }
 
@@ -511,7 +519,7 @@
     if (!event.detail?.user) showAuth("Your LOCKD session ended. Sign in again to continue.", "info");
   });
   window.addEventListener("lockd:saved-change", (event) => updateSavedCount(event.detail?.ids?.length || 0));
-  window.addEventListener("hashchange", () => {const selected=window.location.hash.slice(1);showSection(selected);if(selected==='bookings'&&activeUser)document.querySelector('#account-dashboard [data-account-panel="bookings"] [data-load-bookings="customer"]')?.click();});
+  window.addEventListener("hashchange", () => showSection(window.location.hash.slice(1)));
 
   setAuthMode("signin");
   restoreAccount();

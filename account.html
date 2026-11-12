@@ -21,12 +21,13 @@
     <script src="./bookings.js" defer></script>
   <script src="./messaging-onboarding.mjs" type="module"></script>
   <script type="module" src="./reviews.mjs"></script>    <link rel="stylesheet" href="./brand-refinement.css">
+  <script defer src="./site-menu.js"></script>
 </head>
   <body class="account-page">
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header" id="top">
       <a class="brand" href="index.html#top" aria-label="LOCKD home"><img class="brand-image" src="./assets/brand/lockd.svg" alt="LOCKD" width="1330" height="317"></a>
-      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu"><span></span><span></span></button>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu"><span></span><span></span><span></span></button>
       <nav class="primary-nav" id="primary-nav" aria-label="Main navigation">
         <a href="rentals.html">Explore rentals</a>
         <a href="rooms.html">Book a room</a>
@@ -35,9 +36,9 @@
         <a href="tech.html">Tech &amp; Gadgets</a>
         <a href="account.html" aria-current="page">Account</a>
         <a class="owner-nav-link" href="owners.html">Become a lister</a>
-      <a href="reviews.html" data-lockd-reviews-entry hidden>Reviews</a></nav>
+      <a href="reviews.html" data-lockd-reviews-entry hidden>Reviews</a><a class="mobile-settings-link" href="account.html#personal">Settings</a></nav>
       <a class="header-cta" href="rentals.html">Explore Rentals</a>
-    </header>
+    <details class="site-account-menu desktop-account-menu"><summary aria-label="Account menu"><span></span><span></span><span></span></summary><nav aria-label="Account shortcuts"><a href="account.html#bookings">Reservations</a><a href="messages.html">Messages</a><a href="account.html#saved">Saved rentals</a><a href="account.html#personal">Settings</a></nav></details></header>
 
     <main class="account-main" id="main">
       <div class="account-intro" id="account-intro">
@@ -106,7 +107,7 @@
         <nav class="account-section-nav" aria-label="Account sections">
           <button type="button" data-account-section="overview" aria-current="page">Overview</button>
           <button type="button" data-account-section="saved">Saved rentals</button>
-          <button type="button" data-account-section="bookings" data-load-bookings="customer">Reservations</button>
+          <button type="button" data-account-section="bookings">Reservations</button>
           <button type="button" data-account-section="personal">Personal info</button>
           <button type="button" data-account-section="security">Login &amp; security</button>
           <button type="button" data-account-section="preferences">Preferences</button>
@@ -119,7 +120,7 @@
           <div class="account-overview-grid">
             <a class="account-overview-card" href="rentals.html"><span class="account-card-index">01</span><h4>Explore rentals</h4><p>Pick up your next stay, drive or experience.</p><span class="account-card-link">Browse the catalogue</span></a>
             <button class="account-overview-card" type="button" data-go-section="saved"><span class="account-card-index">02</span><h4>Saved rentals</h4><p id="saved-overview-count">Your saved listings appear here.</p><span class="account-card-link">View saved</span></button>
-            <button class="account-overview-card" type="button" data-go-section="bookings" data-load-bookings="customer"><span class="account-card-index">03</span><h4>Bookings &amp; trips</h4><p>View your recorded reservation requests and their current status.</p><span class="account-card-link">View reservations</span></button>
+            <button class="account-overview-card" type="button" data-go-section="bookings"><span class="account-card-index">03</span><h4>Bookings &amp; trips</h4><p>Check your dates, payments and booking status.</p><span class="account-card-link">View reservations</span></button>
           </div>
           <p class="account-security-note">Your customer and lister tools use the same LOCKD sign-in. Lister listings remain managed in the <a href="owners.html">lister workspace</a>.</p>
           <p class="account-security-note"><a href="trust.html">Verification, rental updates &amp; support</a></p>
@@ -127,10 +128,10 @@
           <p class="account-security-note" data-lockd-address-entry hidden><a href="verification.html">Address evidence</a></p>
         </section>
 
-        <section class="account-section" data-account-panel="bookings" hidden aria-labelledby="bookings-title"><p class="eyebrow">YOUR RENTALS</p><h3 id="bookings-title">Reservations.</h3><p>Requests awaiting payment are not confirmed rentals. You won’t be charged when you send a booking request.</p><div class="account-section-nav"><button type="button" data-load-bookings="customer">My rentals</button><button type="button" data-load-bookings="owner">Bookings for my listings</button></div><div id="booking-history" aria-live="polite">Select My rentals or Bookings for my listings.</div></section>
+        <section class="account-section" data-account-panel="bookings" hidden aria-labelledby="bookings-title"><p class="eyebrow">YOUR RENTALS</p><h3 id="bookings-title">Reservations.</h3><p>Track your dates, requests and payments here.</p><div class="account-section-nav"><button type="button" data-load-bookings="customer">My rentals</button><button type="button" data-load-bookings="owner">Bookings for my listings</button></div><div id="booking-history" aria-live="polite">Loading reservations…</div></section>
         <section class="account-section" data-account-panel="saved" hidden aria-labelledby="saved-title">
           <div class="account-section-heading"><div><p class="eyebrow">KEPT CLOSE</p><h3 id="saved-title">Saved rentals.</h3></div><a class="text-button" href="rentals.html">Explore rentals</a></div>
-          <p class="account-section-intro">Listings currently published by LOCKD appear first. Saved items that are no longer listed remain here as a private reference.</p>
+          <p class="account-section-intro">Find rentals you’ve saved. Unavailable rentals stay in your list until you remove them.</p>
           <div class="account-saved-grid" id="account-saved-grid" aria-live="polite"><p>Loading your saved rentals…</p></div>
         </section>
 

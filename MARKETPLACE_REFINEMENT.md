@@ -13,7 +13,7 @@ Public lister discovery requires explicit consent and genuine published, eligibl
 | Area | Implementation | Verification and limit |
 |---|---|---|
 | Existing visual identity | index.html, tech.html, marketplace-refinement.css | Inbuilt-browser screenshots; Tech checked at 320, 375, 390, 430, 768, 1024, 1440. No horizontal overflow or broken images in these checks. Original supplied photos retained. |
-| Unified landing search | unified-search.mjs, app.js, catalogue.js | Actual experience search carries q/category/kind into the existing listing backend. Genuine empty results observed. Lister tab appears after public eligible profiles exist. |
+| Unified landing search | app.js, catalogue.js | Category and location are chosen in one form. Unfiltered name searches include eligible public listers. |
 | Lister discovery/profile | lister-discovery.mjs, lister.html, lib/hosts-api.js, migration 0015 | Real RPC returns an empty directory. Opt-in, publication eligibility, pagination and privacy enforced in SQL. Populated profile journeys blocked by absent genuine listings. |
 | Lister registration/access | owners.html/js, account-service.js | Existing Google/email auth reused, return path retained; guest controls inspected. Fresh OAuth/registration was not performed this increment. |
 | Public profile editing | lister-profile.mjs, lib/host-profile-api.js | Authenticated own-profile RPC; editor waits for an actual owned listing. No new account or fake listing created to exercise it. |

@@ -1,12 +1,8 @@
 /* Shared LOCKD refinements: existing colour, type, geometry and motion tokens. */
 @media(min-width:761px){.primary-nav a[href$="#about"],.primary-nav a[href$="#how-it-works"],.primary-nav a[href$="#discover-feed"]{display:none}.primary-nav a{white-space:nowrap}}
-.search-scopes{display:flex;gap:.25rem;border:0;border-bottom:1px solid var(--line);padding:0;margin:1.5rem 0 0;overflow:auto}
-.search-scopes label{display:flex;align-items:center;min-height:46px;padding:.5rem 1.1rem;border-bottom:2px solid transparent;font-size:.8rem;white-space:nowrap;cursor:pointer}
-.search-scopes label:has(:checked){border-color:var(--burgundy);color:var(--oxblood);font-weight:650}.search-scopes label:focus-within{outline:2px solid var(--burgundy);outline-offset:-3px}
-.search-scopes input{width:1px;height:1px;position:absolute;opacity:0}.search-scopes+.idea-search{margin-top:1rem}
 .lister-directory{margin-block:3rem}.lister-directory h2{font-family:var(--serif);font-size:clamp(2rem,4vw,3rem)}
 .lister-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.5rem}.lister-card{border-top:1px solid var(--line);padding:1.5rem 0}.lister-card h3{font-family:var(--serif);font-size:1.6rem;margin:.9rem 0}.lister-card p{font-size:.85rem;line-height:1.6}.lister-count{font-size:.75rem;color:var(--muted)}.lister-initial{display:grid;place-items:center;width:52px;height:52px;border:1px solid var(--line);background:var(--stone,#e8e2dc);color:var(--oxblood);font-family:var(--serif);font-size:1.8rem}.lister-listing-photo{display:block;width:100%;height:auto;aspect-ratio:1.25;object-fit:cover}.lister-search{display:flex;gap:.8rem;margin-block:1rem}.lister-search input{min-width:0;flex:1;padding:.8rem;border:1px solid var(--line);background:var(--white);font:inherit}.lister-profile-settings{padding-block:2rem;border-block:1px solid var(--line)}
-@media(max-width:760px){.lister-grid{grid-template-columns:1fr}.search-scopes label{padding-inline:.75rem;font-size:.75rem}}
+@media(max-width:760px){.lister-grid{grid-template-columns:1fr}}
 .discovery-heading h2,.categories-heading h2,.related-rentals-heading h2{max-width:20ch;font-size:clamp(2rem,4vw,4rem);line-height:1.08}
 .idea-search{display:grid;grid-template-columns:minmax(180px,1.5fr) minmax(140px,1fr) minmax(130px,1fr) auto;gap:0;max-width:none;padding:.55rem;margin-top:2rem;background:var(--white);border-color:var(--line)}
 .idea-search .search-field{display:flex;flex-direction:column;min-width:0;padding:.45rem 1rem;border-right:1px solid var(--line);transition:background-color var(--motion-control)}

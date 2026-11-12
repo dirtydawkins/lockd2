@@ -26,12 +26,13 @@
     <script src="./rental-pricing.js" defer></script>
     <script src="./catalogue.js" defer></script>
   <link rel="stylesheet" href="./marketplace-refinement.css"><script type="module" src="./lister-discovery.mjs"></script><script type="module" src="./messaging-onboarding.mjs"></script>    <link rel="stylesheet" href="./brand-refinement.css"><link rel="stylesheet" href="./rental-search.css">
+  <script defer src="./site-menu.js"></script>
 </head>
   <body class="rental-search-page">
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header" id="top">
       <a class="brand" href="index.html#top" aria-label="LOCKD home"><img class="brand-image" src="./assets/brand/lockd.svg" alt="LOCKD" width="1330" height="317"></a>
-      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu"><span></span><span></span></button>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu"><span></span><span></span><span></span></button>
       <nav class="primary-nav" id="primary-nav" aria-label="Main navigation">
         <a href="rentals.html">Explore Rentals</a>
         <a href="rooms.html">Book a Room</a>
@@ -42,9 +43,9 @@
         <a class="account-nav-link" href="account.html">Account</a>
         <a href="messages.html" data-lockd-messaging-entry hidden>Messages</a>
         <a class="owner-nav-link" href="owners.html">Become a lister</a>
-      </nav>
+      <a class="mobile-settings-link" href="account.html#personal">Settings</a></nav>
       <a class="header-cta" href="rentals.html?bundle=1">Build Your Bundle</a>
-    </header>
+    <details class="site-account-menu desktop-account-menu"><summary aria-label="Account menu"><span></span><span></span><span></span></summary><nav aria-label="Account shortcuts"><a href="account.html#bookings">Reservations</a><a href="messages.html">Messages</a><a href="account.html#saved">Saved rentals</a><a href="account.html#personal">Settings</a></nav></details></header>
 
     <main id="main" class="catalogue-shell">
       <nav class="breadcrumbs" aria-label="Breadcrumb">
@@ -82,7 +83,7 @@
             <label class="rental-search-field rental-query" for="catalogue-search"><span>What are you looking for?</span><span class="rental-input-wrap"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#search"></use></svg><input id="catalogue-search" type="search" name="q" list="catalogue-suggestions" placeholder="Try a camera, car or place to stay" autocomplete="off"></span></label>
             <datalist id="catalogue-suggestions"></datalist>
             <label class="rental-search-field rental-category" for="catalogue-category"><span>Category</span><span class="rental-input-wrap"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#grid"></use></svg><select id="catalogue-category" name="category" aria-label="Category">
-              <option value="">All categories</option><option value="stay">Accommodation</option><option value="drive">Cars &amp; Mobility</option><option value="experience">Experiences</option><option value="technology">Technology</option><option value="play">Gaming</option><option value="camera">Cameras</option><option value="phone">Phones</option><option value="laptop">Computers</option><option value="audio">Audio</option><option value="creative">Creative equipment</option><option value="other">Other rentals</option>
+              <option value="">All categories</option><option value="stay">Accommodation</option><option value="drive">Cars &amp; Mobility</option><option value="experience">Experiences</option><option value="technology">Tech &amp; Gadgets</option><option value="play">Gaming</option><option value="camera">Cameras</option><option value="phone">Phones</option><option value="laptop">Computers</option><option value="audio">Audio</option><option value="creative">Creative equipment</option><option value="other">Other rentals</option>
             </select></span></label>
             <label class="rental-search-field rental-location" for="catalogue-location"><span>Where?</span><span class="rental-input-wrap"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#location"></use></svg><input id="catalogue-location" type="search" name="location" placeholder="City or area" autocomplete="off"></span></label>
             <button type="submit" class="button button-burgundy">Search rentals <svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#arrow"></use></svg></button>
@@ -121,9 +122,8 @@
         <a href="rentals.html" data-filter="all">All rentals</a>
         <a href="rooms.html" data-filter="stay"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#stay"></use></svg>Book a Room</a>
         <a href="rentals.html?category=drive" data-filter="drive"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#car"></use></svg>Cars &amp; Mobility</a>
-        <a href="rentals.html?category=play" data-filter="play"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#gaming"></use></svg>Play</a>
-        <a href="rentals.html?category=technology" data-filter="technology"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#device"></use></svg>Technology</a>
-        <a href="tech.html">Tech &amp; Gadgets</a>
+        <a href="rentals.html?category=play" data-filter="play"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#gaming"></use></svg>Gaming</a>
+        <a href="tech.html"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#device"></use></svg>Tech &amp; Gadgets</a>
         <a href="rentals.html?category=experience" data-filter="experience"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#experience"></use></svg>Experiences</a>
         <a href="rentals.html?category=camera" data-filter="camera">Cameras</a>
         <a href="rentals.html?category=audio" data-filter="audio">Audio</a>

@@ -24,12 +24,13 @@
     <script src="./motion.js" defer></script>
     <script src="./app.js" defer></script>
   <script type="module" src="./messaging-onboarding.mjs"></script>    <link rel="stylesheet" href="./brand-refinement.css">
+  <script defer src="./site-menu.js"></script>
 </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header" id="top">
       <a class="brand" href="index.html#top" aria-label="LOCKD home"><img class="brand-image" src="./assets/brand/lockd.svg" alt="LOCKD" width="1330" height="317"></a>
-      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu"><span></span><span></span></button>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu"><span></span><span></span><span></span></button>
       <nav class="primary-nav" id="primary-nav" aria-label="Main navigation">
         <a href="index.html#categories">Explore</a>
         <a href="rooms.html">Book a Room</a>
@@ -41,9 +42,9 @@
         <a class="account-nav-link" href="account.html">Account</a>
         <a href="messages.html" data-lockd-messaging-entry hidden>Messages</a>
         <a class="owner-nav-link" href="owners.html">Become a lister</a>
-      </nav>
+      <a class="mobile-settings-link" href="account.html#personal">Settings</a></nav>
       <a class="header-cta" href="rentals.html">Explore Rentals</a>
-    </header>
+    <details class="site-account-menu desktop-account-menu"><summary aria-label="Account menu"><span></span><span></span><span></span></summary><nav aria-label="Account shortcuts"><a href="account.html#bookings">Reservations</a><a href="messages.html">Messages</a><a href="account.html#saved">Saved rentals</a><a href="account.html#personal">Settings</a></nav></details></header>
 
     <main id="main" class="destination-shell">
       <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span aria-hidden="true">/</span><span>Destinations</span></nav>
@@ -99,7 +100,7 @@
             <div class="destination-card-copy"><p class="eyebrow">TROPICAL COAST · ISLANDS</p><h3>Limestone lagoons</h3><p>Turquoise water, long-tail boats and dramatic limestone cliffs make for a memorable day on the water.</p><a class="text-button" href="rentals.html?category=experience">Explore experiences</a></div>
           </article>
         </div>
-        <p class="destination-disclaimer">These are destination guides, not bookable offers. Details, availability and pricing are shown on individual approved listings.</p>
+        <p class="destination-disclaimer">Choose a destination to find local stays and experiences. Each listing shows its own dates and price.</p>
       </section>
     </main>
 

@@ -140,7 +140,8 @@ test("owner listing photos are signed with the authenticated owner's session", a
     calls.push({ url: String(url), options });
     if (String(url).endsWith("/auth/v1/user")) return response(200, { id: "owner-1", email_confirmed_at: "2026-10-01T00:00:00Z" });
     if (String(url).endsWith("/rpc/my_lockd_listings")) return response(200, [{ id: "listing-1", listing_status: "draft", images: [path] }]);
-    return response(200, { signedURL: `/object/sign/lockd-listings/${path}?token=signed` });
+    assert.deepEqual(JSON.parse(options.body).paths, [path]);
+    return response(200, [{ path, signedURL: `/object/sign/lockd-listings/${path}?token=signed` }]);
   };
   const result = await invoke({ headers: { authorization: `Bearer ${token}` } });
   assert.equal(result.statusCode, 200);
@@ -148,6 +149,20 @@ test("owner listing photos are signed with the authenticated owner's session", a
   assert.deepEqual(result.body.items[0].images, [`https://lockd-test.supabase.co/storage/v1/object/sign/lockd-listings/${path}?token=signed`]);
   assert.equal(calls.length, 3);
   assert.equal(calls[2].options.headers.Authorization, `Bearer ${token}`);
+});
+
+test("a missing preview keeps the original photo on the lister's edit form", async (t) => {
+  setup(t);
+  const path = "b97f0876-a29a-4b6a-b8ca-a11111111112/b97f0876-a29a-4b6a-b8ca-a11111111111/b97f0876-a29a-4b6a-b8ca-a11111111113.webp";
+  global.fetch = async (url) => {
+    if (String(url).endsWith("/auth/v1/user")) return response(200, { id: "owner-1", email_confirmed_at: "2026-10-01" });
+    if (String(url).endsWith("/rpc/my_lockd_listings")) return response(200, [{images:[path]}]);
+    return response(503, {});
+  };
+  const result = await invoke({headers:{authorization:"Bearer " + "e".repeat(40)}});
+  assert.equal(result.statusCode, 200);
+  assert.deepEqual(result.body.items[0].image_paths, [path]);
+  assert.deepEqual(result.body.items[0].images, [null]);
 });
 
 test("owner API does not claim a write when the database setup is missing", async (t) => {
@@ -158,7 +173,7 @@ test("owner API does not claim a write when the database setup is missing", asyn
   const result = await invoke({ method: "POST", headers: { authorization: `Bearer ${"c".repeat(40)}` }, body: { listing: {}, publish: false } });
   assert.equal(result.statusCode, 503);
   assert.equal(result.body.error, "owner_setup_pending");
-  assert.match(result.body.message, /migration has not been applied/);
+  assert.match(result.body.message, /could not be saved/);
 });
 
 test("owner API rejects unsupported operations and expired sessions", async (t) => {

@@ -331,7 +331,7 @@
     if (record.collection_available !== null && record.collection_available !== undefined) addFact(facts, "Collection", record.collection_available ? "Available" : "Not available");
     if (record.delivery_available !== null && record.delivery_available !== undefined) addFact(facts, "Delivery", record.delivery_available ? "Available" : "Not available");
     if (record.requires_approval) addFact(facts, "Booking process", "Owner confirmation required");
-    else if (record.checkout_enabled) addFact(facts, "Booking process", "This listing is marked checkout-enabled, but LOCKD checkout is not live yet");
+    else if (record.checkout_enabled) addFact(facts, "Booking process", "Review the total and request your dates");
     else addFact(facts, "Booking process", "Online reservations are currently unavailable");
     if (["technology", "play", "camera", "phone", "laptop", "audio", "creative"].includes(record.category) || record.market_category) {
       try {
@@ -467,7 +467,7 @@
         throw new Error(result.message || "Availability could not be checked.");
       }
       if (result.available) {
-        const manual = listing.requires_approval ? " The owner still needs to confirm this rental." : " This check does not reserve the rental.";
+        const manual = listing.requires_approval ? " The lister will review your request." : " This check does not reserve the rental.";
         setMessage(`The listing calendar shows availability for these dates.${manual}`, "available");
       } else {
         setMessage("This rental is not available for the selected dates. Try another date range.", "unavailable");

@@ -29,12 +29,13 @@
     <script src="./tech.js" defer></script>
     <link rel="stylesheet" href="./marketplace-refinement.css">
   <script type="module" src="./messaging-onboarding.mjs"></script>    <link rel="stylesheet" href="./brand-refinement.css">
+  <script defer src="./site-menu.js"></script>
 </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header" id="top">
       <a class="brand" href="index.html#top" aria-label="LOCKD home"><img class="brand-image" src="./assets/brand/lockd.svg" alt="LOCKD" width="1330" height="317"></a>
-      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu"><span></span><span></span></button>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu"><span></span><span></span><span></span></button>
       <nav class="primary-nav" id="primary-nav" aria-label="Main navigation">
         <a href="rentals.html">Explore Rentals</a>
         <a href="rooms.html">Book a Room</a>
@@ -45,9 +46,9 @@
         <a class="account-nav-link" href="account.html">Account</a>
         <a href="messages.html" data-lockd-messaging-entry hidden>Messages</a>
         <a class="owner-nav-link" href="owners.html">Become a lister</a>
-      </nav>
+      <a class="mobile-settings-link" href="account.html#personal">Settings</a></nav>
       <a class="header-cta" href="rentals.html">Explore Rentals</a>
-    </header>
+    <details class="site-account-menu desktop-account-menu"><summary aria-label="Account menu"><span></span><span></span><span></span></summary><nav aria-label="Account shortcuts"><a href="account.html#bookings">Reservations</a><a href="messages.html">Messages</a><a href="account.html#saved">Saved rentals</a><a href="account.html#personal">Settings</a></nav></details></header>
 
     <main id="main" class="tech-shell">
       <nav class="breadcrumbs" aria-label="Breadcrumb">
@@ -123,7 +124,7 @@
         <p class="catalogue-status tech-status" id="tech-status" role="status" aria-live="polite">Finding technology rentals…</p>
         <div class="tech-listing-grid" id="tech-listing-grid"></div>
         <button class="button button-paper tech-load-more" id="tech-load-more" type="button" hidden>Load more</button>
-        <p class="tech-date-note">Check the calendar for your dates. Availability checks do not reserve an item.</p>
+        <p class="tech-date-note">Choose a rental to check dates and request a reservation.</p>
       </section>
 
       <section class="tech-personal" aria-label="Your saved items and history">
@@ -140,7 +141,7 @@
       <section class="tech-photo-guide" aria-labelledby="tech-photo-guide-title">
         <div class="tech-section-heading">
           <div><p class="eyebrow">Browse by category</p><h2 id="tech-photo-guide-title">Browse equipment.</h2></div>
-          <p class="tech-section-copy">Explore gaming, phones and computer equipment. Published listings show the model, specifications, accessories, location and lister-confirmed rate.</p>
+          <p class="tech-section-copy">Choose a category to see models, accessories and rental rates.</p>
         </div>
         <div class="tech-photo-grid">
           <a class="tech-photo-card" href="tech.html?group=gaming">

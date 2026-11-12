@@ -28,7 +28,8 @@
     <script src="./discovery.js" defer></script><script src="./discovery-map.mjs" type="module"></script><link rel="stylesheet" href="./discovery-map.css">
     <link rel="stylesheet" href="./place-picker.css"><link rel="stylesheet" href="./location-privacy.css"><script type="module" src="./privacy-preferences.mjs"></script><script type="module" src="./discovery-locations.mjs"></script>
     <link rel="stylesheet" href="./marketplace-refinement.css">
-  <script type="module" src="./unified-search.mjs"></script><script type="module" src="./messaging-onboarding.mjs"></script>    <link rel="stylesheet" href="./brand-refinement.css">
+  <script type="module" src="./messaging-onboarding.mjs"></script>    <link rel="stylesheet" href="./brand-refinement.css">
+  <script defer src="./site-menu.js"></script>
 </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
@@ -36,9 +37,7 @@
     <header class="site-header" id="top">
       <a class="brand" href="#top" aria-label="LOCKD home"><img class="brand-image" src="./assets/brand/lockd.svg" alt="LOCKD" width="1330" height="317"></a>
 
-      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
-        <span></span><span></span>
-      </button>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu"><span></span><span></span><span></span></button>
 
       <nav class="primary-nav" id="primary-nav" aria-label="Main navigation">
         <a href="#categories">Explore</a>
@@ -52,10 +51,10 @@
         <a class="account-nav-link" href="account.html">Account</a>
         <a href="messages.html" data-lockd-messaging-entry hidden>Messages</a>
         <a class="owner-nav-link" href="owners.html">Become a lister</a>
-      </nav>
+      <a class="mobile-settings-link" href="account.html#personal">Settings</a></nav>
 
       <a class="header-cta" href="#discovery-title">Explore Rentals</a>
-    </header>
+    <details class="site-account-menu desktop-account-menu"><summary aria-label="Account menu"><span></span><span></span><span></span></summary><nav aria-label="Account shortcuts"><a href="account.html#bookings">Reservations</a><a href="messages.html">Messages</a><a href="account.html#saved">Saved rentals</a><a href="account.html#personal">Settings</a></nav></details></header>
 
     <main id="main">
       <section class="hero section-shell" aria-labelledby="hero-title">
@@ -89,20 +88,20 @@
           </div>
           <p class="section-intro">Search by name, then narrow down by category and location.</p>
         </div>
-        <form class="idea-search" id="idea-search-form" role="search">
+        <form class="idea-search" id="idea-search-form" action="rentals.html" method="get" role="search">
           <div class="search-field search-query"><label for="idea-search">What do you need?</label>
 
-          <input id="idea-search" name="idea" type="search" list="idea-suggestions" placeholder="Try “PS5 Pro”, “room in Nairobi”…”" autocomplete="off">
+          <input id="idea-search" name="q" type="search" list="idea-suggestions" placeholder="Try a camera or a room in Nairobi" autocomplete="off">
           <datalist id="idea-suggestions"></datalist></div>
           <div class="search-field"><label for="idea-category">Category</label>
           <select id="idea-category" name="category" aria-label="All categories">
-            <option value="">All categories</option><option value="stay">Accommodation</option><option value="drive">Cars &amp; Mobility</option><option value="experience">Experiences</option><option value="technology">Technology</option><option value="play">Gaming</option><option value="camera">Cameras</option><option value="phone">Phones</option><option value="laptop">Computers</option><option value="audio">Audio</option><option value="creative">Creative equipment</option>
+            <option value="">All categories</option><option value="stay">Accommodation</option><option value="drive">Cars &amp; Mobility</option><option value="experience">Experiences</option><option value="technology">Tech &amp; Gadgets</option><option value="play">Gaming</option><option value="camera">Cameras</option><option value="phone">Phones</option><option value="laptop">Computers</option><option value="audio">Audio</option><option value="creative">Creative equipment</option>
           </select></div>
           <div class="search-field"><label for="idea-location">Where?</label>
           <input id="idea-location" name="location" type="search" placeholder="Anywhere" autocomplete="off"></div>
           <button class="button button-burgundy" type="submit">Search rentals</button>
         </form>
-        <p class="search-note" id="search-note">Check available dates on the rental page.</p>
+        <p class="search-note" id="search-note">Choose a rental to see available dates.</p>
       </section>
 
       <section class="categories section-shell" id="categories" aria-labelledby="categories-title">
@@ -166,7 +165,7 @@
           <button class="discovery-clear-location" id="clear-location" type="button" hidden>Clear</button>
         </div>
         <form class="discovery-filters" id="discovery-filters">
-          <label><span>Category</span><select id="discovery-category"><option value="">All rentals</option><option value="stay">Accommodation</option><option value="drive">Cars &amp; Mobility</option><option value="experience">Experiences</option><option value="technology">Technology</option><option value="play">Gaming</option><option value="camera">Cameras</option><option value="phone">Phones</option><option value="laptop">Computers</option><option value="audio">Audio</option><option value="creative">Creator equipment</option><option value="other">Other rentals</option></select></label>
+          <label><span>Category</span><select id="discovery-category"><option value="">All rentals</option><option value="stay">Accommodation</option><option value="drive">Cars &amp; Mobility</option><option value="experience">Experiences</option><option value="technology">Tech &amp; Gadgets</option><option value="play">Gaming</option><option value="camera">Cameras</option><option value="phone">Phones</option><option value="laptop">Computers</option><option value="audio">Audio</option><option value="creative">Creator equipment</option><option value="other">Other rentals</option></select></label>
           <label><span>From KSh</span><input id="discovery-min-price" type="number" min="0" max="100000000" inputmode="numeric" placeholder="Any"></label>
           <label><span>To KSh</span><input id="discovery-max-price" type="number" min="0" max="100000000" inputmode="numeric" placeholder="Any"></label>
           <label><span>Available from</span><input id="discovery-start-date" type="date"></label>
@@ -178,20 +177,20 @@
         <p class="discovery-feed-status" id="discovery-feed-status" role="status" aria-live="polite">Choose a location to see nearby listings. You can browse without sharing your location.</p>
 
         <section class="discovery-row" id="nearby-row" aria-labelledby="nearby-row-title" hidden>
-          <div class="discovery-row-heading"><div><p class="eyebrow">A little closer</p><h3 id="nearby-row-title">Around your area</h3></div><p id="nearby-row-note"></p></div>
+          <div class="discovery-row-heading"><div><h3 id="nearby-row-title">Around your area</h3></div><p id="nearby-row-note"></p></div>
           <div class="discovery-card-grid" id="nearby-listings"></div>
           <button class="discovery-more" id="expand-nearby" type="button" hidden>Explore a wider area</button>
           <button class="discovery-more" id="load-more-nearby" type="button" hidden>Load more nearby rentals</button>
         </section>
 
         <section class="discovery-row" id="available-row" aria-labelledby="available-row-title" hidden>
-          <div class="discovery-row-heading"><div><p class="eyebrow">Dates checked against listing calendars</p><h3 id="available-row-title">Available for your dates</h3></div><p id="available-row-note"></p></div>
+          <div class="discovery-row-heading"><div><h3 id="available-row-title">Available for your dates</h3></div><p id="available-row-note"></p></div>
           <div class="discovery-card-grid" id="available-listings"></div>
           <button class="discovery-more" id="load-more-available" type="button" hidden>Load more available rentals</button>
         </section>
 
         <section class="discovery-row" id="recent-row" hidden aria-labelledby="recent-row-title" hidden>
-          <div class="discovery-row-heading"><div><p class="eyebrow">Freshly published</p><h3 id="recent-row-title">Recently added</h3></div><p>Recently added rentals.</p></div>
+          <div class="discovery-row-heading"><div><h3 id="recent-row-title">Recently added</h3></div></div>
           <div class="discovery-card-grid" id="recent-listings"></div>
           <button class="discovery-more" id="load-more-recent" type="button" hidden>Load more listings</button>
         </section>
@@ -206,7 +205,7 @@
             <h2 id="destination-preview-title">Explore destinations.</h2>
           </div>
           <div class="destination-preview-intro">
-            <p class="section-intro">From the Maasai Mara to Santorini, find a place that gives the trip its shape. Published experiences appear when a lister lists them.</p>
+            <p class="section-intro">Find places to stay and things to do, from the Maasai Mara to Santorini.</p>
             <a class="text-button" href="destinations.html">Explore destinations</a>
           </div>
         </div>
@@ -233,9 +232,9 @@
 
       <section class="tech-preview section-shell" aria-labelledby="tech-preview-title">
         <div class="tech-preview-copy">
-          <p class="eyebrow"><span class="eyebrow-rule"></span> Tech &amp; gadgets</p>
+
           <h2 id="tech-preview-title">Tech &amp; gadgets.</h2>
-          <p>Explore gaming, phones, computers, cameras and useful gear through the published LOCKD catalogue.</p>
+          <p>Browse consoles, phones, computers and cameras.</p>
           <a class="text-button" href="tech.html">Explore Tech &amp; Gadgets <span aria-hidden="true">↗</span></a>
           <nav class="tech-preview-links" aria-label="Technology categories">
             <a href="tech.html?group=gaming">Gaming</a>
@@ -270,21 +269,21 @@
 
       <section class="how section-shell" id="how-it-works" aria-labelledby="how-title">
         <div class="how-heading">
-          <p class="eyebrow">Simple by design</p>
+
           <h2 id="how-title">How renting works.</h2>
         </div>
         <div class="how-list">
           <article class="how-step">
             <span class="step-number">01</span>
-            <div><h3>Choose what you need.</h3><p>Browse published rentals and add the items you want to bring together.</p></div>
+            <div><h3>Find your rental.</h3><p>Choose a stay, a car, equipment or an experience. Open the listing for its price and rental terms.</p></div>
           </article>
           <article class="how-step">
             <span class="step-number">02</span>
-            <div><h3>Choose the practical details.</h3><p>Set dates and quantities, then review the options configured for each listing.</p></div>
+            <div><h3>Choose your dates.</h3><p>Check availability for the dates and quantity you need. Review the total and any refundable deposit.</p></div>
           </article>
           <article class="how-step">
             <span class="step-number">03</span>
-            <div><h3>Check availability.</h3><p>Availability and pricing come from each published listing. A date check does not reserve the item.</p></div>
+            <div><h3>Request your reservation.</h3><p>Send a request from the listing. Follow its approval and payment status in <a href="account.html#bookings">My reservations</a>.</p></div>
           </article>
         </div>
       </section>

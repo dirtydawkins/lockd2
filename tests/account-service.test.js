@@ -38,6 +38,7 @@ function createService({ href, fetchImpl } = {}) {
     crypto: webcrypto,
     btoa: (value) => Buffer.from(value, "binary").toString("base64"),
     TextEncoder,
+    AbortSignal,
     CustomEvent: class CustomEvent { constructor(type, options) { this.type = type; this.detail = options?.detail; } },
     history: { replaceState(_state, _title, url) { historyWrites.push(String(url)); } },
     fetch: async (url, init = {}) => {

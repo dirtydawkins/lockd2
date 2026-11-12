@@ -26,12 +26,13 @@
     <script src="./photo-fallbacks.js" defer></script>
     <script src="./rooms.js" defer></script>
   <script type="module" src="./messaging-onboarding.mjs"></script>    <link rel="stylesheet" href="./brand-refinement.css">
+  <script defer src="./site-menu.js"></script>
 </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header" id="top">
       <a class="brand" href="index.html#top" aria-label="LOCKD home"><img class="brand-image" src="./assets/brand/lockd.svg" alt="LOCKD" width="1330" height="317"></a>
-      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu"><span></span><span></span></button>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu"><span></span><span></span><span></span></button>
       <nav class="primary-nav" id="primary-nav" aria-label="Main navigation">
         <a href="rentals.html">Explore Rentals</a>
         <a href="rooms.html" aria-current="page">Book a Room</a>
@@ -43,16 +44,16 @@
         <a class="account-nav-link" href="account.html">Account</a>
         <a href="messages.html" data-lockd-messaging-entry hidden>Messages</a>
         <a class="owner-nav-link" href="owners.html">Become a lister</a>
-      </nav>
+      <a class="mobile-settings-link" href="account.html#personal">Settings</a></nav>
       <a class="header-cta" href="rentals.html?bundle=1">Build Your Bundle</a>
-    </header>
+    <details class="site-account-menu desktop-account-menu"><summary aria-label="Account menu"><span></span><span></span><span></span></summary><nav aria-label="Account shortcuts"><a href="account.html#bookings">Reservations</a><a href="messages.html">Messages</a><a href="account.html#saved">Saved rentals</a><a href="account.html#personal">Settings</a></nav></details></header>
 
     <main class="rooms-shell" id="main">
       <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span aria-hidden="true">/</span><span>Book a Room</span></nav>
       <section class="rooms-intro" aria-labelledby="rooms-title">
         <p class="eyebrow"><span class="eyebrow-rule"></span> STAYS, ROOMS AND HOLIDAY HOMES</p>
         <h1 id="rooms-title">Find a place<br><em>to land.</em></h1>
-        <p>Search published rooms and stays by place, dates and guests. Rates and availability come from each approved listing.</p>
+        <p>Choose a place, your dates and the number of guests.</p>
       </section>
 
       <section class="room-search-panel" aria-labelledby="room-search-title">
@@ -78,16 +79,16 @@
           <label>Max price (KES)<input id="room-max-price" name="maxPrice" type="number" min="0" max="100000000" step="1" inputmode="numeric" placeholder="Any"></label>
           <button class="button button-dark" type="submit">Search rooms</button>
         </form>
-        <p class="room-search-hint">Availability is checked against the listing calendar. A date check does not reserve a room.</p>
+        <p class="room-search-hint">Open a stay to review the total and request your dates.</p>
       </section>
 
       <section class="room-results" aria-labelledby="room-results-title">
         <div class="room-results-heading"><div><p class="eyebrow">THE LOCKD STAY COLLECTION</p><h2 id="room-results-title">Places to stay</h2></div><p id="room-result-count" aria-live="polite"></p></div>
-        <p class="room-results-status" id="room-results-status" role="status" aria-live="polite">Add dates and search to check published availability.</p>
+        <p class="room-results-status" id="room-results-status" role="status" aria-live="polite">Choose your dates to find a stay.</p>
         <div class="room-results-grid" id="room-results-grid"></div>
         <button class="button button-paper room-load-more" id="room-load-more" type="button" hidden>Load more stays</button>
       </section>
-      <p class="room-booking-note">LOCKD can currently search published stays and check their calendars. Online reservation and payment are not enabled yet; a room is confirmed only through the process shown on its listing.</p>
+
     </main>
     <footer class="catalogue-footer">
       <a class="brand" href="index.html#top" aria-label="LOCKD home"><img class="brand-image" src="./assets/brand/lockd.svg" alt="LOCKD" width="1330" height="317"></a>

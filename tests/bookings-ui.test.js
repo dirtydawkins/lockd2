@@ -24,6 +24,7 @@ test("lost reservation responses retry the same request without quoting against 
   };
   const calls = [];
   let failed = false;
+  let target;
   const fetch = async (url, options) => {
     if (url.includes("capabilities"))
       return { json: async () => ({ requestsEnabled: true }) };
@@ -66,10 +67,11 @@ test("lost reservation responses retry the same request without quoting against 
             ? form
             : null,
     },
+    AbortSignal,
     crypto: { randomUUID: () => "stable-reference" },
     fetch,
     URL,
-    location: { href: "https://lockd.test/rental.html" },
+    location: { href: "https://lockd.test/rental.html", assign(url) { target = url; } },
     Date,
   });
   await click({ currentTarget: button });
@@ -84,4 +86,5 @@ test("lost reservation responses retry the same request without quoting against 
   );
   assert.deepEqual(calls[2], calls[3]);
   assert.match(message.textContent, /persisted-reservation/);
+  assert.equal(target, "checkout.html?booking=persisted-reservation");
 });

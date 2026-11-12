@@ -124,3 +124,10 @@ button.account-overview-card { width: 100%; color: inherit; cursor: pointer; fon
 
 .booking-history-item { padding:1.5rem 0; border-bottom:1px solid var(--line); }
 .booking-history-item .text-button { margin:1rem 1.5rem 0 0; }
+
+.account-section-nav [aria-pressed=true] { background:var(--oxblood); color:white; border-color:var(--oxblood); }
+.booking-history-item { border:1px solid var(--line); border-radius:14px; padding:clamp(16px,3vw,24px); margin-top:1rem; }
+.booking-history-item > h4 { margin:0 0 .45rem; }
+.booking-history-item > small { display:block; color:var(--muted); overflow-wrap:anywhere; }
+.booking-history-item > :is(button,a) { display:inline-flex; align-items:center; min-height:44px; margin:.25rem 1rem 0 0; }
+.booking-history-item [hidden] { display:none; }

@@ -3,7 +3,7 @@
   if (!feed) return;
 
   const categories = {
-    stay: "Accommodation", drive: "Cars & Mobility", play: "Gaming", technology: "Technology",
+    stay: "Accommodation", drive: "Cars & Mobility", play: "Gaming", technology: "Tech & Gadgets",
     experience: "Experiences", camera: "Cameras", phone: "Phones", laptop: "Computers",
     audio: "Audio", creative: "Creator equipment", other: "Other rentals",
   };
@@ -386,10 +386,7 @@
     recentRow.hidden = !recent || recent.items.length === 0;
     if (recent?.items.length) {
       renderGrid($("#recent-listings"), recent.items.slice(0, 6));
-      $("#recent-row-title").textContent = recent.publicationTimestampReliable ? "Recently added" : "Published rentals";
-      $("#recent-row").querySelector(".discovery-row-heading > p").textContent = recent.publicationTimestampReliable
-        ? "Recently published listings from LOCKD listers."
-        : "Explore recently added rentals.";
+      $("#recent-row-title").textContent = recent.publicationTimestampReliable ? "Recently added" : "More rentals";
       pageState.recent = { page: 0, hasMore: recent.hasMore, buffer: recent.items.slice(6) };
       $(pageButtons.recent).hidden = !pageState.recent.hasMore && !pageState.recent.buffer.length;
     }

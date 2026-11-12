@@ -4,7 +4,7 @@
     stay: "Stay",
     drive: "Cars & Mobility",
     play: "Play",
-    technology: "Technology",
+    technology: "Tech & Gadgets",
     experience: "Experiences",
     camera: "Cameras",
     phone: "Phones",
