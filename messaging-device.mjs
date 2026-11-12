@@ -11,7 +11,7 @@ async function createLocal(userId,slot='device:v2'){
 export async function ensureMessageDevice(){
  const session=await window.LockdAccount.getSession();if(!session)return {state:'signed_out'};
  const userId=session.user.id;if(pending.has(userId))return pending.get(userId);
- const operation=(async()=>{
+ const prepare=async()=>{
   const capabilities=await request('messages',{view:'capabilities'},undefined,userId);
   if(!capabilities.enabled)return {state:'disabled',capabilities,userId};
   const devices=await request('messages',{view:'devices'},undefined,userId),active=devices.find(d=>!d.revoked_at);
@@ -21,9 +21,11 @@ export async function ensureMessageDevice(){
   local ||=await createLocal(userId);
   await readPublic(local.identity.publicKey,local.identity.fingerprint);
   const privateKey=await unlock(local.identity,local.secret);
-  const device=await request('messages',{}, {action:'registerDevice',publicKey:local.identity.publicKey,fingerprint:local.identity.fingerprint},userId);
+  const device=active || await request('messages',{}, {action:'registerDevice',publicKey:local.identity.publicKey,fingerprint:local.identity.fingerprint},userId);
   return {state:'ready',identity:local.identity,privateKey,device,capabilities,userId};
- })();
+ };
+ const locks=globalThis.navigator?.locks;
+ const operation=locks ? locks.request('lockd-message-device:'+userId,prepare) : prepare();
  pending.set(userId,operation);
  try{return await operation;}finally{pending.delete(userId);}
 }

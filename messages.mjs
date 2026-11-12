@@ -63,6 +63,7 @@ function showAccountAccess(){
  $('#messages-access').hidden=false;$('#messages-signin').href=window.LockdAccount.authLink({returnTo:location.pathname+location.search});status(notice,'');
 }
 function lock(message='Sign in to open your messages.'){
+ stopRelay();clearTimeout(refreshTimer);
  epoch++;connectionEpoch++;privateKey=null;decrypted.clear();selected.clear();pendingReport=null;drafts.clear();previews.clear();syncCursor=null;
  inboxPending=null;refreshPending=null;inboxSignature=null;
  if(channel&&realtime)void realtime.removeChannel(channel);channel=null;realtime?.disconnect();realtime=null;clearInterval(poll);poll=null;
@@ -165,21 +166,29 @@ async function searchTargets(){
 $('#message-target-form').addEventListener('submit',event=>{event.preventDefault();void searchTargets();});
 targetQuery.addEventListener('input',()=>{targetSequence++;targetRequest?.abort();clearTimeout(targetDebounce);targetResults.replaceChildren();if(targetQuery.value.trim().length>=2)targetDebounce=setTimeout(()=>void searchTargets(),400);else status(targetNotice,'Search for a rental or lister by name.');});
 $('#message-target-back').addEventListener('click',()=>void searchTargets());
-async function startRealtime(){
- const config=await window.LockdAccount.getConfig();
- if(config.messagingRealtimeEnabled===false)return;
- realtime=new RealtimeClient(config.supabase.url.replace('https:','wss:')+'/realtime/v1',{params:{apikey:config.supabase.publishableKey},accessToken:async()=> (await window.LockdAccount.getSession())?.access_token||null});
- await realtime.setAuth((await window.LockdAccount.getSession()).access_token);
+let refreshTimer;
+function queueRefresh() {
+ clearTimeout(refreshTimer);
+ if (user && !document.hidden) refreshTimer=setTimeout(()=>{if(user && !document.hidden)void refreshMessages().catch(error);},120);
 }
-async function subscribe(){
- if(!realtime)await startRealtime();
- if(!realtime){status($('#sync-status'),'');return;}
- if(channel)await realtime.removeChannel(channel);
- const context=active.id;
- channel=realtime.channel('lockd-conversation-'+context)
- .on('postgres_changes',{event:'INSERT',schema:'public',table:'lockd_encrypted_messages',filter:'conversation_id=eq.'+context},()=>{if(active?.id===context)void sync().catch(error);})
- .on('postgres_changes',{event:'*',schema:'public',table:'lockd_message_receipts',filter:'recipient_id=eq.'+peer?.user_id},()=>{if(active?.id===context)void sync().catch(error);})
- .subscribe(state=>{if(active?.id!==context)return;status($('#sync-status'),state==='SUBSCRIBED'?'':state==='CHANNEL_ERROR'||state==='TIMED_OUT'?'Trying to refresh. Your messages are still here.':'');});
+async function startRealtime(){
+ if(realtime)return realtime;
+ const accountId=user?.id;
+ const [config, session]=await Promise.all([window.LockdAccount.getConfig(),window.LockdAccount.getSession()]);
+ if(config.messagingRealtimeEnabled===false || !accountId || user?.id!==accountId || session?.user.id!==accountId)return;
+ if(realtime)return realtime;
+ realtime=new RealtimeClient(config.supabase.url.replace('https:','wss:')+'/realtime/v1',{params:{apikey:config.supabase.publishableKey},accessToken:async()=> (await window.LockdAccount.getSession())?.access_token||null});
+ await realtime.setAuth(session.access_token);
+ return realtime;
+}
+async function watchInbox(accountId){
+ const client=await startRealtime();
+ if(!client||user?.id!==accountId||channel)return;
+ // Row policies limit both streams to the signed-in participant's conversations.
+ channel=client.channel('lockd-inbox-'+accountId)
+ .on('postgres_changes',{event:'INSERT',schema:'public',table:'lockd_encrypted_messages'},queueRefresh)
+ .on('postgres_changes',{event:'UPDATE',schema:'public',table:'lockd_message_receipts'},queueRefresh)
+ .subscribe(state=>{if(state==='SUBSCRIBED')queueRefresh();});
 }
 async function open(id){
  const item=conversations.find(c=>c.id===id);if(!item)return;
@@ -218,7 +227,7 @@ async function open(id){
  $('#message-compose').hidden=!peer || item.blocked;
  const availability=$('#conversation-availability');availability.hidden=Boolean(peer)&&!item.blocked;
  availability.textContent=item.blocked?'You blocked this conversation. You can unblock it in Conversation options.':!peer?'Your contact has not opened messages yet. You can write to them when they do.':'';
- await inbox();if(current!==epoch)return;await sync(true);if(current!==epoch)return;await subscribe();
+ await inbox();if(current!==epoch)return;await sync(true);
 }
 async function loadBookingContext(item,current){
  const panel=$('#message-booking');panel.hidden=false;panel.replaceChildren(node('p','Loading reservation…'));
@@ -367,8 +376,19 @@ async function connectMessages(){
   await inbox();
   if (currentConnection !== connectionEpoch || user?.id !== accountId) return;
   $('.message-attachment-control').hidden=capabilities.attachmentsEnabled!==true;
+  clearInterval(poll);
+  poll=setInterval(queueRefresh,10000);
+  void watchInbox(accountId).catch(()=>{ /* Periodic refresh also runs independently. */ });
   if(result.state==='another_device'){
    device = result.active;
+   const previous = await stored(accountId,'link-request:v2');
+   if(user?.id!==accountId || connectionEpoch!==currentConnection)return;
+   if(previous?.expiresAt>Date.now() && previous.origin===location.origin && previous.userId===accountId){
+    requestLink=pairingLink('link',previous);
+    $('#connection-request-code').textContent=pairingCode(previous.fingerprint);
+    $('#link-next-step').hidden=false;
+    void watchApproval(previous,accountId).catch(()=>{});
+   }
    $('#restore-chats').hidden = false;
    $('#message-workspace').classList.add('is-locked');
    $('#message-workspace').classList.remove('has-open-thread');
@@ -380,7 +400,7 @@ async function connectMessages(){
   identity=result.identity;privateKey=result.privateKey;device=result.device;
   updatePerspective();
   $('#own-fingerprint').textContent=fingerprint(identity.fingerprint);outbox=(await stored(user.id,'outbox'))||[];
-  deviceDialog.close();$('#restore-chats').hidden=true;$('#message-workspace').classList.remove('is-locked');status(notice,'');
+  stopRelay();deviceDialog.close();$('#restore-chats').hidden=true;$('#message-workspace').classList.remove('is-locked');status(notice,'');
   const url=new URL(location.href);
   if(url.searchParams.has('listing')){
    try {
@@ -402,7 +422,7 @@ async function connectMessages(){
   else if(conversations.some(c=>c.id===url.searchParams.get('conversation')))await open(url.searchParams.get('conversation'));
   else if(visibleThreads().length&&matchMedia('(min-width:761px)').matches)await open(visibleThreads()[0].id);
   else $('#message-workspace').classList.remove('has-open-thread');
-  clearInterval(poll);poll=setInterval(()=>{if(!document.hidden&&privateKey)void refreshMessages().catch(error);},10000);
+
  }catch(err){lock(err.message||'Your messages couldn’t open. Please try again.');}
 }
 $('#verify-contact').addEventListener('click',async()=>{try{
@@ -459,6 +479,27 @@ $('#block-contact').addEventListener('click',async()=>{if(!active)return;try{awa
 // Only encrypted approvals and public requests travel in URL fragments.
 const approvalUI = dialogUI($('#approve-device'));
 let pairRequest = null, requestLink = '', replyLink = '';
+let stopRelay = () => {};
+async function watchApproval(link, id) {
+ stopRelay();
+ const original=requestLink,client=await startRealtime();
+ if(!client || user?.id!==id || original!==requestLink)return;
+ let receiving=false;
+ const room=client.channel('lockd-link-'+link.requestId).on('broadcast',{event:'approval'},async ({payload})=>{
+  if(receiving || user?.id!==id || Date.now()>=link.expiresAt || typeof payload?.envelope!=='string' || payload.envelope.length>45000)return;
+  receiving=true;
+  try {
+   await acceptConnection(id,payload.envelope);
+   if(user?.id!==id)return;
+   stopRelay();
+   await connectMessages();
+  } catch {receiving=false;}
+ }).subscribe(state=>{
+  if(state==='SUBSCRIBED')void room.send({type:'broadcast',event:'ready',payload:{}}).catch(()=>{});
+ });
+ const timer=setTimeout(()=>stopRelay(),Math.max(0,link.expiresAt-Date.now()));
+ stopRelay=()=>{clearTimeout(timer);void client.removeChannel(room);stopRelay=()=>{};};
+}
 const pairingCode = key => key.slice(0, 12).match(/.{4}/g).join(' ').toUpperCase();
 function pairingLink(type, payload) {
  const url = new URL('messages.html', location.href);
@@ -477,6 +518,7 @@ $('#create-link-request').addEventListener('click',async event=>{
   const id=user.id,link=await createConnectionRequest(id);
   if(user?.id!==id)return;
   requestLink=pairingLink('link',link);
+  void watchApproval(link,id).catch(()=>{});
   $('#connection-request-code').textContent=pairingCode(link.fingerprint);
   $('#link-next-step').hidden=false;
   status($('#connection-status'),'Your link lasts 10 minutes.');
@@ -490,8 +532,27 @@ $('#approve-link').addEventListener('click',async event=>{
   const id=user.id, encrypted=await connectAnotherDevice(id,pairRequest);
   if(user?.id!==id)return;
   replyLink=pairingLink('approval',encrypted);
+  status($('#approval-status'),'Finishing up…');
   $('#share-approval').hidden=false;
-  status($('#approval-status'),'Send the approval link back to your new device and open it there.');
+  try {
+   const client=await startRealtime();
+   if(!client || user?.id!==id)throw Error();
+   stopRelay();
+   const expires=pairRequest.expiresAt;
+   let lastSent=0;
+   const room=client.channel('lockd-link-'+pairRequest.requestId);
+   const deliver=async()=>{
+    const now=Date.now();
+    if(user?.id!==id || now>=expires || now-lastSent<800)return;
+    lastSent=now;
+    await room.httpSend('approval',{envelope:encrypted});
+   };
+   room.on('broadcast',{event:'ready'},()=>{void deliver().catch(()=>{});}).subscribe();
+   const timer=setTimeout(()=>stopRelay(),Math.max(0,expires-Date.now()));
+   stopRelay=()=>{clearTimeout(timer);void client.removeChannel(room);stopRelay=()=>{};};
+   await deliver();
+   status($('#approval-status'),'Return to Messages on your new device. If it was closed, use the approval link below.');
+  } catch {status($('#approval-status'),'Open the approval link on your new device to finish.');}
  } catch {status($('#approval-status'),'This link can’t be approved here. Open a fresh link on your linked device.',true);button.disabled=false;}
 });
 $('#share-approval').addEventListener('click',()=>sharePairing(replyLink,$('#approval-status')));
@@ -541,8 +602,9 @@ $('#report-form').addEventListener('submit',async event=>{
 });
 async function myReports(){const items=await request('messages',{view:'reports'}),target=$('#my-message-reports');target.replaceChildren(...(items.length?items.map(r=>node('p',`${r.id.slice(0,8)} · ${pretty(r.category)} · ${pretty(r.status)}`)):[node('p','No reports submitted.')]));}
 $('#message-reports-panel').addEventListener('toggle',()=>{if($('#message-reports-panel').open&&user){$('#my-message-reports').replaceChildren(node('p','Loading your reports…'));void myReports().catch(()=>$('#my-message-reports').replaceChildren(node('p','Reports could not be loaded. Close and reopen this section to try again.')));}});
-window.addEventListener('online',()=>{if(privateKey)void sync().catch(error);});
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&privateKey)void sync().catch(error);});
+window.addEventListener('online',queueRefresh);
+window.addEventListener('focus',queueRefresh);
+document.addEventListener('visibilitychange',queueRefresh);
 window.addEventListener('pagehide',()=>lock());
 window.addEventListener('pageshow',event=>{if(event.persisted&&user)void connectMessages();});
 window.addEventListener('lockd:auth-change',event=>{if(user && event.detail?.user?.id!==user.id){user=null;lock('Sign in again to open your messages.');identity=null;outbox=[];}});

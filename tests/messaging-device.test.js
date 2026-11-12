@@ -38,7 +38,8 @@ test('automatic account-bound device keys stay local and need no separate sign-i
   assert.equal(Buffer.from(record.ciphertext).includes(Buffer.from('PRIVATE KEY')),false);
  });
  await t.test('fresh opening restores the same identity without creating another account or key',async()=>{
-  const restored=await device.ensureMessageDevice();assert.equal(restored.identity.fingerprint,first.identity.fingerprint);assert.equal(devices.length,1);
+  const registrations=posted.length;
+  const restored=await device.ensureMessageDevice();assert.equal(posted.length,registrations);assert.equal(restored.identity.fingerprint,first.identity.fingerprint);assert.equal(devices.length,1);
  });
  await t.test('wrapping is bound to the authenticated account, not a public account identifier',async()=>{
   const record=await store.stored(user,'device:v2');await store.stored(other,'device:v2',record);

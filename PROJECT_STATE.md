@@ -1,5 +1,13 @@
 # LOCKD project state
 
+## Automatic chat updates and device approval
+
+The inbox subscribes to participant-scoped message inserts and receipt updates before a thread is selected. Visible tabs also refresh on focus, reconnection and a ten-second interval. A returning device uses its registered identity. First-time setup is serialized across tabs where Web Locks are supported.
+
+After the user approves a new device, its signed, encrypted approval is sent over a temporary Realtime channel identified by the random link request ID. The new device resumes an unexpired request after reload. The approval link remains available if the devices cannot reach each other. Device authorization and signature checks still happen before local access is restored.
+
+Verified 33 focused tests, marketplace checks, live ephemeral broadcast delivery with non-user data, and automatic display of an incoming encrypted reply in both the inbox and the open thread in an isolated browser fixture. A physical two-phone pairing was not tested.
+
 ## Account settings and linked devices — November 12
 
 The account menu opens settings.html for both rental and listing workspaces. Personal information, sign-in methods, preferences and privacy use the existing account handlers. Cookie preferences are available to visitors. Google-only accounts manage their password through Google.
