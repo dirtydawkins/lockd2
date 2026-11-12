@@ -254,3 +254,15 @@
   .messages-access:not([hidden]) { grid-template-columns:1fr }
   .messages-access img { grid-row:1; height:clamp(140px,42vw,230px); min-height:0 }
 }
+
+.message-workspace.is-locked {display:block;height:auto;max-width:52rem}
+.message-workspace.is-locked .message-thread {display:none}
+.restore-chats {display:flex;align-items:center;justify-content:space-between;gap:1rem;margin:0 0 .75rem;padding:.75rem 1rem;border:1px solid var(--line);border-radius:14px;background:var(--message-surface);color:var(--burgundy);font:inherit;cursor:pointer}
+.restore-chats[hidden] {display:none}
+#message-device {box-sizing:border-box;width:min(28rem,calc(100% - 2rem));max-height:85dvh;overflow:auto;padding:1.5rem;border:1px solid var(--line);border-radius:20px;background:var(--message-surface);color:var(--ink)}
+#message-device::backdrop {background:rgb(30 18 20 / .35)}
+#message-device p {line-height:1.55}
+#message-device details {margin-top:1rem}
+#message-device summary {padding:.45rem 0;cursor:pointer}
+#message-device input {max-width:100%}
+#connection-request-code {overflow-wrap:anywhere}

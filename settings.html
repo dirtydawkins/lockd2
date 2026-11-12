@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f7f4ef">
+    <meta name="description" content="Manage your profile, sign-in, rental preferences and privacy.">
+    <meta name="robots" content="noindex,follow">
+    <link rel="canonical" href="https://lockd2.vercel.app/settings.html">
+    <title>Settings — LOCKD</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./account.css">
+    <link rel="stylesheet" href="./image-presentation.css">
+    <script src="./app.js" defer></script>
+    <script src="./account-service.js" defer></script>
+    <script type="module" src="./privacy-preferences.mjs"></script>
+      <link rel="stylesheet" href="./brand-refinement.css">
+  <script defer src="./site-menu.js"></script>
+</head>
+  <body class="account-page">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header" id="top">
+      <a class="brand" href="index.html#top" aria-label="LOCKD home"><img class="brand-image" src="./assets/brand/lockd.svg" alt="LOCKD" width="1330" height="317"></a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu"><span></span><span></span><span></span></button>
+      <nav class="primary-nav" id="primary-nav" aria-label="Main navigation">
+        <a href="rentals.html">Explore rentals</a>
+        <a href="rooms.html">Book a room</a>
+        <a href="rentals.html?category=drive">Cars &amp; Mobility</a>
+        <a href="destinations.html">Destinations</a>
+        <a href="tech.html">Tech &amp; Gadgets</a>
+        <a href="account.html" aria-current="page">Account</a>
+        <a class="owner-nav-link" href="owners.html">Become a lister</a>
+      <a href="reviews.html" data-lockd-reviews-entry hidden>Reviews</a><a class="mobile-settings-link" href="settings.html">Settings</a></nav>
+      <a class="header-cta" href="rentals.html">Explore Rentals</a>
+    <details class="site-account-menu desktop-account-menu"><summary aria-label="Account menu"><span></span><span></span><span></span></summary><nav aria-label="Account shortcuts"><a href="account.html#overview">My account</a><a href="account.html#bookings">Reservations</a><a href="messages.html?inbox=renting" data-account-messages>Messages</a><a href="account.html#saved">Saved rentals</a><a href="settings.html">Settings</a><a data-switch-workspace href="owners.html">Switch to listing</a></nav></details></header>
+<main id="main" class="settings-main"><a class="text-button" href="account.html#overview" data-settings-account>My account</a><h1>Settings</h1>
+<nav class="settings-list" aria-label="Settings sections">
+  <a href="account.html#personal" data-settings-section="personal"><span><strong>Personal information</strong><small>Change your profile photo and display name.</small></span><span aria-hidden="true">›</span></a>
+  <a href="account.html#security" data-settings-section="security"><span><strong>Login and security</strong><small>Review your sign-in methods and manage your password.</small></span><span aria-hidden="true">›</span></a>
+  <a href="account.html#preferences" data-settings-section="preferences"><span><strong>Rental preferences</strong><small>Save your preferred currency, language and search area.</small></span><span aria-hidden="true">›</span></a>
+  <a href="account.html#privacy" data-settings-section="privacy"><span><strong>Privacy and account data</strong><small>Review your privacy choices or request account deletion.</small></span><span aria-hidden="true">›</span></a>
+</nav>
+<button class="settings-cookie" type="button" data-cookie-preferences>Cookie preferences</button>
+</main></body></html>

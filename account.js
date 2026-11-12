@@ -75,7 +75,7 @@
     });
     $$("[data-account-panel]").forEach((section) => { section.hidden = section.dataset.accountPanel !== selected; });
     if (selected === "saved") loadSavedListings();
-    if (selected === "security") loadDeletionRequestState();
+    if (selected === "privacy") loadDeletionRequestState();
     const current = new URL(window.location.href);
     const route = new URL(current.pathname, current.origin);
     if (current.searchParams.get("view") === "listing")
@@ -90,6 +90,12 @@
 
   function showDashboard(user) {
     activeUser = user;
+    const providers = new Set([...(user.app_metadata?.providers || []), ...(user.identities || []).map(identity => identity.provider)]);
+    const email = providers.has("email");
+    const google = providers.has("google");
+    $("#account-login-methods").textContent = [email && "Email", google && "Google"].filter(Boolean).join(" · ") || "LOCKD account";
+    $("#password-form").hidden = google && !email;
+    $("#account-provider-help").textContent = google && !email ? "Manage your password in your Google Account." : "";
     profile = null;
     authPanel.hidden = true;
     dashboard.hidden = false;
@@ -147,8 +153,6 @@
       $("#profile-language").value = profile.preferred_language || "en";
       $("#profile-location").value = profile.discovery_location || "";
       await renderProfilePhoto();
-      const methods=[...new Set((activeUser.identities||[]).map(identity=>identity.provider).filter(provider=>['email','google'].includes(provider)))];
-      $('#account-login-methods').textContent=methods.length?methods.map(method=>method==='google'?'Google':'Email').join(' · '):'Your existing LOCKD sign-in';
       if (needsProfileName) {
         showSection("personal");
         setStatus("Add a display name to finish setting up your LOCKD account.", "info");
@@ -505,7 +509,12 @@
     if (busy) return;
     setBusy(true, button);
     setStatus("Opening Google sign-in…");
-    try { await account.startOAuth(button.dataset.provider); }
+    try {
+      if (["#personal", "#security", "#preferences", "#privacy"].includes(location.hash) && !account.getPendingAuth()) {
+        account.setPendingAuth({ returnTo: location.pathname + location.search + location.hash });
+      }
+      await account.startOAuth(button.dataset.provider);
+    }
     catch (error) {
       setStatus(error.message || "Google sign-in could not be started. Use email or try again later.", "error");
       setBusy(false, button);

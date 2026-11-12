@@ -21,13 +21,23 @@
       link.href = listing ? 'account.html#overview' : 'owners.html';
       link.textContent = listing ? 'Switch to renting' : 'Switch to listing';
     }
+    for (const link of document.querySelectorAll('[data-settings-section]')) {
+      link.href = (listing ? 'account.html?view=listing#' : 'account.html#') + link.dataset.settingsSection;
+    }
+    for (const link of document.querySelectorAll('a.mobile-settings-link')) {
+      link.href = listing ? 'settings.html?view=listing' : 'settings.html';
+    }
+    const settingsHome = document.querySelector('[data-settings-home]');
+    if (settingsHome) settingsHome.href = listing ? 'settings.html?view=listing' : 'settings.html';
+    const settingsAccount = document.querySelector('[data-settings-account]');
+    if (settingsAccount) settingsAccount.href = listing ? 'owners.html#owner-workspace' : 'account.html#overview';
     for (const shortcuts of document.querySelectorAll('[aria-label="Account shortcuts"]')) {
       const account = shortcuts.querySelector('a:first-child');
       if (account) {
         account.href = listing ? 'owners.html#owner-workspace' : 'account.html#overview';
       }
-      const settings = shortcuts.querySelector('a[href*="#personal"]');
-      if (settings) settings.href = listing ? 'account.html?view=listing#personal' : 'account.html#personal';
+      const settings = shortcuts.querySelector('a[href^="settings.html"]');
+      if (settings) settings.href = listing ? 'settings.html?view=listing' : 'settings.html';
     }
     for (const reservations of document.querySelectorAll('[aria-label="Account shortcuts"] a[href*="#bookings"]')) {
       reservations.href = listing ? 'account.html?view=listing#bookings' : 'account.html#bookings';

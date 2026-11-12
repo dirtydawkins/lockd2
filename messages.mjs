@@ -69,7 +69,7 @@ function lock(message='Sign in to open your messages.'){
  for(const url of objectURLs)URL.revokeObjectURL(url);objectURLs.clear();reading.clear();readOnDevice.clear();
  $('#message-workspace').hidden=true;$('#message-history').replaceChildren(threadWelcome.cloneNode(true));$('.message-thread').setAttribute('data-empty','');$('#message-text').value='';clearAttachment();$('#report-dialog').close();$('#new-message-dialog').close();$('#message-target-results').replaceChildren();$('#report-preview').replaceChildren();status(notice,message);
  active=null;conversations=[];hasListerWorkspace=false;
- $('#message-settings').close();$('#message-settings-trigger').hidden=true;$('#inbox-perspectives').hidden=true;$('#lister-booking-action').hidden=true;
+ $('#message-device').close();$('#restore-chats').hidden=true;$('#link-next-step').hidden=true;$('#approve-device').close();pairRequest=null;replyLink='';requestLink='';$('#connection-request-code').textContent='';$('#connection-status').textContent='';pendingConversation=null;$('#message-settings').close();$('#message-settings-trigger').hidden=true;$('#inbox-perspectives').hidden=true;$('#lister-booking-action').hidden=true;
  $('#new-message').hidden=true;$('#retry-inbox').hidden=!user;if(!user)showAccountAccess();
 }
 async function getDevices(conversationId=null){return await request('messages',{view:'devices',...(conversationId?{conversationId}:{})});}
@@ -132,6 +132,9 @@ document.querySelectorAll('[data-inbox-filter]').forEach(button=>button.addEvent
 // Start from the existing public catalogue, then use the participant-scoped RPC.
 const privacyDialog = $('#message-settings');
 const privacyUI = dialogUI(privacyDialog);
+const deviceDialog = $('#message-device');
+const deviceUI = dialogUI(deviceDialog);
+$('#restore-chats').addEventListener('click', () => deviceUI.open($('#restore-chats')));
 $('#message-settings-trigger').addEventListener('click', () => {
   const menu = $('.site-account-menu');
   menu.open = false;
@@ -182,7 +185,7 @@ async function open(id){
  const item=conversations.find(c=>c.id===id);if(!item)return;
  perspective = item.owner_id === user.id ? 'listing' : 'renting';
  updatePerspective();
- if(!privateKey){pendingConversation=id;await connectMessages();return;}
+ if(!privateKey){pendingConversation=id;deviceUI.open(document.activeElement);return;}
  if(active)drafts.set(active.id,$('#message-text').value);
  const current=++epoch;active=item;messages.clear();decrypted.clear();selected.clear();allEarlierLoaded=false;syncCursor=null;
  peer=null;$('#message-compose').hidden=true;$('#conversation-availability').hidden=true;status($('#compose-status'),'');renderInbox();
@@ -365,12 +368,19 @@ async function connectMessages(){
   if (currentConnection !== connectionEpoch || user?.id !== accountId) return;
   $('.message-attachment-control').hidden=capabilities.attachmentsEnabled!==true;
   if(result.state==='another_device'){
-   device=result.active;$('#message-device').hidden=false;$('#message-workspace').classList.add('is-locked','has-open-thread');status(notice,'Approve this browser from one you already use for messages.');return;
+   device = result.active;
+   $('#restore-chats').hidden = false;
+   $('#message-workspace').classList.add('is-locked');
+   $('#message-workspace').classList.remove('has-open-thread');
+   status(notice, '');
+   const intent = new URLSearchParams(location.search);
+   if (intent.has('listing') || intent.has('conversation')) deviceUI.open($('#restore-chats'));
+   return;
   }
   identity=result.identity;privateKey=result.privateKey;device=result.device;
   updatePerspective();
   $('#own-fingerprint').textContent=fingerprint(identity.fingerprint);outbox=(await stored(user.id,'outbox'))||[];
-  $('#message-device').hidden=true;$('#message-workspace').classList.remove('is-locked');status(notice,'');
+  deviceDialog.close();$('#restore-chats').hidden=true;$('#message-workspace').classList.remove('is-locked');status(notice,'');
   const url=new URL(location.href);
   if(url.searchParams.has('listing')){
    try {
@@ -446,18 +456,65 @@ $('#back-to-inbox').addEventListener('click',()=>{$('#message-workspace').classL
 $('#retry-inbox').addEventListener('click',()=>{if(user)void connectMessages();});
 $('#confirm-contact').addEventListener('click',()=>{$('#contact-check').open=true;$('#security-details').open=true;$('#fingerprint-compared').focus();});
 $('#block-contact').addEventListener('click',async()=>{if(!active)return;try{await request('messages',{}, {action:'block',conversationId:active.id,block:!active.blocked});await inbox();await open(active.id);}catch(err){error(err);}});
-function downloadConnection(data,name,type='application/json'){
- const url=URL.createObjectURL(new Blob([typeof data==='string'?data:JSON.stringify(data)],{type})),link=node('a','',{href:url,download:name});link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+// Only encrypted approvals and public requests travel in URL fragments.
+const approvalUI = dialogUI($('#approve-device'));
+let pairRequest = null, requestLink = '', replyLink = '';
+const pairingCode = key => key.slice(0, 12).match(/.{4}/g).join(' ').toUpperCase();
+function pairingLink(type, payload) {
+ const url = new URL('messages.html', location.href);
+ url.hash = type + '=' + encodeURIComponent(btoa(JSON.stringify(payload)));
+ return url.href;
 }
-$('#create-link-request').addEventListener('click',async()=>{try{const link=await createConnectionRequest(user.id);$('#connection-request-code').textContent='Connection code: '+fingerprint(link.fingerprint);downloadConnection(link,'lockd-connection-request.json');status($('#connection-status'),'Open this request on your existing browser, then bring its connection file back here.');}catch(err){error(err);}});
-$('#create-device-transfer').addEventListener('click',async()=>{try{
- if(!$('#device-link-confirm').checked)throw Error('Check that the connection code matches your new browser first.');
- const file=$('#device-link-request').files[0];if(!file||file.size>20000)throw Error('Choose the connection request from your new browser.');
- const link=JSON.parse(await file.text()),encrypted=await connectAnotherDevice(user.id,link);downloadConnection(encrypted,'lockd-device-connection.lockd','application/octet-stream');status(notice,'Open the connection file on your new browser within 10 minutes.');
-}catch(err){error(err);}});
-$('#device-link-request').addEventListener('change',async()=>{try{const file=$('#device-link-request').files[0];if(!file||file.size>20000)throw Error('Choose a valid connection request.');const link=JSON.parse(await file.text());await readPublic(link.publicKey,link.fingerprint);$('#device-link-code').textContent='Connection code: '+fingerprint(link.fingerprint);$('#device-link-confirm').checked=false;}catch(err){error(err);}});
-$('#accept-device-transfer').addEventListener('change',async event=>{try{const file=event.target.files[0];if(!file||file.size>262144)throw Error('Choose the connection file from your existing browser.');await acceptConnection(user.id,await file.text());await connectMessages();}catch(err){status($('#connection-status'),err.message,true);}finally{event.target.value='';}});
-$('#retry-message-access').addEventListener('click',()=>connectMessages());
+async function sharePairing(url, feedback) {
+ try {
+  if (navigator.share) await navigator.share({title:'LOCKD Messages',url});
+  else {await navigator.clipboard.writeText(url);status(feedback,'Link copied. Send it to yourself.');}
+ } catch (err) {if(err.name!=='AbortError')status(feedback,'Sharing is unavailable here. Try another browser.',true);}
+}
+$('#create-link-request').addEventListener('click',async event=>{
+ const button=event.currentTarget;button.disabled=true;
+ try {
+  const id=user.id,link=await createConnectionRequest(id);
+  if(user?.id!==id)return;
+  requestLink=pairingLink('link',link);
+  $('#connection-request-code').textContent=pairingCode(link.fingerprint);
+  $('#link-next-step').hidden=false;
+  status($('#connection-status'),'Your link lasts 10 minutes.');
+ } catch {status($('#connection-status'),'Couldn’t prepare the link. Try again.',true);}
+ finally {button.disabled=false;}
+});
+$('#share-link-request').addEventListener('click',()=>sharePairing(requestLink,$('#connection-status')));
+$('#approve-link').addEventListener('click',async event=>{
+ const button=event.currentTarget;button.disabled=true;
+ try {
+  const id=user.id, encrypted=await connectAnotherDevice(id,pairRequest);
+  if(user?.id!==id)return;
+  replyLink=pairingLink('approval',encrypted);
+  $('#share-approval').hidden=false;
+  status($('#approval-status'),'Send the approval link back to your new device and open it there.');
+ } catch {status($('#approval-status'),'This link can’t be approved here. Open a fresh link on your linked device.',true);button.disabled=false;}
+});
+$('#share-approval').addEventListener('click',()=>sharePairing(replyLink,$('#approval-status')));
+async function handlePairingLink(fragment) {
+ if(!fragment)return;
+ try {
+  if(fragment.length>50000)throw Error();
+  const params=new URLSearchParams(fragment.slice(1));
+  if(params.has('approval')){
+   const encrypted=JSON.parse(atob(params.get('approval')));
+   if(typeof encrypted!=='string')throw Error();
+   await acceptConnection(user.id,encrypted);
+   await connectMessages();
+   return;
+  }
+  const link=JSON.parse(atob(params.get('link')));
+  if(!privateKey||link.userId!==user.id||link.origin!==location.origin||!(link.expiresAt>Date.now()))throw Error();
+  await readPublic(link.publicKey,link.fingerprint);
+  pairRequest=link;
+  $('#approval-code').textContent=pairingCode(link.fingerprint);
+  approvalUI.open($('#message-settings-trigger'));
+ } catch {status(notice,'This link can’t be used here. Check the account and device, or start again for a fresh link.',true);}
+}
 $('#revoke-device').addEventListener('click',async()=>{try{if(!$('#remove-access-confirm').checked)throw Error('Review and confirm the effect on your old messages first.');await removeMessageDevice(user.id,device.id);lock('Message access removed.');identity=null;await connectMessages();}catch(err){error(err);}});
 $('#report-messages').addEventListener('click',()=>{
  const records=[...selected].map(id=>({row:messages.get(id),payload:decrypted.get(id)})).filter(x=>x.row&&x.payload);
@@ -490,7 +547,20 @@ window.addEventListener('pagehide',()=>lock());
 window.addEventListener('pageshow',event=>{if(event.persisted&&user)void connectMessages();});
 window.addEventListener('lockd:auth-change',event=>{if(user && event.detail?.user?.id!==user.id){user=null;lock('Sign in again to open your messages.');identity=null;outbox=[];}});
 try{
+ const pairingSlot='lockd:pending-message-link';
+ let fragment='';
+ if(/^#(?:link|approval)=/.test(location.hash)){
+  fragment=location.hash;
+  history.replaceState(null,'',location.pathname+location.search);
+ }
  const session=await window.LockdAccount.getSession();user=session?.user||null;
- if(!user)showAccountAccess();
- else await connectMessages();
+ if(!user){
+  if(fragment && fragment.length<=50000)sessionStorage.setItem(pairingSlot,JSON.stringify({fragment,until:Date.now()+600000}));
+  showAccountAccess();
+ } else {
+  const pending=JSON.parse(sessionStorage.getItem(pairingSlot)||'null');
+  sessionStorage.removeItem(pairingSlot);
+  await connectMessages();
+  await handlePairingLink(fragment || (pending?.until>Date.now()?pending.fragment:''));
+ }
 }catch(err){error(err);}

@@ -1,5 +1,13 @@
 # LOCKD project state
 
+## Account settings and linked devices — November 12
+
+The account menu opens settings.html for both rental and listing workspaces. Personal information, sign-in methods, preferences and privacy use the existing account handlers. Cookie preferences are available to visitors. Google-only accounts manage their password through Google.
+
+On a new browser the conversation list opens first. Encrypted history still requires an approved device. Linking now uses expiring request and approval links shared between the account holder’s devices. The account, origin, request, signature, recipient and expiry checks remain in messaging-device.mjs. The share payload is carried in the URL fragment. The inbox no longer asks people to download or upload files.
+
+Verification included 40 focused tests for accounts, direct messaging, database permissions and encryption, the marketplace checks, and a local browser check of the unlinked inbox and link generation. A two-phone production handoff was not exercised.
+
 ## Messages
 
 The inbox uses the existing LOCKD account and encrypted messaging service. Desktop has a conversation list beside the thread. On phones, selecting a conversation opens the thread and All messages returns to the list. Listers can switch between listing enquiries and their own rentals.

@@ -3,6 +3,7 @@ Allow: /
 Disallow: /api/
 Disallow: /lockd2/
 Disallow: /account.html
+Disallow: /settings.html
 Disallow: /auth-callback.html
 Disallow: /messages.html
 Disallow: /verification.html

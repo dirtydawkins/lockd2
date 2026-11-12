@@ -36,9 +36,9 @@
         <a href="tech.html">Tech &amp; Gadgets</a>
         <a href="account.html" aria-current="page">Account</a>
         <a class="owner-nav-link" href="owners.html">Become a lister</a>
-      <a href="reviews.html" data-lockd-reviews-entry hidden>Reviews</a><a class="mobile-settings-link" href="account.html#personal">Settings</a></nav>
+      <a href="reviews.html" data-lockd-reviews-entry hidden>Reviews</a><a class="mobile-settings-link" href="settings.html">Settings</a></nav>
       <a class="header-cta" href="rentals.html">Explore Rentals</a>
-    <details class="site-account-menu desktop-account-menu"><summary aria-label="Account menu"><span></span><span></span><span></span></summary><nav aria-label="Account shortcuts"><a href="account.html#overview">My account</a><a href="account.html#bookings">Reservations</a><a href="messages.html?inbox=renting" data-account-messages>Messages</a><a href="account.html#saved">Saved rentals</a><a href="account.html#personal">Settings</a><a data-switch-workspace href="owners.html">Switch to listing</a></nav></details></header>
+    <details class="site-account-menu desktop-account-menu"><summary aria-label="Account menu"><span></span><span></span><span></span></summary><nav aria-label="Account shortcuts"><a href="account.html#overview">My account</a><a href="account.html#bookings">Reservations</a><a href="messages.html?inbox=renting" data-account-messages>Messages</a><a href="account.html#saved">Saved rentals</a><a href="settings.html">Settings</a><a data-switch-workspace href="owners.html">Switch to listing</a></nav></details></header>
 
     <main class="account-main" id="main">
       <div class="account-intro" id="account-intro">
@@ -108,10 +108,7 @@
           <button type="button" data-account-section="overview" aria-current="page">Overview</button>
           <button type="button" data-account-section="saved">Saved rentals</button>
           <button type="button" data-account-section="bookings">Reservations</button>
-          <button type="button" data-account-section="personal">Personal info</button>
-          <button type="button" data-account-section="security">Login &amp; security</button>
-          <button type="button" data-account-section="preferences">Preferences</button>
-          <button type="button" data-account-section="privacy">Privacy &amp; data</button>
+          <a href="settings.html" data-settings-home>Settings</a>
           <a href="messages.html?inbox=renting" data-account-messages>Messages</a>
         </nav>
 
@@ -147,16 +144,14 @@
 
         <section class="account-section" data-account-panel="security" hidden aria-labelledby="security-title">
           <p class="eyebrow">ACCOUNT ACCESS</p><h3 id="security-title">Login &amp; security.</h3>
-          <div class="account-login-methods"><h4>How you sign in</h4><p id="account-login-methods">Loading sign-in methods…</p><p>Use these methods with your existing LOCKD account.</p></div>
+          <div class="account-login-methods"><h4>How you sign in</h4><p id="account-login-methods">Loading sign-in methods…</p><p><span id="account-provider-help"></span></p></div>
           <form class="account-form account-profile-form" id="password-form">
             <label class="account-field"><span>Current password</span><input id="current-password" type="password" autocomplete="current-password" required></label>
             <label class="account-field"><span>New password</span><input id="new-password" type="password" minlength="8" maxlength="128" autocomplete="new-password" required></label>
             <label class="account-field"><span>Confirm new password</span><input id="new-password-confirm" type="password" minlength="8" maxlength="128" autocomplete="new-password" required></label>
             <button class="button button-dark" type="submit">Change password</button>
           </form>
-          <div class="account-delete-request"><p class="eyebrow">DATA &amp; PRIVACY</p><h4>Request account deletion</h4><p>LOCKD records your request for review. It does not immediately delete your account or erase booking or financial records.</p>
-            <form class="account-form" id="delete-request-form"><label class="account-field"><span>Anything we should know? <small>Optional</small></span><textarea id="delete-reason" rows="3" maxlength="1000"></textarea></label><label class="account-consent"><input id="delete-confirm" type="checkbox" required><span>I understand this is a deletion request, not an instant deletion.</span></label><button class="button button-light" type="submit">Submit deletion request</button></form><p class="account-field-note" id="delete-request-state"></p>
-          </div>
+
         </section>
 
         <section class="account-section" data-account-panel="preferences" hidden aria-labelledby="preferences-title">
@@ -169,7 +164,9 @@
             <button class="button button-dark" type="submit">Save preferences</button>
           </form>
         </section>
-        <section class="account-section" data-account-panel="privacy" hidden aria-labelledby="account-privacy-title"><p class="eyebrow">YOUR CHOICES</p><h3 id="account-privacy-title">Privacy &amp; data.</h3><div class="account-settings-list"><div><h4>Cookie preferences</h4><p>Choose whether LOCKD remembers anonymous usage. Essential sign-in cookies stay on.</p><button type="button" class="text-button" data-cookie-preferences>Manage cookies</button></div><div><h4>Your information</h4><p>Learn how account, booking and message information is used.</p><a class="text-button" href="privacy.html">Read the privacy notice</a></div><div><h4>Your messages</h4><p>Manage message privacy and approved browsers from your inbox.</p><a class="text-button" href="messages.html">Open messages</a></div><div><h4>Leave LOCKD</h4><p>Request account deletion. Active bookings and required records are reviewed before anything is removed.</p><button type="button" class="text-button" data-go-section="security">Manage account deletion</button></div></div></section>
+        <section class="account-section" data-account-panel="privacy" hidden aria-labelledby="account-privacy-title"><p class="eyebrow">YOUR CHOICES</p><h3 id="account-privacy-title">Privacy &amp; data.</h3><div class="account-settings-list"><div><h4>Cookie preferences</h4><p>Choose whether LOCKD remembers anonymous usage. Essential sign-in cookies stay on.</p><button type="button" class="text-button" data-cookie-preferences>Manage cookies</button></div><div><h4>Your information</h4><p>Learn how account, booking and message information is used.</p><a class="text-button" href="privacy.html">Read the privacy notice</a></div><div><h4>Your messages</h4><p>Manage message privacy and approved browsers from your inbox.</p><a class="text-button" href="messages.html">Open messages</a></div><div class="account-delete-request"><p class="eyebrow">DATA &amp; PRIVACY</p><h4>Request account deletion</h4><p>LOCKD records your request for review. It does not immediately delete your account or erase booking or financial records.</p>
+            <form class="account-form" id="delete-request-form"><label class="account-field"><span>Anything we should know? <small>Optional</small></span><textarea id="delete-reason" rows="3" maxlength="1000"></textarea></label><label class="account-consent"><input id="delete-confirm" type="checkbox" required><span>I understand this is a deletion request, not an instant deletion.</span></label><button class="button button-light" type="submit">Submit deletion request</button></form><p class="account-field-note" id="delete-request-state"></p>
+          </div></div></section>
       </section>
 
       <p class="account-legal-line">By using an account, you agree to use LOCKD responsibly. Read the <a href="privacy.html">Privacy Notice</a>.</p>
