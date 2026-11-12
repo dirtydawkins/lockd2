@@ -15,7 +15,11 @@ module.exports=endpoint((method,q,b)=>{
   }
   if(b.action==='registerDevice' && text(b.publicKey,20000,100) && /^[a-f0-9]{64}$/.test(b.fingerprint||'')) return {rpc:'register_lockd_message_device',args:{p_key:b.publicKey,p_fingerprint:b.fingerprint}};
   if(b.action==='revokeDevice' && validId(b.id)) return {rpc:'revoke_lockd_message_device',args:{p_id:b.id}};
-  if(b.action==='open' && validId(b.listingId) && (!b.bookingId || validId(b.bookingId))) return {rpc:'open_lockd_conversation',args:{p_listing_id:b.listingId,p_booking_id:b.bookingId||null}};
+  if(b.action==='open' && validId(b.listingId) && (!b.bookingId || validId(b.bookingId))) return {rpc:'open_lockd_conversation',errors:{
+    'Conversation is unavailable.':{status:404,message:'You can only start a conversation about another lister’s available listing.'},
+    'Reservation not found.':{status:404,message:'This reservation is unavailable in your account.'},
+    'Conversation limit reached.':{status:429,message:'You’ve opened several conversations today. You can still reply in your inbox.'}
+  },args:{p_listing_id:b.listingId,p_booking_id:b.bookingId||null}};
   if(b.action==='reserveAttachment' && validId(b.conversationId) && validId(b.id) && Number.isInteger(b.bytes) && b.bytes>=100 && b.bytes<=2200000)return {rpc:'reserve_lockd_chat_attachment',args:{p_conversation_id:b.conversationId,p_id:b.id,p_bytes:b.bytes}};
   if(b.action==='send' && validId(b.conversationId) && validId(b.clientId) && validId(b.senderDevice) && validId(b.recipientDevice) && text(b.ciphertext,65536,100) && (!b.attachmentIds || (Array.isArray(b.attachmentIds)&&b.attachmentIds.length<=3&&b.attachmentIds.every(validId)))) return {rpc:'send_lockd_ciphertext',args:{p_conversation_id:b.conversationId,p_client_id:b.clientId,p_sender_device:b.senderDevice,p_recipient_device:b.recipientDevice,p_ciphertext:b.ciphertext,p_attachment_ids:b.attachmentIds||[]}};
   if(b.action==='acknowledge' && validId(b.id) && typeof b.read==='boolean') return {rpc:'acknowledge_lockd_message',args:{p_message_id:b.id,p_read:b.read}};

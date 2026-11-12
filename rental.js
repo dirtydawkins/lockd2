@@ -397,7 +397,7 @@
       const messagesLink = document.querySelector('#rental-messages');
       if (messagesLink) {
         messagesLink.href = `messages.html?listing=${encodeURIComponent(data.item.id)}`;
-        messagesLink.hidden = document.documentElement.dataset.lockdMessaging !== 'enabled';
+        messagesLink.hidden = !data.item.id;
       }
       renderListing(data.item, config);
     } catch (error) {

@@ -372,7 +372,21 @@ async function connectMessages(){
   $('#message-device').hidden=true;$('#message-workspace').classList.remove('is-locked');status(notice,'');
   const url=new URL(location.href);
   if(url.searchParams.has('listing')){
-   const conversationId=await request('messages',{}, {action:'open',listingId:url.searchParams.get('listing'),bookingId:url.searchParams.get('booking')||undefined});await inbox();url.searchParams.delete('listing');url.searchParams.delete('booking');url.searchParams.set('conversation',conversationId);history.replaceState(null,'',url);await open(conversationId);
+   try {
+     const conversationId=await request('messages',{}, {action:'open',listingId:url.searchParams.get('listing'),bookingId:url.searchParams.get('booking')||undefined});
+     if(user?.id!==accountId||currentConnection!==connectionEpoch)return;
+     await inbox();
+     if(user?.id!==accountId||currentConnection!==connectionEpoch)return;
+     if(!conversations.some(item=>item.id===conversationId))throw Error('Your conversation could not be loaded. Try again from the listing.');
+     url.searchParams.delete('listing');
+     url.searchParams.delete('booking');
+     url.searchParams.set('conversation',conversationId);
+     history.replaceState(null,'',url);
+     await open(conversationId);
+   } catch(err) {
+     if(user?.id!==accountId||currentConnection!==connectionEpoch)return;
+     error(err);
+   }
   }else if(pendingConversation){const selected=pendingConversation;pendingConversation=null;await open(selected);}
   else if(conversations.some(c=>c.id===url.searchParams.get('conversation')))await open(url.searchParams.get('conversation'));
   else if(visibleThreads().length&&matchMedia('(min-width:761px)').matches)await open(visibleThreads()[0].id);
