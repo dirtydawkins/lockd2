@@ -113,7 +113,16 @@ function renderInbox(){
   if(Number(item.unread)>0)meta.append(node('span',Number(item.unread)>99?'99+':String(item.unread),{class:'conversation-unread','aria-label':`${item.unread} unread messages`}));
   link.append(listingArtwork(item),copy,meta);list.append(link);
  }
- if(threads.length&&!list.children.length)list.append(node('p','No conversations match. Try another name or filter.'));
+ if(threads.length&&!list.children.length){
+   const empty=node('div',undefined,{class:'inbox-empty'});
+   empty.append(node('h3',inboxFilter==='unread'&&!term?'You’re all caught up.':'No matching messages.'),
+     action('Show all messages',()=>{
+       $('#conversation-search').value='';
+       document.querySelector('[data-inbox-filter="all"]').click();
+       $('#conversation-search').focus();
+     },'text-button'));
+   list.append(empty);
+ }
  if(focusedId)list.querySelector(`[data-conversation-id="${CSS.escape(focusedId)}"]`)?.focus({preventScroll:true});
 }
 $('#conversation-search').addEventListener('input',renderInbox);
@@ -181,7 +190,12 @@ async function open(id){
  $('#message-workspace').classList.add('has-open-thread');
  $('#message-text').value=drafts.get(id)||'';$('#message-text').style.height='auto';clearAttachment();$('#message-search').value='';$('#report-dialog').close();pendingReport=null;
  $('#thread-title').textContent=item.title||'Rental conversation';$('#thread-person').textContent=[item.participant_name, item.owner_id === user.id ? 'Renter' : 'Lister'].filter(Boolean).join(' · ');$('#thread-title').parentElement.querySelector('.thread-artwork')?.remove();const artwork=listingArtwork(item);artwork.classList.add('thread-artwork');$('#thread-title').parentElement.prepend(artwork);$('#message-history').replaceChildren(node('p','Opening your conversation…'));
- devices=await getDevices(id);if(current!==epoch)return;
+ $('#contact-check').hidden=true;
+ $('#contact-reminder').hidden=true;
+ $('#message-context').replaceChildren();
+ const loadedDevices=await getDevices(id);
+ if(current!==epoch)return;
+ devices=loadedDevices;
  device=devices.find(d=>d.user_id===user.id && d.fingerprint===identity.fingerprint && !d.revoked_at);
  peer=devices.find(d=>d.user_id!==user.id && !d.revoked_at)||null;
  if(!device){lock('Message access changed. Reconnecting your account…');await connectMessages();return;}
@@ -192,13 +206,15 @@ async function open(id){
  if(item.booking_id)void loadBookingContext(item,current);
  $('#contact-check').hidden=false;$('#peer-fingerprint').textContent=peer?fingerprint(peer.fingerprint):'Your contact hasn’t opened private messages yet. You’ll be able to message them once they do.';
  let pin=peer?await stored(user.id,'contact:'+peer.user_id):null;
- if(peer&&!pin){await readPublic(peer.public_key,peer.fingerprint);pin={current:peer.fingerprint,verified:[peer.fingerprint],firstSeenAt:new Date().toISOString(),manualComparison:false};await stored(user.id,'contact:'+peer.user_id,pin);}
+ if(current!==epoch)return;
+ if(peer&&!pin){await readPublic(peer.public_key,peer.fingerprint);if(current!==epoch)return;pin={current:peer.fingerprint,verified:[peer.fingerprint],firstSeenAt:new Date().toISOString(),manualComparison:false};await stored(user.id,'contact:'+peer.user_id,pin);}
+ if(current!==epoch)return;
  $('#contact-reminder').hidden=!peer||(typeof pin==='string'?pin:pin?.current)===peer?.fingerprint;
  $('#fingerprint-compared').checked=false;$('#verify-contact').disabled=!peer;$('#block-contact').textContent=item.blocked?'Unblock contact':'Block contact';
  $('#message-compose').hidden=!peer || item.blocked;
  const availability=$('#conversation-availability');availability.hidden=Boolean(peer)&&!item.blocked;
  availability.textContent=item.blocked?'You blocked this conversation. You can unblock it in Conversation options.':!peer?'Your contact has not opened messages yet. You can write to them when they do.':'';
- await inbox();await sync(true);if(current!==epoch)return;await subscribe();
+ await inbox();if(current!==epoch)return;await sync(true);if(current!==epoch)return;await subscribe();
 }
 async function loadBookingContext(item,current){
  const panel=$('#message-booking');panel.hidden=false;panel.replaceChildren(node('p','Loading reservation…'));

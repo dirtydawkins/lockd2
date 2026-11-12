@@ -23,7 +23,14 @@
   <main id="main" class="messages-main">
     <div class="messages-heading"><div><h1>Messages</h1><p class="messages-lede">Ask listers about your rentals and reservations.</p></div><a id="lister-booking-action" class="button button-burgundy" href="account.html?view=listing#bookings" hidden>Booking requests</a><button class="button button-burgundy message-new" id="new-message" type="button" hidden><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#compose"></use></svg><span>New message</span></button></div>
     <p id="messages-status" role="status" aria-live="polite">Opening your messages…</p>
-    <section id="messages-access" class="messages-access" hidden aria-labelledby="messages-access-title"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#message"></use></svg><h2 id="messages-access-title">Your conversations, together.</h2><p>Use your LOCKD account to talk about rentals, share details and make plans.</p><a id="messages-signin" class="button button-burgundy" href="account.html?returnTo=%2Fmessages.html">Continue to your account</a></section>
+    <section id="messages-access" class="messages-access" hidden aria-labelledby="messages-access-title">
+      <div class="messages-access-copy">
+        <h2 id="messages-access-title">Open your inbox</h2>
+        <p>Sign in to ask about a listing or pick up a conversation about your reservation.</p>
+        <a id="messages-signin" class="button button-burgundy" href="account.html?returnTo=%2Fmessages.html">Sign in</a>
+      </div>
+      <img src="./WhatsApp%20Image%202026-10-27%20at%2023.34.59.jpeg" width="736" height="1308" alt="" decoding="async">
+    </section>
     <button id="retry-inbox" class="text-button" type="button" hidden>Try again</button>
     <div id="message-workspace" class="message-workspace is-locked" hidden>
       <aside class="message-inbox" aria-label="Inbox">
@@ -31,8 +38,7 @@
           <a href="messages.html?inbox=renting" data-perspective="renting">Renting</a>
           <a href="messages.html?inbox=listing" data-perspective="listing">Listing</a>
         </nav>
-        <div class="message-inbox-heading"><h2 class="visually-hidden">Inbox</h2><button class="message-icon-button" id="refresh-inbox" type="button" aria-label="Refresh conversations" title="Refresh conversations"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5M19 9a7.5 7.5 0 0 0-13-3L4 8m1 7a7.5 7.5 0 0 0 13 3l2-2"/></svg></button></div>
-        <label class="conversation-search-field"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#search"></use></svg><span class="visually-hidden">Search conversations</span><input type="search" id="conversation-search" placeholder="Search conversations" autocomplete="off" maxlength="100"></label>
+        <div class="inbox-toolbar"><label class="conversation-search-field"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#search"></use></svg><span class="visually-hidden">Search conversations</span><input type="search" id="conversation-search" placeholder="Search conversations" autocomplete="off" maxlength="100"></label><button class="message-icon-button" id="refresh-inbox" type="button" aria-label="Refresh conversations" title="Refresh conversations"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5M19 9a7.5 7.5 0 0 0-13-3L4 8m1 7a7.5 7.5 0 0 0 13 3l2-2"/></svg></button></div>
         <div class="conversation-filters" role="group" aria-label="Filter conversations"><button type="button" data-inbox-filter="all" aria-pressed="true">All</button><button type="button" data-inbox-filter="rental" aria-pressed="false"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#car"></use></svg>Rentals</button><button type="button" data-inbox-filter="booking" aria-pressed="false"><svg aria-hidden="true"><use href="./assets/icons/marketplace.svg#calendar"></use></svg>Bookings</button><button type="button" data-inbox-filter="unread" aria-pressed="false"><span class="unread-dot" aria-hidden="true"></span>Unread</button></div>
         <div id="conversations" aria-live="polite"></div>
       </aside>

@@ -11,3 +11,4 @@ infra/
 render.yaml
 scripts/
 lockd2/
+PROJECT_STATE.md
