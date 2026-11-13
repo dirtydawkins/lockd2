@@ -11,9 +11,9 @@ function mockResponse() {
   };
 }
 
-async function invoke({ method = "GET", headers = {}, body } = {}) {
+async function invoke({ method = "GET", headers = {}, body, query } = {}) {
   const res = mockResponse();
-  await handler({ method, headers, body }, res);
+  await handler({ method, headers, body, query }, res);
   return res;
 }
 
@@ -41,6 +41,36 @@ test("owner API requires a signed-in user before reading or writing", async (t) 
   assert.equal(result.statusCode, 401);
   assert.equal(result.body.error, "not_authenticated");
   assert.equal(result.headers["cache-control"], "no-store");
+});
+
+test("wording uses verified identity and public facts only, never the publishing RPC", async t => {
+  setup(t);
+  const oldKey = process.env.NVIDIA_API_KEY;
+  process.env.NVIDIA_API_KEY = 'isolated-provider-test';
+  t.after(() => { if (oldKey === undefined) delete process.env.NVIDIA_API_KEY; else process.env.NVIDIA_API_KEY = oldKey; });
+  const req = { method: 'POST', query: { view: 'wording' }, headers: { authorization: 'Bearer ' + 'a'.repeat(40) },
+    body: { category: 'drive', title: 'Car', summary: '', description: '', facts: { transmission: 'automatic', pickup_instructions: 'gate code 4321' },
+      private_address: 'private street', publish: true } };
+  let verified = false, modelCalls = 0, reply = { summary: 'Automatic car', description: 'This car has an automatic transmission.' };
+  global.fetch = async (url, options) => {
+    if (url.endsWith('/auth/v1/user')) return response(200, { id: 'writer', email_confirmed_at: verified });
+    assert.equal(url, 'https://integrate.api.nvidia.com/v1/chat/completions'); modelCalls++;
+    const data = JSON.parse(JSON.parse(options.body).messages[1].content);
+    assert.deepEqual(data, { category: 'drive', title: 'Car', notes: '', intro: '', facts: { transmission: 'automatic' } });
+    return response(200, { choices: [{ message: { content: JSON.stringify(reply) } }] });
+  };
+  assert.equal((await invoke({...req, headers:{}})).statusCode, 401);
+  assert.equal((await invoke(req)).statusCode, 403);
+  verified = true;
+  assert.equal((await invoke({...req, method:'PATCH'})).statusCode, 405);
+  assert.equal((await invoke({...req, body:{...req.body, facts:{}}})).statusCode, 400);
+  assert.equal(modelCalls, 0);
+  assert.deepEqual((await invoke(req)).body, reply);
+  reply = { summary:'x', description:'broken' };
+  assert.equal((await invoke(req)).statusCode, 503);
+  for (let i=0; i<3; i++) await invoke(req);
+  assert.equal((await invoke(req)).statusCode, 429);
+  assert.equal(modelCalls, 5);
 });
 
 test("owner publish uses the caller's user token and the database RPC", async (t) => {

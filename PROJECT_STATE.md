@@ -63,3 +63,9 @@ Category discovery uses shared assisted search on submit, including scoped car, 
 UI refinement 2026-11-13: browser review identified squeezed stay filters, detached location controls, crowded desktop navigation and repeated navigation CTAs. Stay form now adapts its columns, locality actions stay with their fields, duplicate header actions are removed, and shared focus/disabled states and breadcrumb spacing are consistent. Signed-out message access was observed; signed-in screens were not exercised in this pass.
 
 Account motion refinement adds short panel entrances, menu open transitions, settings hover/press feedback and reduced-motion fallbacks. Save feedback continues to use the existing server-confirmed save state. Real signed-in verification requires an authenticated session, which this browser currently lacks.
+
+## Listing writing assistance
+
+The description step in the lister wizard offers optional wording suggestions from the existing server-side NVIDIA integration. The owner endpoint verifies the Supabase session and confirmed email, limits requests per account per instance, and sends only title, category, public copy and selected product facts. It never saves or publishes the suggestion. The lister can preview, apply, edit or undo using the ordinary listing form. Private address, directions, images, account and payment fields are excluded.
+
+Verification: 10 owner API tests passed (including authorization, allowed inputs, malformed model output, throttling and no publication) and all 15 marketplace checks passed. An isolated inbuilt-browser exercise verified applying, undoing and invalidating suggestions after an edit. A signed-in production generation has not been verified.

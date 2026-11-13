@@ -106,3 +106,10 @@
 @media (prefers-reduced-motion: reduce) {
   .owner-field input, .owner-field select, .owner-field textarea { transition: none; }
 }
+.listing-wording {margin:.5rem 0 1.25rem;display:flex;align-items:baseline;gap:.4rem .85rem;flex-wrap:wrap}
+.listing-wording p {margin:0}
+.listing-wording [role=status]:not(:empty),.listing-wording section {flex-basis:100%}
+.listing-wording section {padding:1rem 1.25rem;border-inline-start:3px solid var(--burgundy,#762432);background:var(--paper,#f7f4ef)}
+.listing-wording section h5 {margin:0 0 .4rem;font:inherit;font-weight:600}
+.listing-wording section p {margin:0 0 1rem;white-space:pre-line;overflow-wrap:anywhere}
+.listing-wording [hidden] {display:none}

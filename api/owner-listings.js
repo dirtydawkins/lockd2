@@ -50,6 +50,11 @@ module.exports = async function handler(req, res) {
     if (!user?.id) return send(res, 401, { error: "not_authenticated", message: "Sign in to manage your listings." });
     if (!user.email_confirmed_at) return send(res, 403, { error: "owner_verification_required", message: "Verify your email address before managing listings." });
 
+    if (req.query?.view === "wording") {
+      if (req.method !== "POST") return send(res, 405, { message: "Use POST for a wording suggestion." });
+      return require("../lib/listing-wording")(user.id, readBody(req), (status, data) => send(res, status, data));
+    }
+
     if (req.method === "GET" && req.query?.view === "inbox-context") {
       // Use the caller's existing private listing/profile functions, including drafts.
       const read = async name => {
