@@ -167,6 +167,8 @@ h2 { margin: 0; font-size: clamp(3rem, 5.6vw, 5.6rem); line-height: .98; }
 .idea-search input:focus-visible { outline: 0; }
 .idea-search:focus-within { outline: 2px solid var(--red); outline-offset: 3px; }
 .search-note { margin: .75rem 0 0 1.1rem; color: #8b847e; font-size: .7rem; }
+.discovery .assisted-search-link { border:0; background:transparent; color:var(--oxblood); min-height:44px; padding:8px 12px; font:600 .86rem var(--sans); cursor:pointer; }
+.discovery .assisted-search-link:hover { text-decoration:underline; }
 .search-results { max-width: 900px; margin-top: 1rem; padding: 1rem 1.1rem; border-left: 2px solid var(--burgundy); background: #efeae4; font-size: .8rem; }
 .search-results p { margin: 0 0 .8rem; }
 .search-hit-list { display: flex; flex-wrap: wrap; gap: .5rem; }

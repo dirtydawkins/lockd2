@@ -35,11 +35,22 @@
   const searchLocation = document.querySelector("#idea-location");
   const searchSuggestions = document.querySelector("#idea-suggestions");
   if (searchForm && searchInput) {
+    document.querySelector('#home-assisted-search')?.addEventListener('click', () => {
+      const term = searchInput.value.trim();
+      if (!term) { searchInput.focus(); return; }
+      const target = new URL('rentals.html', location.href);
+      target.searchParams.set('q', term);
+      target.searchParams.set('assist', '1');
+      if (searchCategory?.value) target.searchParams.set('category', searchCategory.value);
+      if (searchLocation?.value.trim()) target.searchParams.set('location', searchLocation.value.trim());
+      location.assign(target.href);
+    });
     searchForm.addEventListener("submit", (event) => {
       event.preventDefault();
       const target = new URL("rentals.html", window.location.href);
       const query = searchInput.value.trim();
       if (query) target.searchParams.set("q", query);
+      if (query.split(/\s+/).length >= 5 && !searchCategory?.value) target.searchParams.set('assist', '1');
       if (query && !searchCategory?.value && !searchLocation?.value.trim()) target.searchParams.set("kind", "all");
       if (searchCategory?.value) target.searchParams.set("category", searchCategory.value);
       const location = searchLocation?.value.trim() || "";

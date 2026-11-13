@@ -49,3 +49,9 @@ Verification: 7 account-service tests and 15 marketplace checks passed. An isola
 Conversation history loads independently of inbox refresh. Pending bubbles show locally composed text and the composer is available while delivery completes. The persistent outbox still contains ciphertext. The UI deduplicates pending and confirmed bubbles and skips device lookups on refreshes with nothing to decrypt.
 
 Verification: 33 messaging tests and 15 marketplace checks passed. Live two-account delivery, visual mobile behavior and network latency were not measured.
+
+## Assisted rental search — 2026-11-13
+
+Plain-language searches can use NVIDIA Nemotron 3.5 Bolt E4B through the existing listings API. The model extracts category, item and location, then selects from published catalogue matches. Displayed titles and prices are assembled from those catalogue records. The normal search remains available. The provider key is a private Vercel environment variable, absent from browser assets and Git.
+
+Verification: provider authentication and a small search extraction succeeded, the new endpoint passed a mocked published-listing check, and 15 marketplace release checks passed. Production assisted search and mobile rendering still require verification after deployment. The supplied key was exposed in chat and should be rotated.

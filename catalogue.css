@@ -10,6 +10,12 @@
 .destination-filter-note { margin: .8rem 0 0; color: var(--oxblood); font-size: .71rem; line-height: 1.55; }
 .catalogue-count { margin: 0 0 .35rem; color: #7d746e; font-size: .72rem; }
 .catalogue-controls { display: flex; align-items: center; justify-content: space-between; gap: 1.2rem; padding: 1.1rem 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.catalogue-controls { flex-wrap: wrap; }
+.assisted-search-link { border:0; background:transparent; color:var(--oxblood); font:600 .86rem var(--sans); cursor:pointer; min-height:44px; padding:8px 12px; text-align:left; }
+.assisted-search-link:hover { text-decoration:underline; }
+.assisted-search-link:disabled { opacity:.6; cursor:wait; }
+.assisted-search-answer { flex:1 0 100%; border-left:3px solid var(--burgundy); background:var(--stone); padding:14px 18px; font-size:.91rem; line-height:1.5; }
+.assisted-search-answer[hidden] { display:none; }
 .catalogue-search { display: flex; width: min(100%, 610px); align-items: center; gap: .7rem; }
 .catalogue-search input, .catalogue-search select, .vehicle-filter-panel input, .vehicle-filter-panel select, .sort-control select, .bundle-fields input, .bundle-fields select, .bundle-fields textarea, .availability-form input { min-height: 46px; padding: .7rem .85rem; border: 1px solid #cfc8c1; border-radius: 0; background: #fffdfb; color: var(--ink); font: inherit; font-size: .78rem; transition: border-color var(--motion-control), background-color var(--motion-control), box-shadow var(--motion-control); }
 .bundle-fields label.has-value input, .bundle-fields label.has-value select, .bundle-fields label.has-value textarea, .availability-form label.has-value input { border-color: rgba(84,29,40,.55); background-color: #fff; }

@@ -41,6 +41,38 @@
   let suggestionController = null;
   const filterState = Object.fromEntries(filterKeys.map((key) => [key, params.get(key) || ""]));
   filterState.sort = params.get("sort") || (query ? "relevance" : "newest");
+  let assistRun = 0;
+
+  async function assistedSearch() {
+    const term = searchInput?.value.trim() || "";
+    if (term.length < 4) { searchInput?.focus(); return; }
+    const panel = document.querySelector('#assisted-search-answer');
+    const button = document.querySelector('#catalogue-assisted-search');
+    const run = ++assistRun;
+    panel.hidden = false;
+    panel.textContent = 'Looking for rentals that fit…';
+    button.disabled = true;
+    try {
+      const response = await fetch('/api/listings?view=assist', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ query: term }), signal: AbortSignal.timeout(9000),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (run !== assistRun) return;
+      if (!response.ok) throw new Error(result.message || 'Try the regular search.');
+      category = categorySelect?.value || result.filters.category;
+      query = result.filters.q;
+      locationQuery = locationInput?.value.trim() || result.filters.location;
+      if (categorySelect) categorySelect.value = category;
+      if (searchInput) searchInput.value = query;
+      if (locationInput) locationInput.value = locationQuery;
+      filterState.sort = query ? 'relevance' : 'newest';
+      panel.textContent = filterState.startDate || filterState.endDate ? 'Showing rentals that fit your search. Check availability for your dates on each listing.' : result.summary;
+      saveSearchState();
+    } catch (error) {
+      if (run === assistRun) panel.textContent = error.message || 'Try the regular search.';
+    } finally { if (run === assistRun) button.disabled = false; }
+  }
 
   function readBundle() {
     try {
@@ -623,6 +655,8 @@
   searchForm?.addEventListener('invalid',event=>{if(event.target.closest('#catalogue-more-filters'))document.querySelector('#catalogue-more-filters').open=true;},true);
   if (searchForm) searchForm.addEventListener("submit", (event) => {
     event.preventDefault();
+    assistRun++;
+    document.querySelector('#assisted-search-answer').hidden = true;
     readFormState({ querySortDefault: true });
     if ((filterState.startDate && !filterState.endDate) || (!filterState.startDate && filterState.endDate) || (filterState.startDate && filterState.endDate && filterState.endDate <= filterState.startDate)) {
       if(document.querySelector('#catalogue-more-filters'))document.querySelector('#catalogue-more-filters').open=true;
@@ -631,8 +665,10 @@
       return;
     }
     document.querySelector("#catalogue-end-date")?.setCustomValidity("");
+    if (query.split(/\s+/).length >= 5 && !categorySelect?.value) { void assistedSearch(); return; }
     saveSearchState();
   });
+  document.querySelector('#catalogue-assisted-search')?.addEventListener('click', assistedSearch);
   if (sortSelect) sortSelect.addEventListener("change", () => { readFormState(); saveSearchState(); });
   document.querySelector("#catalogue-retry")?.addEventListener("click", () => { page = 0; loadListings(); });
   document.querySelector("#catalogue-clear")?.addEventListener("click", () => {
@@ -658,7 +694,7 @@
     if (categorySelect) categorySelect.value = category;
     saveSearchState();
   }));
-  window.addEventListener("popstate", () => { syncSearchUi(); page = 0; loadListings(); });
+  window.addEventListener("popstate", () => { assistRun++; document.querySelector('#assisted-search-answer').hidden = true; syncSearchUi(); page = 0; loadListings(); });
   if (searchInput) searchInput.addEventListener("input", () => {
     window.clearTimeout(suggestionTimer);
     suggestionController?.abort();
@@ -696,4 +732,5 @@
   renderBundle();
   syncSearchUi();
   loadListings();
+  if (params.get('assist') === '1' && query) void assistedSearch();
 })();

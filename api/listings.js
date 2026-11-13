@@ -54,6 +54,7 @@ async function availableIds(config, startDate, endDate, quantity) {
 }
 
 module.exports = async function handler(req, res) {
+  if (req.query?.view === 'assist') return require('../lib/assisted-search')(req, res);
   if(req.query?.view==='map')return require('../lib/map-api')(req,res);
   if(req.query?.view==='places')return require('../lib/places-api')(req,res);
   if (['hosts','host','listers','lister'].includes(req.query?.view)) return require('../lib/hosts-api')(req,res);
