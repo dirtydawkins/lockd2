@@ -85,7 +85,10 @@
       } catch { /* The selected area still works for this page when storage is unavailable. */ }
     }
     const globalLocation = $("#idea-location");
-    if (globalLocation) globalLocation.value = nextLocation?.label || "";
+    if (globalLocation && globalLocation.value !== (nextLocation?.label || "")) {
+      globalLocation.value = nextLocation?.label || "";
+      globalLocation.dispatchEvent(new Event("change", { bubbles: true }));
+    }
     document.querySelectorAll('[data-location-label]').forEach(el=>el.textContent=nextLocation?.label?.split(',')[0]||'Anywhere');
   }
 

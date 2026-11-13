@@ -35,27 +35,64 @@
   const searchLocation = document.querySelector("#idea-location");
   const searchSuggestions = document.querySelector("#idea-suggestions");
   if (searchForm && searchInput) {
-    document.querySelector('#home-assisted-search')?.addEventListener('click', () => {
-      const term = searchInput.value.trim();
-      if (!term) { searchInput.focus(); return; }
-      const target = new URL('rentals.html', location.href);
-      target.searchParams.set('q', term);
-      target.searchParams.set('assist', '1');
-      if (searchCategory?.value) target.searchParams.set('category', searchCategory.value);
-      if (searchLocation?.value.trim()) target.searchParams.set('location', searchLocation.value.trim());
-      location.assign(target.href);
-    });
-    searchForm.addEventListener("submit", (event) => {
+    const preview = document.querySelector("#home-search-preview");
+    const status = preview.querySelector("[role=status]");
+    const matches = preview.querySelector("ul");
+    const browse = preview.querySelector("a");
+    let pending;
+    function resetPreview() {
+      pending?.abort();
+      preview.hidden = true;
+      matches.replaceChildren();
+    }
+    function resultsUrl(fields) {
+      const url = new URL("rentals.html", window.location.href);
+      for (const [key, value] of Object.entries(fields)) if (value) url.searchParams.set(key, value);
+      return url;
+    }
+    searchForm.addEventListener("input", resetPreview);
+    searchForm.addEventListener("change", resetPreview);
+    searchForm.addEventListener("submit", async event => {
       event.preventDefault();
-      const target = new URL("rentals.html", window.location.href);
-      const query = searchInput.value.trim();
-      if (query) target.searchParams.set("q", query);
-      if (query.split(/\s+/).length >= 5 && !searchCategory?.value) target.searchParams.set('assist', '1');
-      if (query && !searchCategory?.value && !searchLocation?.value.trim()) target.searchParams.set("kind", "all");
-      if (searchCategory?.value) target.searchParams.set("category", searchCategory.value);
-      const location = searchLocation?.value.trim() || "";
-      if (location) target.searchParams.set("location", location);
-      window.location.assign(target.href);
+      resetPreview();
+      const term = searchInput.value.trim();
+      const category = searchCategory?.value || "";
+      const place = searchLocation?.value.trim() || "";
+      const direct = resultsUrl({ q: term, category, location: place, kind: term && !category && !place ? "all" : "" });
+      const natural = term.length <= 240 && (term.split(/\s+/).length >= 5 || /\b(in|near|looking for|need a|want a)\s+\S/i.test(term));
+      if (!natural) { window.location.assign(direct.href); return; }
+      const controller = new AbortController();
+      pending = controller;
+      const timeout = setTimeout(() => controller.abort(), 16000);
+      preview.hidden = false;
+      status.textContent = "Searching rentals...";
+      browse.href = direct.href;
+      browse.textContent = "Open rental search";
+      try {
+        const response = await fetch("/api/listings?view=assist", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: term, category, location: place }), signal: controller.signal
+        });
+        if (!response.ok) throw new Error("Search unavailable");
+        const result = await response.json();
+        if (controller !== pending || preview.hidden) return;
+        const items = result.matches || [];
+        status.textContent = items.length ? "Rentals for your search" : result.summary;
+        for (const item of items) {
+          const row = document.createElement("li");
+          const link = document.createElement("a");
+          link.href = "rental.html?" + new URLSearchParams({ slug: item.slug });
+          link.textContent = [item.title, item.location].filter(Boolean).join(" / ");
+          row.append(link);
+          matches.append(row);
+        }
+        browse.href = resultsUrl(result.filters).href;
+        browse.textContent = items.length ? "See all matches" : "Adjust filters";
+      } catch {
+        if (controller === pending && !preview.hidden) status.textContent = "Continue with regular search.";
+      } finally {
+        clearTimeout(timeout);
+      }
     });
 
     let suggestionTimer = 0;
