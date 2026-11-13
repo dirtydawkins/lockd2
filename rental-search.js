@@ -7,6 +7,12 @@
   async function interpret(form, fields, category, status, force = false) {
     pending.get(form)?.abort();
     const term = fields.q.value.trim();
+    if (/\b(near me|nearby|around me)\b/i.test(term) && fields.location && !fields.location.value.trim()) {
+      status.hidden = false;
+      status.textContent = 'Choose a town or use your location to search nearby.';
+      fields.location.focus();
+      return false;
+    }
     if (!natural(term) && !force) return true;
     const controller = new AbortController();
     pending.set(form, controller);

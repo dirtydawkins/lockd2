@@ -60,6 +60,11 @@
       const place = searchLocation?.value.trim() || "";
       const direct = resultsUrl({ q: term, category, location: place, kind: term && !category && !place ? "all" : "" });
       const natural = window.LockdRentalSearch.natural(term);
+      if (/\b(near me|nearby|around me)\b/i.test(term) && !place && searchLocation) {
+        searchLocation.focus();
+        searchLocation.click();
+        return;
+      }
       if (!natural) { window.location.assign(direct.href); return; }
       const controller = new AbortController();
       pending = controller;
