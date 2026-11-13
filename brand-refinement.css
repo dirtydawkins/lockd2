@@ -91,3 +91,26 @@ body[data-discovery-active] .site-header{background:#fffdfbf5;border-color:#eee5
  :is(.tech-shell,.rooms-shell,.catalogue-shell,.account-main) label { line-height:1.5; }
  :is(.tech-shell,.rooms-shell,.catalogue-shell,.account-main) input[type=search] { font-size:16px; }
 }
+
+/* Account controls share the marketplace's short, responsive motion. */
+:root { --account-ease:cubic-bezier(.2,.75,.25,1); }
+.account-section-nav :is(a,button),.account-link,.settings-list a,.profile-photo-actions :is(button,label),.site-account-menu summary {
+ transition:background-color 180ms var(--account-ease),border-color 180ms var(--account-ease),color 180ms var(--account-ease),transform 160ms var(--account-ease);
+}
+.account-section-nav :is(a,button):active,.settings-list a:active,.profile-photo-actions :is(button,label):active { transform:translateY(1px); }
+[data-account-panel]:not([hidden]) { animation:account-panel-enter 220ms var(--account-ease); }
+.site-account-menu[open] > nav { animation:account-menu-enter 180ms var(--account-ease); transform-origin:top right; }
+.settings-list a:hover { background:var(--paper); border-color:var(--burgundy); }
+.profile-photo { flex-shrink:0; }
+.account-field input[readonly] { background:var(--paper); color:var(--muted); }
+.account-session-actions { justify-content:flex-start; }
+.account-save-row .save-result { line-height:1.5; }
+@keyframes account-panel-enter { from { opacity:.65; transform:translateY(5px); } to { opacity:1; transform:none; } }
+@keyframes account-menu-enter { from { opacity:0; transform:translateY(-4px) scale(.98); } to { opacity:1; transform:none; } }
+@media(hover:hover) {
+ .settings-list a:hover { transform:translateX(2px); }
+}
+@media(prefers-reduced-motion:reduce) {
+ [data-account-panel]:not([hidden]),.site-account-menu[open] > nav { animation:none; }
+ .account-section-nav :is(a,button),.account-link,.settings-list a,.profile-photo-actions :is(button,label),.site-account-menu summary { transition:none; transform:none; }
+}

@@ -12,7 +12,10 @@ if (field) {
   const notice = document.createElement('span');
   notice.setAttribute('role', 'status');
   control.append(options, near, notice);
-  field.closest('label').append(control);
+  const label = field.closest('label');
+  const labelText = label.querySelector('span')?.textContent || label.childNodes[0]?.textContent || 'Location';
+  if (!field.hasAttribute('aria-label')) field.setAttribute('aria-label', labelText.trim());
+  label.append(control);
   let sequence = 0, timer, request;
   function cancel() {
     sequence++;
