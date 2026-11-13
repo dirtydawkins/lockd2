@@ -61,3 +61,7 @@
 @media (prefers-reduced-motion: reduce) {
   .destination-preview-card img { transition: none; }
 }
+
+.destination-search { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.5rem; }
+.destination-search label { flex-basis: 100%; font-weight: 600; }
+.destination-search input { flex: 1 1 12rem; min-width: 0; padding: .8rem; font: inherit; background: var(--paper); color: var(--ink); border: 1px solid var(--line); border-radius: .5rem; }

@@ -20,6 +20,7 @@
     <script src="./image-assets.js" defer></script>
     <script src="./image-presentation.js" defer></script>
     <script src="./motion.js" defer></script>
+    <script src="./rental-search.js" defer></script>
     <script src="./app.js" defer></script>
     <script src="./account-service.js" defer></script>
     <script src="./rental-pricing.js" defer></script>
@@ -27,7 +28,8 @@
     <script src="./rooms.js" defer></script>
   <script type="module" src="./messaging-onboarding.mjs"></script>    <link rel="stylesheet" href="./brand-refinement.css">
   <script defer src="./site-menu.js"></script>
-</head>
+  <script type="module" src="./rental-places.mjs"></script>
+  </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header" id="top">
@@ -58,11 +60,12 @@
       <section class="room-search-panel" aria-labelledby="room-search-title">
         <h2 class="visually-hidden" id="room-search-title">Search rooms and stays</h2>
         <form id="room-search-form" class="room-search-form" role="search">
+          <label>What kind of stay?<input id="room-query" name="q" type="search" placeholder="Apartment with a pool in Nairobi"></label>
           <label class="room-location">Where
             <input id="room-location" name="location" type="search" placeholder="City, area or destination" autocomplete="off">
           </label>
-          <label>Check in<input id="room-checkin" name="startDate" type="date" required></label>
-          <label>Check out<input id="room-checkout" name="endDate" type="date" required></label>
+          <label>Check in<input id="room-checkin" name="startDate" type="date"></label>
+          <label>Check out<input id="room-checkout" name="endDate" type="date"></label>
           <label>Adults<input id="room-adults" name="adults" type="number" min="1" max="20" value="2" required></label>
           <label>Children<input id="room-children" name="children" type="number" min="0" max="19" value="0"></label>
           <label>Rooms<input id="room-count" name="rooms" type="number" min="1" max="20" value="1" required></label>

@@ -5,6 +5,7 @@
   const count = document.querySelector("#room-result-count");
   const loadMoreButton = document.querySelector("#room-load-more");
   const fields = {
+    q: document.querySelector("#room-query"),
     location: document.querySelector("#room-location"),
     startDate: document.querySelector("#room-checkin"),
     endDate: document.querySelector("#room-checkout"),
@@ -31,9 +32,9 @@
   fields.startDate.addEventListener("change", () => { fields.endDate.min = fields.startDate.value || todayText; });
 
   function validRange() {
-    return /^\d{4}-\d{2}-\d{2}$/.test(fields.startDate.value)
+    return ((!fields.startDate.value && !fields.endDate.value) || (/^\d{4}-\d{2}-\d{2}$/.test(fields.startDate.value)
       && /^\d{4}-\d{2}-\d{2}$/.test(fields.endDate.value)
-      && fields.endDate.value > fields.startDate.value
+      && fields.endDate.value > fields.startDate.value))
       && Number(fields.adults.value) >= 1
       && Number(fields.children.value) >= 0
       && Number(fields.adults.value) + Number(fields.children.value) <= 20
@@ -147,6 +148,7 @@
     const url = new URL("/api/listings", window.location.origin);
     url.searchParams.set("category", "stay");
     url.searchParams.set("page", String(page));
+    if (filters.q) url.searchParams.set("q", filters.q);
     if (filters.location) url.searchParams.set("location", filters.location);
     if (filters.startDate && filters.endDate) {
       url.searchParams.set("startDate", filters.startDate);
@@ -198,7 +200,7 @@
     }
   }
 
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (!validRange()) {
       status.dataset.kind = "error";
@@ -206,6 +208,7 @@
       fields.endDate.focus();
       return;
     }
+    if (!await window.LockdRentalSearch.interpret(form, fields, "stay", status)) return;
     const next = new URL(window.location.href);
     next.search = "";
     Object.entries(fields).forEach(([key, field]) => { if (field.value) next.searchParams.set(key, field.value); });

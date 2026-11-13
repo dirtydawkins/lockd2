@@ -59,7 +59,7 @@
       const category = searchCategory?.value || "";
       const place = searchLocation?.value.trim() || "";
       const direct = resultsUrl({ q: term, category, location: place, kind: term && !category && !place ? "all" : "" });
-      const natural = term.length <= 240 && (term.split(/\s+/).length >= 5 || /\b(in|near|looking for|need a|want a)\s+\S/i.test(term));
+      const natural = window.LockdRentalSearch.natural(term);
       if (!natural) { window.location.assign(direct.href); return; }
       const controller = new AbortController();
       pending = controller;

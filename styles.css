@@ -468,3 +468,6 @@ h2 { margin: 0; font-size: clamp(3rem, 5.6vw, 5.6rem); line-height: .98; }
   .tech-preview-images figure { height: min(65vw, 360px); }
   .tech-preview-images figure:first-child, .tech-preview-images figure:last-child { transform: none; }
 }
+
+.search-locality { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: .65rem; color: var(--oxblood); font-size: .85rem; }
+.search-locality .text-button { min-height: 42px; }

@@ -23,6 +23,7 @@
     <script src="./image-assets.js" defer></script>
     <script src="./image-presentation.js" defer></script>
     <script src="./motion.js" defer></script>
+    <script src="./rental-search.js" defer></script>
     <script src="./app.js" defer></script>
     <script src="./account-service.js" defer></script>
     <script src="./photo-fallbacks.js" defer></script>
@@ -30,7 +31,8 @@
     <link rel="stylesheet" href="./marketplace-refinement.css">
   <script type="module" src="./messaging-onboarding.mjs"></script>    <link rel="stylesheet" href="./brand-refinement.css">
   <script defer src="./site-menu.js"></script>
-</head>
+  <script type="module" src="./rental-places.mjs"></script>
+  </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header" id="top">
@@ -106,6 +108,7 @@
           <label>Collection<select name="collection" id="tech-collection"><option value="">Any option</option><option value="yes">Collection available</option></select></label>
           <label>Delivery<select name="delivery" id="tech-delivery"><option value="">Any option</option><option value="yes">Delivery available</option></select></label>
           <label>Sort<select name="sort" id="tech-sort"><option value="relevance">Most relevant</option><option value="newest">Recently added</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option></select></label>
+          <button class="button button-burgundy" type="submit">Search tech</button>
           <button class="text-button tech-clear-filters" type="reset" id="clear-tech-filters">Clear filters</button>
           <button class="text-button tech-save-search" type="button" id="save-tech-search">Save this search</button>
         </form>

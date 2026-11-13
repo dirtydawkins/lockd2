@@ -562,7 +562,13 @@
   syncFilterDrawer();
   mobileFilters.addEventListener("change", syncFilterDrawer);
 
-  form.addEventListener("submit", (event) => { event.preventDefault(); setUrlFromFilters(); loadListings(); });
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+    clearTimeout(searchTimer);
+    if (!await window.LockdRentalSearch.interpret(form, filterFields, 'technology', status)) return;
+    setUrlFromFilters();
+    loadListings();
+  });
   form.addEventListener("change", (event) => {
     if (event.target.name !== "q" && event.target.name !== "brand" && event.target.name !== "location") {
       setUrlFromFilters();
@@ -575,6 +581,7 @@
         filterFields.sort.value = "relevance";
       }
       window.clearTimeout(searchTimer);
+      if (field === filterFields.q && window.LockdRentalSearch.natural(field.value)) return;
       searchTimer = window.setTimeout(() => { setUrlFromFilters(); loadListings(); }, 350);
     });
   });

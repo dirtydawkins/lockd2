@@ -20,6 +20,7 @@
     <script src="./image-assets.js" defer></script>
     <script src="./image-presentation.js" defer></script>
     <script src="./motion.js" defer></script>
+    <script src="./rental-search.js" defer></script>
     <script src="./app.js" defer></script>
     <script src="./account-service.js" defer></script>
     <script src="./photo-fallbacks.js" defer></script>
@@ -27,7 +28,8 @@
     <script src="./catalogue.js" defer></script>
   <link rel="stylesheet" href="./marketplace-refinement.css"><script type="module" src="./lister-discovery.mjs"></script><script type="module" src="./messaging-onboarding.mjs"></script>    <link rel="stylesheet" href="./brand-refinement.css"><link rel="stylesheet" href="./rental-search.css">
   <script defer src="./site-menu.js"></script>
-</head>
+  <script type="module" src="./rental-places.mjs"></script>
+  </head>
   <body class="rental-search-page">
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header" id="top">
@@ -89,6 +91,9 @@
           </div>
           <details class="rental-more-filters" id="catalogue-more-filters"><summary>Dates &amp; filters</summary>
           <div class="catalogue-search-optional">
+            <label>Gadget type<select id="catalogue-type"><option value="">Any</option><option value="gaming">Gaming</option><option value="phone">Phone</option><option value="computer">Computer</option><option value="tablet">Tablet</option><option value="camera">Camera</option><option value="lens">Lens</option><option value="audio">Audio</option><option value="creator">Creator</option><option value="projector">Projector</option></select></label>
+            <label>Property type<select id="catalogue-property"><option value="">Any</option><option value="hotel">Hotel</option><option value="guesthouse">Guesthouse</option><option value="apartment">Apartment</option><option value="holiday_home">Holiday home</option><option value="lodge">Lodge</option><option value="hostel">Hostel</option></select></label>
+            <label>Stay amenity<select id="catalogue-amenity"><option value="">Any</option><option value="wifi">Wifi</option><option value="kitchen">Kitchen</option><option value="parking">Parking</option><option value="pool">Pool</option><option value="breakfast">Breakfast</option><option value="workspace">Workspace</option><option value="air_conditioning">Air conditioning</option></select></label>
             <label>Min price<input id="catalogue-min-price" name="minPrice" type="number" min="0" step="100" inputmode="numeric" placeholder="Any"></label>
             <label>Max price<input id="catalogue-max-price" name="maxPrice" type="number" min="0" step="100" inputmode="numeric" placeholder="Any"></label>
             <label>Currency<select id="catalogue-currency" name="currency"><option value="">Any</option><option value="KES">KES</option><option value="USD">USD</option><option value="EUR">EUR</option></select></label>
@@ -98,7 +103,6 @@
             <button type="button" class="catalogue-clear" id="catalogue-clear">Clear filters</button>
           </div></details>
         </form>
-        <button class="assisted-search-link" id="catalogue-assisted-search" type="button">Describe what you need <span aria-hidden="true">→</span></button>
         <section class="assisted-search-answer" id="assisted-search-answer" role="status" aria-live="polite" hidden></section>
         <label class="sort-control" for="catalogue-sort">Sort
           <select id="catalogue-sort" name="sort">
