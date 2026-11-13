@@ -70,7 +70,11 @@
       panel.textContent = filterState.startDate || filterState.endDate ? 'Showing rentals that fit your search. Check availability for your dates on each listing.' : result.summary;
       saveSearchState();
     } catch (error) {
-      if (run === assistRun) panel.textContent = error.message || 'Try the regular search.';
+      if (run === assistRun) {
+        panel.textContent = 'Assisted search is unavailable. Showing regular search results.';
+        readFormState({ querySortDefault: true });
+        saveSearchState();
+      }
     } finally { if (run === assistRun) button.disabled = false; }
   }
 
