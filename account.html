@@ -103,21 +103,21 @@
       </section>
 
       <section class="account-dashboard" id="account-dashboard" hidden aria-labelledby="account-dashboard-title">
-        <div class="account-dashboard-heading"><span class="profile-photo account-heading-photo" data-profile-photo aria-hidden="true"></span><div><p class="eyebrow">YOUR LOCKD</p><h2 id="account-dashboard-title">Welcome back.</h2><p id="account-email-label"></p></div><a class="account-link" href="owners.html#owner-workspace">Switch to listing</a><button class="account-link" id="account-signout" type="button">Sign out</button></div>
+        <div class="account-dashboard-heading"><span class="profile-photo account-heading-photo" data-profile-photo aria-hidden="true"></span><div><h2 id="account-dashboard-title">My account</h2><p id="account-email-label"></p></div><div class="account-session-actions"><a class="account-link" href="owners.html#owner-workspace">Switch to listing</a><button class="account-link" id="account-signout" type="button">Sign out</button></div></div>
         <nav class="account-section-nav" aria-label="Account sections">
           <button type="button" data-account-section="overview" aria-current="page">Overview</button>
-          <button type="button" data-account-section="saved">Saved rentals</button>
-          <button type="button" data-account-section="bookings">Reservations</button>
+          <button type="button" data-account-section="saved">Saved</button>
+          <button type="button" data-account-section="bookings">Bookings</button>
           <a href="settings.html" data-settings-home>Settings</a>
           <a href="messages.html?inbox=renting" data-account-messages>Messages</a>
         </nav>
 
         <section class="account-section" data-account-panel="overview" aria-labelledby="overview-title">
-          <p class="eyebrow">YOUR ACCOUNT</p><h3 id="overview-title">Your plans, in one place.</h3>
+          <h3 id="overview-title">Your rentals</h3>
           <div class="account-overview-grid">
-            <a class="account-overview-card" href="rentals.html"><span class="account-card-index">01</span><h4>Explore rentals</h4><p>Pick up your next stay, drive or experience.</p><span class="account-card-link">Browse the catalogue</span></a>
-            <button class="account-overview-card" type="button" data-go-section="saved"><span class="account-card-index">02</span><h4>Saved rentals</h4><p id="saved-overview-count">Your saved listings appear here.</p><span class="account-card-link">View saved</span></button>
-            <button class="account-overview-card" type="button" data-go-section="bookings"><span class="account-card-index">03</span><h4>Bookings &amp; trips</h4><p>Check your dates, payments and booking status.</p><span class="account-card-link">View reservations</span></button>
+            <a class="account-overview-card" href="rentals.html"><h4>Explore rentals</h4><p>Pick up your next stay, drive or experience.</p><span class="account-card-link">Browse the catalogue</span></a>
+            <button class="account-overview-card" type="button" data-go-section="saved"><h4>Saved rentals</h4><p id="saved-overview-count">Your saved listings appear here.</p><span class="account-card-link">View saved</span></button>
+            <button class="account-overview-card" type="button" data-go-section="bookings"><h4>Bookings &amp; trips</h4><p>Check your dates, payments and booking status.</p><span class="account-card-link">View reservations</span></button>
           </div>
           <p class="account-security-note"><a href="trust.html">Verification, rental updates &amp; support</a></p>
           <p class="account-security-note" data-lockd-address-entry hidden><a href="verification.html">Address evidence</a></p>
@@ -132,13 +132,13 @@
 
         <section class="account-section" data-account-panel="personal" hidden aria-labelledby="personal-title">
           <p class="eyebrow">YOUR DETAILS</p><h3 id="personal-title">Personal information.</h3>
-          <div class="profile-photo-settings"><span class="profile-photo" data-profile-photo aria-hidden="true"></span><div><h4>Profile photo</h4><p>Make your account feel like you.</p><div class="profile-photo-actions"><label class="button button-light profile-photo-picker">Change photo<input type="file" id="profile-photo-file" accept="image/jpeg,image/png,image/webp" class="visually-hidden"></label><button id="remove-profile-photo" class="text-button" type="button" hidden>Remove photo</button></div><small>JPG, PNG or WebP, up to 8 MB. Your photo is cropped to a square.</small><p id="profile-photo-status" role="status" aria-live="polite"></p></div></div>
+          <div class="profile-photo-settings"><span class="profile-photo" data-profile-photo aria-hidden="true"></span><div><h4>Profile photo</h4><div class="profile-photo-actions"><label class="button button-light profile-photo-picker">Change photo<input type="file" id="profile-photo-file" accept="image/jpeg,image/png,image/webp" class="visually-hidden"></label><button id="remove-profile-photo" class="text-button" type="button" hidden>Remove photo</button></div><small>JPG, PNG or WebP · Up to 8 MB</small><p id="profile-photo-status" role="status" aria-live="polite"></p></div></div>
           <p class="account-onboarding-note" id="profile-onboarding-note" role="status" hidden>Welcome to LOCKD. Add a display name so we can finish setting up your account.</p>
           <form class="account-form account-profile-form" id="profile-form">
             <label class="account-field"><span>Display name</span><input id="profile-name" name="display_name" type="text" maxlength="100" autocomplete="name"></label>
             <label class="account-field"><span>Email address</span><input id="profile-email" type="email" readonly aria-describedby="email-readonly-note"></label>
             <p class="account-field-note" id="email-readonly-note">Contact support if you need to change your email address.</p>
-            <button class="button button-dark" type="submit">Save changes</button>
+            <div class="account-save-row"><button class="button button-burgundy" type="submit" data-idle-label="Save changes">Save changes</button><span role="status" class="save-result"></span></div>
           </form>
         </section>
 
@@ -149,7 +149,7 @@
             <label class="account-field"><span>Current password</span><input id="current-password" type="password" autocomplete="current-password" required></label>
             <label class="account-field"><span>New password</span><input id="new-password" type="password" minlength="8" maxlength="128" autocomplete="new-password" required></label>
             <label class="account-field"><span>Confirm new password</span><input id="new-password-confirm" type="password" minlength="8" maxlength="128" autocomplete="new-password" required></label>
-            <button class="button button-dark" type="submit">Change password</button>
+            <div class="account-save-row"><button class="button button-burgundy" type="submit" data-idle-label="Change password">Change password</button><span role="status" class="save-result"></span></div>
           </form>
 
         </section>
@@ -161,7 +161,7 @@
             <label class="account-field"><span>Preferred currency</span><select id="profile-currency"><option value="KES">Kenyan shilling (KES)</option><option value="USD">US dollar (USD)</option><option value="EUR">Euro (EUR)</option><option value="GBP">Pound sterling (GBP)</option></select></label>
             <label class="account-field"><span>Language</span><select id="profile-language"><option value="en">English</option><option value="sw">Kiswahili</option></select></label>
             <label class="account-field"><span>Discovery area <small>Optional, entered by you</small></span><input id="profile-location" type="text" maxlength="120" autocomplete="off" placeholder="City or neighbourhood"></label>
-            <button class="button button-dark" type="submit">Save preferences</button>
+            <div class="account-save-row"><button class="button button-burgundy" type="submit" data-idle-label="Save preferences">Save preferences</button><span role="status" class="save-result"></span></div>
           </form>
         </section>
         <section class="account-section" data-account-panel="privacy" hidden aria-labelledby="account-privacy-title"><p class="eyebrow">YOUR CHOICES</p><h3 id="account-privacy-title">Privacy &amp; data.</h3><div class="account-settings-list"><div><h4>Cookie preferences</h4><p>Choose whether LOCKD remembers anonymous usage. Essential sign-in cookies stay on.</p><button type="button" class="text-button" data-cookie-preferences>Manage cookies</button></div><div><h4>Your information</h4><p>Learn how account, booking and message information is used.</p><a class="text-button" href="privacy.html">Read the privacy notice</a></div><div><h4>Your messages</h4><p>Manage message privacy and approved browsers from your inbox.</p><a class="text-button" href="messages.html">Open messages</a></div><div class="account-delete-request"><p class="eyebrow">DATA &amp; PRIVACY</p><h4>Request account deletion</h4><p>LOCKD records your request for review. It does not immediately delete your account or erase booking or financial records.</p>
@@ -169,7 +169,7 @@
           </div></div></section>
       </section>
 
-      <p class="account-legal-line">By using an account, you agree to use LOCKD responsibly. Read the <a href="privacy.html">Privacy Notice</a>.</p>
+      <p class="account-legal-line"><a href="privacy.html">Privacy notice</a></p>
     </main>
     <footer class="site-footer"><a class="brand brand-footer" href="index.html#top" aria-label="LOCKD home"><img class="brand-image" src="./assets/brand/lockd.svg" alt="LOCKD" width="1330" height="317"></a><p class="footer-line">Your next move, locked in.</p><div class="footer-bottom"><span>© <span id="year">2026</span> LOCKD</span><span>Stay. Drive. Play. Explore.</span><a href="privacy.html">Privacy</a><a href="#top">Back to top</a></div></footer>
   </body>

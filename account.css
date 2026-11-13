@@ -145,3 +145,44 @@ button.account-overview-card { width: 100%; color: inherit; cursor: pointer; fon
 .settings-cookie {margin-top:20px;min-height:44px;border:0;background:none;color:var(--oxblood);font:inherit;text-decoration:underline;cursor:pointer}
 
 #password-form[hidden] { display: none; }
+.account-dashboard .account-dashboard-heading {
+  display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center;
+  gap:12px 16px; padding-bottom:18px;
+}
+.account-dashboard-heading .account-heading-photo { width:52px; height:52px; }
+.account-dashboard-heading h2 { font-size:clamp(1.6rem,3vw,2.4rem); line-height:1.12; overflow-wrap:anywhere; }
+.account-dashboard-heading #account-email-label { margin:4px 0 0; }
+.account-session-actions { display:flex; flex-wrap:wrap; align-items:center; gap:16px; }
+.account-dashboard-heading .account-session-actions .account-link { margin:0; min-height:44px; display:inline-flex; align-items:center; }
+.account-dashboard > .account-section-nav { flex-wrap:wrap; gap:4px; margin:12px 0 24px; padding-bottom:10px; }
+.account-dashboard > .account-section-nav :is(a,button) {
+  display:inline-flex; align-items:center; justify-content:center; min-height:44px;
+  border:1px solid transparent; border-radius:10px; padding:7px 11px;
+  font:600 .9rem/1.25 var(--sans); text-decoration:none; color:var(--ink);
+}
+.account-dashboard > .account-section-nav :is(a,button):hover { background:var(--stone); }
+.account-dashboard > .account-section-nav [aria-current=page] { color:var(--oxblood); background:#f3e6e8; border-color:#dec5ca; }
+.account-dashboard .account-overview-grid { margin-top:16px; }
+.account-dashboard .account-overview-card { min-height:0; padding:20px; }
+.account-save-row { display:flex; flex-wrap:wrap; align-items:center; gap:12px; }
+.account-save-row .button { min-width:9rem; min-height:44px; border-radius:12px; transition:background-color 180ms,transform 150ms; }
+.account-save-row .button:active { transform:translateY(1px); }
+.account-save-row [data-save-state=saving] { cursor:progress; }
+.account-save-row [data-save-state=saving]::before {
+  content:""; width:.85em; height:.85em; border:2px solid currentColor;
+  border-right-color:transparent; border-radius:50%; animation:account-saving 750ms linear infinite;
+}
+.account-save-row [data-save-state=saved] { background:var(--paper); color:var(--oxblood); border-color:var(--oxblood); }
+.save-result.save-error { color:var(--burgundy); font-size:.9rem; }
+#account-status:empty, #profile-photo-status:empty { display:none; }
+@keyframes account-saving { to { transform:rotate(1turn); } }
+@media(max-width:680px) {
+  .account-main:has(.account-dashboard:not([hidden])) { padding-top:24px; }
+  .account-dashboard .account-dashboard-heading { grid-template-columns:auto minmax(0,1fr); }
+  .account-session-actions { grid-column:1/-1; }
+  .account-dashboard > .account-section-nav { gap:2px; }
+  .account-dashboard > .account-section-nav :is(a,button) { padding-inline:8px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .account-save-row .button, .account-save-row [data-save-state=saving]::before { transition:none; animation:none; transform:none; }
+}

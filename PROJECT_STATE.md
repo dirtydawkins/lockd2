@@ -37,3 +37,9 @@ The isolated database journey in tests/messaging-direct.test.js opened a convers
 ## Account navigation
 
 Messages lives in Account on desktop and inside the mobile menu’s Account group. The same account can switch between the lister workspace and renting. Reservation and inbox links carry the current view in their URLs. Changing the reservation tab updates the account shortcuts. The navigation mode grants no additional access. Eight account and booking UI checks and 15 marketplace release checks passed.
+
+## Signed-in account interface — 2026-11-13
+
+The account header groups the avatar, name and session actions. Account navigation links and tabs share touch targets. The shared sans-serif font is served locally. Profile, preferences and password controls show pending, confirmed and retry states beside the action. A pending save temporarily locks editable fields in that form.
+
+Verification: 7 account-service tests and 15 marketplace checks passed. An isolated profile handler check covered pending, failure, retry, saved and subsequent edits. The inbuilt browser timed out loading the local preview. Authenticated mobile rendering and a real profile write remain unverified in this release.

@@ -103,7 +103,7 @@
     resetPanel.hidden = true;
     $("#account-intro").hidden = true;
     const displayName = user.user_metadata?.full_name || user.user_metadata?.name || "";
-    $("#account-dashboard-title").textContent = `Welcome${displayName ? `, ${displayName.trim().split(/\s+/)[0]}` : " back"}.`;
+    $("#account-dashboard-title").textContent = displayName.trim() || "My account";
     $("#account-email-label").textContent = user.email || "Signed in with LOCKD";
   }
 
@@ -144,7 +144,7 @@
       const metadata = activeUser.user_metadata || {};
       const displayName = profile.display_name || metadata.full_name || metadata.name || "";
       $("#profile-name").value = displayName;
-      $("#account-dashboard-title").textContent = `Welcome${displayName ? `, ${displayName.trim().split(/\s+/)[0]}` : " back"}.`;
+      $("#account-dashboard-title").textContent = displayName.trim() || "My account";
       needsProfileName = account.profileNeedsDisplayName(activeUser, profile);
       $("#profile-name").required = needsProfileName;
       $("#profile-onboarding-note").hidden = !needsProfileName;
@@ -156,8 +156,6 @@
       if (needsProfileName) {
         showSection("personal");
         setStatus("Add a display name to finish setting up your LOCKD account.", "info");
-      } else {
-        setStatus("Your LOCKD profile is up to date.", "success");
       }
     } catch (error) {
       needsProfileName = false;
@@ -324,7 +322,7 @@
         return;
       }
       if (session?.user) {
-        await finishAuthentication(session.user, url.searchParams.has("verified") ? "Email verified. Your account is ready." : url.searchParams.has("auth") ? "Sign-in complete." : "Welcome back.");
+        await finishAuthentication(session.user, url.searchParams.has("verified") ? "Email verified. Your account is ready." : url.searchParams.has("auth") ? "Sign-in complete." : "");
       } else {
         showAuth(url.searchParams.has("verified") ? "Email verified. Sign in to continue." : "", "success");
       }
@@ -382,12 +380,39 @@
     button.disabled = true;
     try {
       await account.updatePassword(password);
-      event.currentTarget.reset();
+      button.form.reset();
       const session = await account.getSession();
       if (session?.user) await finishAuthentication(session.user, "Your password was updated.");
       else showAuth("Your password was updated. Sign in with your new password.", "success");
     } catch (error) { setStatus(error.message || "Your password could not be updated.", "error"); }
     finally { button.disabled = false; }
+  });
+
+  function saveState(button, state, message = "") {
+    if (state === "saving") {
+      for (const field of button.form.querySelectorAll("input:not(:disabled):not([readonly]), select:not(:disabled)")) {
+        field.dataset.lockedForSave = "";
+        field.disabled = true;
+      }
+    } else {
+      for (const field of button.form.querySelectorAll("[data-locked-for-save]")) {
+        field.disabled = false;
+        delete field.dataset.lockedForSave;
+      }
+    }
+    button.dataset.saveState = state;
+    button.disabled = state === "saving";
+    button.textContent = state === "saving" ? "Saving…" : state === "saved" ? "✓ Saved" : button.dataset.idleLabel;
+    const result = button.nextElementSibling;
+    result.textContent = message || (state === "saved" ? "Changes saved." : "");
+    result.classList.toggle("visually-hidden", !message);
+    result.classList.toggle("save-error", state === "error");
+  }
+
+  document.querySelectorAll(".account-save-row button").forEach(button => {
+    button.form.addEventListener("input", () => {
+      if (!button.disabled) saveState(button, "idle");
+    });
   });
 
   $("#profile-form").addEventListener("submit", async (event) => {
@@ -399,17 +424,18 @@
       $("#profile-name").focus();
       return;
     }
-    button.disabled = true;
+    saveState(button, "saving");
     try {
       profile = await account.saveProfile({ display_name: displayName });
-      $('#account-dashboard-title').textContent=`Welcome${displayName?`, ${displayName.split(/\s+/)[0]}`:' back'}.`;await renderProfilePhoto();
+      $('#account-dashboard-title').textContent = profile.display_name || 'My account';
+      await renderProfilePhoto();
       const completedOnboarding = needsProfileName;
       needsProfileName = false;
       $("#profile-name").required = false;
       $("#profile-onboarding-note").hidden = true;
-      setStatus("Your name was saved to your LOCKD profile.", "success");
+      saveState(button, "saved");
       if (completedOnboarding) await continuePendingAuthentication();
-    } catch (error) { setStatus(error.message || "Your profile could not be saved.", "error"); }
+    } catch (error) { saveState(button, "error", error.message || "Your profile could not be saved."); }
     finally { button.disabled = false; }
   });
 
@@ -422,15 +448,15 @@
       return;
     }
     const button = event.currentTarget.querySelector("button[type=submit]");
-    button.disabled = true;
+    saveState(button, "saving");
     try {
       profile = await account.saveProfile({
         preferred_currency: $("#profile-currency").value,
         preferred_language: $("#profile-language").value,
         discovery_location: $("#profile-location").value,
       });
-      setStatus("Your preferences were saved.", "success");
-    } catch (error) { setStatus(error.message || "Your preferences could not be saved.", "error"); }
+      saveState(button, "saved");
+    } catch (error) { saveState(button, "error", error.message || "Your preferences could not be saved."); }
     finally { button.disabled = false; }
   });
 
@@ -448,13 +474,13 @@
     event.preventDefault();
     const button = event.currentTarget.querySelector("button[type=submit]");
     const newPassword = $("#new-password").value;
-    if (newPassword !== $("#new-password-confirm").value) { setStatus("The new passwords do not match.", "error"); return; }
-    button.disabled = true;
+    if (newPassword !== $("#new-password-confirm").value) { saveState(button, "error", "The new passwords do not match."); return; }
+    saveState(button, "saving");
     try {
       await account.updatePassword(newPassword, $("#current-password").value);
-      event.currentTarget.reset();
-      setStatus("Your password was changed.", "success");
-    } catch (error) { setStatus(error.message || "Your password could not be changed.", "error"); }
+      button.form.reset();
+      saveState(button, "saved");
+    } catch (error) { saveState(button, "error", error.message || "Your password could not be changed."); }
     finally { button.disabled = false; }
   });
 

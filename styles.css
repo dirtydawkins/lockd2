@@ -1,5 +1,13 @@
 @charset "UTF-8";
 
+@font-face {
+  font-family: "Source Sans 3";
+  src: url("./assets/fonts/source-sans-3.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 200 900;
+  font-display: swap;
+}
+
 :root {
   color-scheme: light;
   --oxblood: #541d28;
@@ -11,7 +19,7 @@
   --white: #fff;
   --muted: #706b67;
   --line: rgba(25, 24, 23, .16);
-  --sans: "Aptos", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --sans: "Source Sans 3", "Aptos", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --serif: "Iowan Old Style", "Baskerville Old Face", Baskerville, Georgia, serif;
   --page-gutter: clamp(1.25rem, 5.4vw, 5.5rem);
   --max-page: 1600px;
