@@ -47,6 +47,8 @@ function request(service,query={},body){if(!user)throw Error('Open your account 
 let devices=[],messages=new Map(),decrypted=new Map(),selected=new Set(),pendingReport=null,epoch=0;
 let realtime=null,channel=null,poll=null,loading=null,outbox=[],allEarlierLoaded=false,inboxPending=null,refreshPending=null;
 const sending=new Set();
+// Only ciphertext enters the persistent outbox.
+const pendingPayloads = new WeakMap();
 const objectURLs=new Set();
 const reading=new Set(),readOnDevice=new Set();
 const drafts=new Map(),previews=new Map();let syncCursor=null,pendingConversation=null;
@@ -227,7 +229,7 @@ async function open(id){
  $('#message-compose').hidden=!peer || item.blocked;
  const availability=$('#conversation-availability');availability.hidden=Boolean(peer)&&!item.blocked;
  availability.textContent=item.blocked?'You blocked this conversation. You can unblock it in Conversation options.':!peer?'Your contact has not opened messages yet. You can write to them when they do.':'';
- await inbox();if(current!==epoch)return;await sync(true);
+ await sync(true);if(current===epoch)void inbox().catch(error);
 }
 async function loadBookingContext(item,current){
  const panel=$('#message-booking');panel.hidden=false;panel.replaceChildren(node('p','Loading reservation…'));
@@ -262,7 +264,8 @@ async function sync(initial=false,before=null){
    for(const row of latest){if(messages.has(row.id)){const old=messages.get(row.id);if(old.read_at!==row.read_at||old.delivered_at!==row.delivered_at)changed=true;messages.set(row.id,row);}}
   }
   if(before || initial)allEarlierLoaded=rows.length<40;
-  const known=await getDevices(context);if(current!==epoch)return;devices=known;
+  const known=rows.some(row=>!decrypted.has(row.id)) ? await getDevices(context) : devices;
+  if(current!==epoch)return;devices=known;
   for(const row of rows){
    if(current!==epoch)return;
    const old=messages.get(row.id);if(!old||old.read_at!==row.read_at||old.delivered_at!==row.delivered_at)changed=true;
@@ -338,9 +341,16 @@ function render({prepend=false}={}){
   }
   element.append(footer);container.append(element);
  }
- for(const item of outbox.filter(x=>x.conversationId===active?.id)){
-  const element=node('article',undefined,{class:'message-row','data-self':'true'});element.append(node('p',item.failed?'Message not sent. Your draft is saved in this browser.':'Sending your message…'));
-  element.append(action('Retry',()=>sendOutbox(item).catch(error)));container.append(element);
+ const confirmedIds=new Set(sorted.filter(row=>row.sender_id===user?.id).map(row=>row.client_id));
+ for(const item of outbox.filter(x=>x.conversationId===active?.id && !confirmedIds.has(x.clientId))){
+  const payload=pendingPayloads.get(item);
+  const element=node('article',undefined,{class:'message-row','data-self':'true'});
+  element.append(node('p',payload?.text || (payload?'Attachment':'Message')));
+  const footer=node('footer');
+  const retry=item.failed || (!payload && !sending.has(item.clientId));
+  footer.append(node('span',retry?'Not sent':'Sending�'));
+  if(retry)footer.append(action('Retry',()=>sendOutbox(item).catch(error)));
+  element.append(footer);container.append(element);
  }
  if(!container.children.length)container.append(node('p',query?'No matches here. Try loading earlier messages.':'No messages yet.'));
  $('#report-messages').hidden=!selected.size;
@@ -358,7 +368,12 @@ async function sendOutbox(item){
   const result=await request('messages',{}, {action:'send',...item});
   if(user?.id!==accountId)return;
   outbox=outbox.filter(x=>x.clientId!==item.clientId);await stored(accountId,'outbox',outbox);
-  if(active?.id===item.conversationId){messages.set(result.id,result);await sync();render();}
+  if(active?.id===item.conversationId){
+   messages.set(result.id,result);
+   const payload=pendingPayloads.get(item);
+   if(payload && result.ciphertext===item.ciphertext)decrypted.set(result.id,payload);
+   render();queueRefresh();
+  }
   if(active?.id===context)status($('#compose-status'),'');
  }catch(err){if(user?.id===accountId){item.failed=true;await stored(accountId,'outbox',outbox);render();}throw err;}finally{sending.delete(item.clientId);}
 }
@@ -448,7 +463,18 @@ $('#message-compose').addEventListener('submit',async event=>{
   const ciphertext=await encryptMessage(payload,privateKey,[self,recipient]);
   if(current!==epoch)throw Error('Conversation changed. Review your draft before sending.');
   const item={conversationId:context,clientId,senderDevice,recipientDevice,ciphertext,attachmentIds:attachments.map(a=>a.id)};
-  outbox.push(item);await stored(user.id,'outbox',outbox);$('#message-text').value='';$('#message-text').style.height='auto';drafts.delete(context);clearAttachment();render();await sendOutbox(item);
+  pendingPayloads.set(item,payload);
+  outbox.push(item);
+  try { await stored(user.id,'outbox',outbox); }
+  catch(err){outbox=outbox.filter(row=>row!==item);throw err;}
+  if(current!==epoch)return;
+  const field=$('#message-text');
+  if(field.value.trim()===text){field.value='';field.style.height='auto';drafts.delete(context);}
+  if($('#chat-file').files[0]===file)clearAttachment();
+  render();
+  const history=$('#message-history');history.scrollTop=history.scrollHeight;
+  status($('#compose-status'),'');
+  void sendOutbox(item).catch(err=>{if(epoch===current)status($('#compose-status'),err.message,true);});
  }catch(err){status($('#compose-status'),err.message,true);}finally{button.disabled=false;}
 });
 $('#older-messages').addEventListener('click',()=>{const before=Math.min(...[...messages.values()].map(m=>m.sequence));void sync(false,before).catch(error);});
@@ -466,10 +492,16 @@ $('#message-text').addEventListener('keydown',event=>{if(event.key==='Enter'&&!e
 async function refreshMessages(){
  if(refreshPending)return refreshPending;
  const connection=connectionEpoch,accountId=user?.id;
- const task=(async()=>{await inbox();if(connection!==connectionEpoch||accountId!==user?.id)return;
-  if(active&&!peer){const known=await getDevices(active.id);if(known.some(item=>item.user_id!==user.id&&!item.revoked_at)){await open(active.id);return;}}
-  await sync();if(notice.dataset.kind==='error')status(notice,'');
- })();refreshPending=task;try{return await task;}finally{if(refreshPending===task)refreshPending=null;}
+ const thread=active,version=epoch;
+ const refreshThread=async()=>{
+  if(!thread || !user || version!==epoch)return;
+  if(active&&!peer){const known=await getDevices(active.id);if(version!==epoch || accountId!==user?.id)return;if(known.some(item=>item.user_id!==user.id&&!item.revoked_at)){await open(thread.id);return;}}
+  await sync();
+ };
+ const task=Promise.all([inbox(),refreshThread()]).then(()=>{
+  if(connection===connectionEpoch && accountId===user?.id && notice.dataset.kind==='error')status(notice,'');
+ });
+ refreshPending=task;try{return await task;}finally{if(refreshPending===task)refreshPending=null;}
 }
 $('#refresh-inbox').addEventListener('click',()=>refreshMessages().catch(error));
 $('#back-to-inbox').addEventListener('click',()=>{$('#message-workspace').classList.remove('has-open-thread');($('#conversations [aria-current=true]')||$('#conversations button'))?.focus();});

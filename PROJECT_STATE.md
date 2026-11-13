@@ -43,3 +43,9 @@ Messages lives in Account on desktop and inside the mobile menu’s Account grou
 The account header groups the avatar, name and session actions. Account navigation links and tabs share touch targets. The shared sans-serif font is served locally. Profile, preferences and password controls show pending, confirmed and retry states beside the action. A pending save temporarily locks editable fields in that form.
 
 Verification: 7 account-service tests and 15 marketplace checks passed. An isolated profile handler check covered pending, failure, retry, saved and subsequent edits. The inbuilt browser timed out loading the local preview. Authenticated mobile rendering and a real profile write remain unverified in this release.
+
+## Conversation responsiveness — 2026-11-13
+
+Conversation history loads independently of inbox refresh. Pending bubbles show locally composed text and the composer is available while delivery completes. The persistent outbox still contains ciphertext. The UI deduplicates pending and confirmed bubbles and skips device lookups on refreshes with nothing to decrypt.
+
+Verification: 33 messaging tests and 15 marketplace checks passed. Live two-account delivery, visual mobile behavior and network latency were not measured.
