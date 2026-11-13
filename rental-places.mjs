@@ -12,7 +12,7 @@ if (field) {
   const notice = document.createElement('span');
   notice.setAttribute('role', 'status');
   control.append(options, near, notice);
-  field.closest('label').after(control);
+  field.closest('label').append(control);
   let sequence = 0, timer, request;
   function cancel() {
     sequence++;

@@ -2,6 +2,14 @@
   const menu = document.querySelector('.site-account-menu');
   if (!menu) return;
   const primary = document.querySelector('#primary-nav');
+  const primaryAction = document.querySelector('.header-cta');
+  if (primary && primaryAction) {
+    const target = new URL(primaryAction.href, location.href);
+    for (const link of primary.querySelectorAll('a')) {
+      const destination = new URL(link.href, location.href);
+      if (destination.pathname === target.pathname && destination.search === target.search && destination.hash === target.hash) link.remove();
+    }
+  }
   if (primary && document.querySelector('.menu-toggle')) {
     const group = document.createElement('details');
     group.className = 'mobile-account-group';
