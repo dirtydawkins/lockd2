@@ -1,6 +1,7 @@
 (() => {
   const $ = (selector, root = document) => root.querySelector(selector);
-  const draftStorageKey = "lockd:owner-draft:v1";
+  let workspaceUserId = null;
+  const draftStorageKey = () => workspaceUserId ? `lockd:owner-draft:v2:${workspaceUserId}` : null;
   const categories = {
     stay: "Rooms & accommodation", drive: "Cars & Mobility", play: "Gaming & consoles",
     technology: "Technology & gadgets", phone: "Phones", laptop: "Computers",
@@ -23,8 +24,8 @@
   let session = null;
   let authMode = "signin";
   let selectedPhotos = [];
-  let draft = null;
   let busy = false;
+  let restoreVersion = 0;
 
   const setStatus = (element, text, kind = "info") => {
     if (!element) return;
@@ -38,7 +39,14 @@
   }
 
   async function ensureSession() {
-    session = await window.LockdAccount.getSession();
+    const active = await window.LockdAccount.getSession();
+    if (workspaceUserId && active?.user?.id !== workspaceUserId) {
+      session = null;
+      workspace.hidden = true;
+      window.location.reload();
+      throw new Error("Your account changed. Reopening your workspace…");
+    }
+    session = active;
     return session;
   }
 
@@ -52,29 +60,39 @@
   function showAuth(message = "") {
     authPanel.hidden = false;
     workspace.hidden = true;
-    liveStatus.textContent = "Sign in or create an account to manage LOCKD listings.";
+    liveStatus.textContent = "";
     liveStatus.dataset.kind = "info";
     if (message) setStatus(authStatus, message, "error");
-    $("#owner-email")?.focus({ preventScroll: true });
+    if (message) $("#owner-email")?.focus({ preventScroll: true });
   }
 
   function showWorkspace() {
     authPanel.hidden = true;
     workspace.hidden = false;
-    liveStatus.textContent = "Your listings are saved to your LOCKD account.";
+    liveStatus.textContent = "";
     liveStatus.dataset.kind = "success";
     $("#owner-account-label").textContent = session?.user?.email ? `Signed in as ${session.user.email}` : "Signed in to your LOCKD lister account";
   }
 
-  document.querySelector("#owner-google")?.addEventListener("click",async event=>{event.currentTarget.disabled=true;try{window.LockdAccount.setPendingAuth({returnTo:"/owners.html"});await window.LockdAccount.startOAuth("google");}catch(error){setStatus(authStatus,error.message||"Google sign-in is unavailable. Use email or try again later.","error");event.currentTarget.disabled=false;}});
+  document.querySelector("#owner-google")?.addEventListener("click", async event => {
+    const button = event.currentTarget;
+    button.disabled = true;
+    try {
+      window.LockdAccount.setPendingAuth({ returnTo: "/owners.html#owner-portal" });
+      await window.LockdAccount.startOAuth("google");
+    } catch (error) {
+      setStatus(authStatus, error.message || "Google sign-in is unavailable. Use email or try again later.", "error");
+      button.disabled = false;
+    }
+  });
 
   function switchAuthMode(mode) {
     authMode = mode;
     const create = mode === "signup";
-    $("#owner-auth-title").textContent = create ? "Create your lister account." : "Sign in to continue.";
+    $("#owner-auth-title").textContent = create ? "Create your account" : "Sign in to list";
     $("#owner-auth-intro").textContent = create
-      ? "Use an email address you can verify. Your listing draft stays on this device while you confirm it."
-      : "Sign in to create, publish and manage your own listings.";
+      ? "Use an email address you can verify to publish your first listing."
+      : "Use the same LOCKD account for renting and listing.";
     $("#owner-name-row").hidden = !create;
     $("#owner-name").required = create;
     $("#owner-password").autocomplete = create ? "new-password" : "current-password";
@@ -210,7 +228,8 @@
 
   function readLocalDraft() {
     try {
-      const saved = JSON.parse(localStorage.getItem(draftStorageKey) || "null");
+      if (!workspaceUserId) return null;
+      const saved = JSON.parse(localStorage.getItem(draftStorageKey()) || "null");
       return saved && typeof saved === "object" ? saved : null;
     } catch { return null; }
   }
@@ -231,11 +250,9 @@
       units: $("#availability-units").value, collection: $("#listing-collection").checked,
       delivery: $("#listing-delivery").checked, attributes: details,
       image_paths: uploadedPhotos.map((photo) => photo.storagePath),
-      image_urls: uploadedPhotos.map((photo) => photo.url || null),
     };
-    draft = values;
     $("#listing-id").value = values.id;
-    try { localStorage.setItem(draftStorageKey, JSON.stringify(values)); } catch { /* Backend draft saving is separate. */ }
+    try { if (workspaceUserId) localStorage.setItem(draftStorageKey(), JSON.stringify(values)); } catch { /* Backend draft saving is separate. */ }
     return values;
   }
 
@@ -271,8 +288,9 @@
     return signed.startsWith("/storage/v1/") ? `${config.supabase.url}${signed}` : `${config.supabase.url}/storage/v1${signed.startsWith("/") ? signed : `/${signed}`}`;
   }
 
-  async function restoreDraft(values) {
+  async function restoreDraft(values, scrollToForm = true) {
     if (!values) return;
+    const version = ++restoreVersion;
     $("#listing-id").value = values.id || crypto.randomUUID();
     categorySelect.value = values.category || "";
     renderCategoryFields(values.category, values.attributes || {});
@@ -281,7 +299,7 @@
     $("#listing-description").value = values.description || "";
     $("#listing-location").value = values.location_label || values.location || "";
     $("#listing-place-id").value = values.location_place_id || "";
-    $("#listing-place-search").value = "";
+    $("#listing-place-search").value = $("#listing-location").value;
     $("#listing-private-address").value = values.private_address || "";
     for (const key of ["pickup_instructions","return_instructions"]) { const field = document.querySelector(`[data-attribute="${key}"]`); if(field && values[`private_${key}`] !== undefined)field.value = values[`private_${key}`]; }
     $("#listing-latitude").value = values.location_latitude ?? values.latitude ?? "";
@@ -306,20 +324,21 @@
       uploaded: true,
       alt: values.title || "Listing photograph",
     }));
+    window.dispatchEvent(new Event("lockd:listing-restored"));
     let unavailablePhoto = false;
     if (session) await Promise.all(selectedPhotos.map(async (photo) => {
       if (!photo.storagePath) return;
       try { photo.url = await createSignedPhotoUrl(photo.storagePath); }
       catch { photo.url = null; unavailablePhoto = true; }
     }));
+    if (version !== restoreVersion) return;
     renderPhotos();
-    if (unavailablePhoto) setStatus(listingStatus, "One or more saved photos could not be loaded. Upload replacement photos before publishing.", "error");
+    if (unavailablePhoto) setStatus(listingStatus, "Some photo previews couldn’t load. Your saved photos are still attached.");
     $("#listing-id").value ||= crypto.randomUUID();
     $("#wizard-title").textContent = values.listing_status === "published" ? "Update your listing details." : "Continue your draft.";
     $("#wizard-eyebrow").textContent = values.listing_status === "published" ? "Edit a listing" : "Resume your draft";
     storeLocalDraft();
-    window.dispatchEvent(new Event("lockd:listing-restored"));
-    $("#owner-listing-form").scrollIntoView({ behavior: "smooth", block: "start" });
+    if (scrollToForm) $("#owner-listing-form").scrollIntoView({ block: "start" });
   }
 
   function photoLabel(index) { return index === 0 ? "Cover photo" : `Photo ${index + 1}`; }
@@ -524,7 +543,7 @@
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
-      if (response.status === 401) { clearSession(); showAuth("Your session expired. Sign in again to continue."); }
+      if (response.status === 401) { session = null; showAuth("Your session expired. Sign in again to continue."); }
       if (data.error === "owner_verification_required") showAuth(data.message || "Verify your email before managing listings.");
       throw new Error(data.message || "Your lister workspace could not save that change.");
     }
@@ -618,14 +637,14 @@
     try {
       const item = await saveListing(publish);
       if (publish && item?.slug) {
-        try { localStorage.removeItem(draftStorageKey); } catch { /* Optional local recovery. */ }
+        try { localStorage.removeItem(draftStorageKey()); } catch { /* Optional local recovery. */ }
         setStatus(listingStatus, "Published and saved. Opening the public listing…", "success");
-        await refreshListings();
         window.location.assign(`rental.html?slug=${encodeURIComponent(item.slug)}`);
         return;
       }
-      setStatus(listingStatus, "Draft saved to your owner account.", "success");
-      await refreshListings();
+      setStatus(listingStatus, "Draft saved to your account.", "success");
+      try { await refreshListings(); }
+      catch { setStatus(liveStatus, "Refresh the page to see your updated listings."); }
     } catch (error) {
       setStatus(listingStatus, error.message, "error");
       storeLocalDraft();
@@ -657,7 +676,7 @@
         await enterWorkspace();
       } else if (authMode === "signup") {
         switchAuthMode("signin");
-        setStatus(authStatus, "Account created. Check your email for the verification link, then sign in here. Your draft is saved on this device.", "success");
+        setStatus(authStatus, "Check your email for the verification link, then sign in here.", "success");
       } else {
         throw new Error("Sign-in did not return a session. Confirm your email address and try again.");
       }
@@ -671,10 +690,17 @@
 
   async function enterWorkspace() {
     const active = await ensureSession();
-    if (!active) return;
+    if (!active?.user?.id) return;
+    workspaceUserId = active.user.id;
+    const draft = readLocalDraft();
+    $("#listing-id").value = draft?.id || crypto.randomUUID();
     showWorkspace();
-    await refreshListings();
-    if (draft) await restoreDraft(draft);
+    if (draft) await restoreDraft(draft, false);
+    try { await refreshListings(); }
+    catch (error) {
+      $("#owner-listings").textContent = "Your listings couldn’t be loaded. Refresh the page to try again.";
+      setStatus(liveStatus, error.message || "Your listings could not be loaded.", "error");
+    }
   }
 
   async function signOut() {
@@ -686,12 +712,9 @@
     try {
       config = await window.LockdAccount.getConfig();
       if (!config.supabase?.url || !config.supabase?.publishableKey) throw new Error("Account access is unavailable right now. Please try again later.");
-      draft = readLocalDraft();
-      if (!$("#listing-id").value) $("#listing-id").value = draft?.id || crypto.randomUUID();
       session = await window.LockdAccount.getSession();
       if (session) { await enterWorkspace(); return; }
       showAuth();
-      if (draft) await restoreDraft(draft);
     } catch (error) {
       setStatus(liveStatus, error.message || "Your listings could not be loaded. Please try again.", "error");
       authPanel.hidden = true;
@@ -730,8 +753,16 @@
   $("#owner-preview-close").addEventListener("click", () => $("#owner-preview-dialog").close());
   $("#owner-auth-switch").addEventListener("click", () => switchAuthMode(authMode === "signin" ? "signup" : "signin"));
   $("#owner-signout").addEventListener("click", signOut);
+  window.addEventListener("lockd:auth-change", (event) => {
+    if (workspaceUserId && event.detail?.user?.id !== workspaceUserId) {
+      workspace.hidden = true;
+      window.location.reload();
+    }
+  });
   $("#owner-reset-form").addEventListener("click", () => {
     if (!window.confirm("Start a new listing? Your saved account draft will remain in your listings.")) return;
+    restoreVersion++;
+    try { localStorage.removeItem(draftStorageKey()); } catch { /* Optional local recovery. */ }
     listingForm.reset();
     selectedPhotos.forEach((photo) => { if (photo.objectUrl) URL.revokeObjectURL(photo.objectUrl); });
     selectedPhotos = [];

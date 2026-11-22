@@ -33,7 +33,9 @@ async function request(config, token, path, options = {}) {
 
 module.exports = async function handler(req, res) {
   if(['host-profile','lister-profile'].includes(req.query?.view))return require('../lib/host-profile-api')(req,res);
-  res.setHeader("Allow", "GET, POST, PATCH");
+  const wordingRequest = req.query?.view === "wording";
+  res.setHeader("Allow", wordingRequest ? "POST" : "GET, POST, PATCH");
+  if (wordingRequest && req.method !== "POST") return send(res, 405, { message: "Use POST for a wording suggestion." });
   const config = supabaseConfig();
   if (!config) return send(res, 503, { error: "catalogue_not_configured", message: "Listing management is unavailable right now." });
   if (!["GET", "POST", "PATCH"].includes(req.method)) return send(res, 405, { error: "method_not_allowed", message: "Use GET, POST or PATCH for owner listings." });
@@ -44,14 +46,18 @@ module.exports = async function handler(req, res) {
   if (length > 1024 * 1024) return send(res, 413, { error: "request_too_large", message: "The listing request is too large." });
 
   try {
-    const identity = await request(config, token, "/auth/v1/user", { headers: { Accept: "application/json" } });
-    if (!identity.ok) return send(res, 401, { error: "not_authenticated", message: "Your session has expired. Sign in again." });
+    const identity = await request(config, token, "/auth/v1/user", {
+      headers: { Accept: "application/json" }, signal: AbortSignal.timeout(6000),
+    });
+    if (!identity.ok) {
+      if ([401, 403].includes(identity.status)) return send(res, 401, { error: "not_authenticated", message: "Your session has expired. Sign in again." });
+      return send(res, 503, { error: "identity_unavailable", message: "We couldn’t check your account. Please try again." });
+    }
     const user = await identity.json();
     if (!user?.id) return send(res, 401, { error: "not_authenticated", message: "Sign in to manage your listings." });
     if (!user.email_confirmed_at) return send(res, 403, { error: "owner_verification_required", message: "Verify your email address before managing listings." });
 
-    if (req.query?.view === "wording") {
-      if (req.method !== "POST") return send(res, 405, { message: "Use POST for a wording suggestion." });
+    if (wordingRequest) {
       return require("../lib/listing-wording")(user.id, readBody(req), (status, data) => send(res, status, data));
     }
 

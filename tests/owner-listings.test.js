@@ -51,13 +51,17 @@ test("wording uses verified identity and public facts only, never the publishing
   const req = { method: 'POST', query: { view: 'wording' }, headers: { authorization: 'Bearer ' + 'a'.repeat(40) },
     body: { category: 'drive', title: 'Car', summary: '', description: '', facts: { transmission: 'automatic', pickup_instructions: 'gate code 4321' },
       private_address: 'private street', publish: true } };
-  let verified = false, modelCalls = 0, reply = { summary: 'Automatic car', description: 'This car has an automatic transmission.' };
+  let verified = false, modelCalls = 0, finishReason = 'stop', reply = { summary: 'Automatic car', description: 'This car has an automatic transmission.' };
   global.fetch = async (url, options) => {
     if (url.endsWith('/auth/v1/user')) return response(200, { id: 'writer', email_confirmed_at: verified });
     assert.equal(url, 'https://integrate.api.nvidia.com/v1/chat/completions'); modelCalls++;
-    const data = JSON.parse(JSON.parse(options.body).messages[1].content);
+    const request = JSON.parse(options.body);
+    assert.deepEqual(request.response_format.json_schema.schema.required, ['summary', 'description']);
+    assert.equal(request.response_format.type, 'json_schema');
+    assert.equal(request.chat_template_kwargs.enable_thinking, false);
+    const data = JSON.parse(request.messages[1].content);
     assert.deepEqual(data, { category: 'drive', title: 'Car', notes: '', intro: '', facts: { transmission: 'automatic' } });
-    return response(200, { choices: [{ message: { content: JSON.stringify(reply) } }] });
+    return response(200, { choices: [{ finish_reason: finishReason, message: { content: JSON.stringify(reply) } }] });
   };
   assert.equal((await invoke({...req, headers:{}})).statusCode, 401);
   assert.equal((await invoke(req)).statusCode, 403);
@@ -66,11 +70,30 @@ test("wording uses verified identity and public facts only, never the publishing
   assert.equal((await invoke({...req, body:{...req.body, facts:{}}})).statusCode, 400);
   assert.equal(modelCalls, 0);
   assert.deepEqual((await invoke(req)).body, reply);
+  finishReason = 'length';
+  assert.equal((await invoke(req)).statusCode, 503);
+  finishReason = 'stop';
   reply = { summary:'x', description:'broken' };
   assert.equal((await invoke(req)).statusCode, 503);
-  for (let i=0; i<3; i++) await invoke(req);
+  for (let i=0; i<2; i++) await invoke(req);
   assert.equal((await invoke(req)).statusCode, 429);
   assert.equal(modelCalls, 5);
+});
+
+test("upstream auth failure preserves the lister's session and never calls the model", async t => {
+  setup(t);
+  const request = { method: 'POST', query: { view: 'wording' }, headers: { authorization: 'Bearer ' + 'a'.repeat(40) } };
+  let upstreamStatus = 503;
+  global.fetch = async url => {
+    assert.ok(url.endsWith('/auth/v1/user'));
+    return response(upstreamStatus, {});
+  };
+  assert.equal((await invoke(request)).body.error, 'identity_unavailable');
+  upstreamStatus = 429;
+  assert.equal((await invoke(request)).statusCode, 503);
+  upstreamStatus = 401;
+  assert.equal((await invoke(request)).statusCode, 401);
+  assert.equal((await invoke({ ...request, method: 'GET' })).headers.allow, 'POST');
 });
 
 test("owner publish uses the caller's user token and the database RPC", async (t) => {

@@ -58,32 +58,30 @@
 
       <section class="owner-portal section-shell" id="owner-portal" aria-labelledby="owner-portal-title">
         <div class="owner-portal-heading">
-          <div><p class="eyebrow">Lister workspace</p><h2 id="owner-portal-title">Your listings,<br><em>in your hands.</em></h2></div>
-          <p>Create a listing, choose your dates and set your price. Save a draft or publish when you’re ready.</p>
+          <div><h2 id="owner-portal-title">Lister workspace</h2></div>
         </div>
         <p class="owner-live-status" id="owner-live-status" role="status" aria-live="polite">Opening your lister workspace…</p>
 
         <section class="owner-auth" id="owner-auth" aria-labelledby="owner-auth-title" hidden>
-          <div class="owner-auth-copy"><p class="eyebrow">Secure access</p><h3 id="owner-auth-title">Sign in to continue.</h3><p id="owner-auth-intro">Create an account to save and manage your own listings.</p></div>
-          <button type="button" class="button button-light owner-google" id="owner-google">Continue with Google</button><p class="owner-privacy-note">Or use your email. One LOCKD account lets you rent and list.</p><form id="owner-auth-form" class="owner-form" autocomplete="on">
+          <div class="owner-auth-copy"><h3 id="owner-auth-title">Sign in to list</h3><p id="owner-auth-intro">Use the same account you use to rent on LOCKD.</p></div>
+          <div class="owner-auth-methods"><button type="button" class="button button-light owner-google" id="owner-google">Continue with Google</button><p class="owner-auth-divider">or use email</p><form id="owner-auth-form" class="owner-form" autocomplete="on">
             <label class="owner-field" id="owner-name-row" hidden><span>Your name</span><input id="owner-name" name="name" type="text" maxlength="100" autocomplete="name"></label>
             <label class="owner-field"><span>Email address</span><input id="owner-email" name="email" type="email" maxlength="254" autocomplete="email" required></label>
             <label class="owner-field"><span>Password</span><input id="owner-password" name="password" type="password" minlength="8" maxlength="128" autocomplete="current-password" required></label>
             <div class="owner-auth-actions"><button class="button button-dark" id="owner-auth-submit" type="submit">Sign in</button><button class="owner-text-link" id="owner-auth-switch" type="button">Create an account</button></div>
             <p class="owner-form-status" id="owner-auth-status" role="status" aria-live="polite"></p>
-            <p class="owner-privacy-note">Use your own account. LOCKD will not ask you to email identity documents or payment details.</p>
-          </form>
+          </form></div>
         </section>
 
         <section class="owner-workspace" id="owner-workspace" hidden aria-label="Owner listings workspace">
           <div class="owner-account-bar"><a class="owner-text-link" href="account.html">Switch to renting</a><p id="owner-account-label"></p><button class="owner-text-link" id="owner-signout" type="button">Sign out</button></div>
           <div class="owner-dashboard">
             <nav class="lister-workspace-links" aria-label="Manage rentals"><a href="account.html?view=listing#bookings">Booking requests</a><a data-lockd-messaging-entry hidden href="messages.html?inbox=listing">Messages</a></nav>
-            <div><p class="eyebrow">Your catalogue</p><h3>Listings</h3></div>
+            <div><h3>Your listings</h3></div>
             <div class="owner-listings" id="owner-listings" aria-live="polite"><p>Loading your listings…</p></div>
           </div>
 
-          <div class="owner-wizard-heading"><div><p class="eyebrow" id="wizard-eyebrow">Create a listing</p><h3 id="wizard-title">Tell renters what you offer.</h3></div><p>Required fields are checked before publication. You can save a draft at any time.</p></div>
+          <div class="owner-wizard-heading"><div><p class="eyebrow" id="wizard-eyebrow">Create a listing</p><h3 id="wizard-title">Tell renters what you offer.</h3></div><p>Add a title, category and area to save a draft. You’ll review your listing before publishing.</p></div>
           <form class="owner-form owner-listing-form" id="owner-listing-form" novalidate>
             <input id="listing-id" type="hidden">
             <div class="owner-form-section"><h4>1. The basics</h4>
@@ -137,13 +135,11 @@
       </section>
 
       <section class="owner-process section-shell" id="owner-process" aria-labelledby="owner-process-title">
-        <div class="owner-process-heading"><div><p class="eyebrow">A clear path for every listing</p><h2 id="owner-process-title">From your asset<br>to a good booking.</h2></div><p>Manage your details, prices and available dates. Review reservation requests from your workspace.</p></div>
+        <div class="owner-process-heading"><h2 id="owner-process-title">How listing works</h2></div>
         <div class="owner-process-list">
-          <article class="owner-process-step"><span>01</span><h3>Create an account</h3><p>Sign in securely and keep your listing drafts and published assets in your account.</p><span class="owner-step-status">Available</span></article>
-          <article class="owner-process-step"><span>02</span><h3>Add the real details</h3><p>Add photos, a pickup area or address, your price and available dates.</p><span class="owner-step-status">Available</span></article>
-          <article class="owner-process-step"><span>03</span><h3>Publish or save a draft</h3><p>Published listings appear in search and their matching category.</p><span class="owner-step-status">Available</span></article>
-          <article class="owner-process-step"><span>04</span><h3>Manage visibility</h3><p>Pause or resume a listing from your workspace. A paused item is removed from public search.</p><span class="owner-step-status">Available</span></article>
-          <article class="owner-process-step" hidden><span>05</span><h3>Bookings and payouts</h3><p>Track booking requests in your dashboard. Lister payouts are currently unavailable.</p><span class="owner-step-status">Unavailable</span></article>
+          <article class="owner-process-step"><span>01</span><h3>Introduce your rental</h3><p>Add photos and tell renters where to find it and what’s included.</p></article>
+          <article class="owner-process-step"><span>02</span><h3>Set your rate and dates</h3><p>Choose when your rental is available and how much to charge.</p></article>
+          <article class="owner-process-step"><span>03</span><h3>Review and publish</h3><p>Your published listing appears in search. You can edit or pause it from your workspace.</p></article>
         </div>
       </section>
     </main>

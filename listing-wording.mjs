@@ -16,26 +16,48 @@ export function attachWording(form, anchor) {
   anchor.after(box);
   const find = selector => box.querySelector(selector);
   const suggest = find('[data-suggest]'), preview = find('section'), status = find('[role="status"]'), undo = find('[data-undo]');
-  let pending, original, proposed, stamp;
+  let pending, original, proposed, stamp, appliedCopy;
   const version = () => JSON.stringify([field('id').value, context()]);
-  function clear() {
-    pending?.abort(); pending = null; proposed = original = null; stamp = '';
-    suggest.disabled = false; preview.hidden = undo.hidden = true; status.textContent = '';
+  const copyVersion = () => JSON.stringify([field('id').value, intro.value, description.value]);
+  preview.id = 'listing-wording-preview';
+  suggest.setAttribute('aria-controls', preview.id);
+  function busy(value) {
+    suggest.textContent = value ? 'Cancel suggestion' : 'Suggest wording';
+    preview.setAttribute('aria-busy', String(value));
   }
-  form.addEventListener('input', clear);
-  form.addEventListener('change', clear);
+  function clearPreview() {
+    pending?.abort(); pending = proposed = null; stamp = '';
+    busy(false); preview.hidden = true; status.textContent = '';
+  }
+  function clear() {
+    clearPreview(); original = null; undo.hidden = true;
+  }
+  function onEdit() {
+    if (original && copyVersion() !== appliedCopy) {
+      original = null; undo.hidden = true; status.textContent = '';
+    }
+    if (stamp && version() !== stamp) clearPreview();
+  }
+  form.addEventListener('input', onEdit);
+  form.addEventListener('change', onEdit);
   form.addEventListener('reset', clear);
   window.addEventListener('lockd:listing-restored', clear);
   document.querySelector('#owner-signout')?.addEventListener('click', clear);
   suggest.addEventListener('click', async () => {
-    clear();
+    if (pending) { clearPreview(); status.textContent = 'Suggestion cancelled.'; return; }
+    clearPreview();
     const data = context();
     if (!Object.keys(data.facts).length && (data.description + data.summary).trim().length < 12) {
       status.textContent = 'Add a few notes about what renters get, or fill in the details below.';
       description.focus(); return;
     }
     const controller = new AbortController();
-    pending = controller; stamp = version(); suggest.disabled = true; status.textContent = 'Drafting a suggestion…';
+    pending = controller; stamp = version(); busy(true); status.textContent = 'Drafting a suggestion…';
+    const deadline = setTimeout(() => {
+      if (pending !== controller) return;
+      clearPreview();
+      status.textContent = 'That took longer than expected. Try again or keep writing.';
+    }, 18000);
     try {
       const session = await window.LockdAccount.getSession();
       if (controller.signal.aborted) return;
@@ -47,6 +69,9 @@ export function attachWording(form, anchor) {
       const result = await res.json();
       if (!res.ok) throw new Error(result.message || 'Suggestions are unavailable. You can still write your listing.');
       if (controller.signal.aborted || stamp !== version()) return;
+      if (typeof result?.summary !== 'string' || typeof result.description !== 'string' || !result.summary.trim() || !result.description.trim()) {
+        throw new Error('No wording came back. Try again or keep writing.');
+      }
       proposed = result;
       find('[data-intro]').textContent = result.summary;
       find('[data-description]').textContent = result.description;
@@ -54,22 +79,27 @@ export function attachWording(form, anchor) {
     } catch (e) {
       if (!controller.signal.aborted) status.textContent = e instanceof TypeError || e instanceof SyntaxError ? 'Couldn’t reach suggestions. You can keep writing.' : e.message;
     } finally {
-      if (pending === controller) { pending = null; suggest.disabled = false; }
+      clearTimeout(deadline);
+      if (pending === controller) { pending = null; busy(false); }
     }
   });
   function setCopy(value) {
     intro.value = value.summary; description.value = value.description;
     description.dispatchEvent(new Event('input', { bubbles: true }));
   }
-  find('[data-dismiss]').addEventListener('click', () => { clear(); suggest.focus(); });
+  find('[data-dismiss]').addEventListener('click', () => { clearPreview(); suggest.focus(); });
   find('[data-apply]').addEventListener('click', () => {
     if (!proposed || stamp !== version()) { clear(); return; }
     const before = { summary: intro.value, description: description.value };
-    setCopy(proposed); original = before; stamp = version(); undo.hidden = false;
+    const value = proposed;
+    clearPreview();
+    setCopy(value); original = before; appliedCopy = copyVersion(); undo.hidden = false;
     status.textContent = 'Wording added. You can still edit it.'; undo.focus();
   });
   undo.addEventListener('click', () => {
-    if (original && stamp === version()) setCopy(original);
-    clear(); status.textContent = 'Original wording restored.'; description.focus();
+    const restore = original && copyVersion() === appliedCopy ? original : null;
+    clear();
+    if (restore) { setCopy(restore); status.textContent = 'Original wording restored.'; }
+    description.focus();
   });
 }

@@ -1,0 +1,63 @@
+<!doctype html><meta charset="utf-8"><title>Owner wizard integration test</title>
+<p role="status">Checking the listing wizard…</p>
+<script type="module">
+// Serve this file from a local checkout. Every account and API response is isolated.
+const result = document.querySelector('[role=status]');
+const check = (condition, message) => { if (!condition) throw Error(message); };
+const root = new URL('../', location.href);
+const source = new DOMParser().parseFromString(await (await fetch(new URL('owners.html', root))).text(), 'text/html');
+source.querySelectorAll('script,link,img,source').forEach(el => el.remove());
+const base = source.createElement('base'); base.href = root; source.head.prepend(base);
+const sandboxScript = source.createElement('script');
+sandboxScript.textContent = `
+ window.LockdAccount = { getConfig:async()=>({supabase:{url:'https://invalid.test',publishableKey:'unused'}}), getSession:async()=>({user:{id:'isolated-wizard-user'},access_token:'unused'}) };
+ window.fetch = async(url,options={}) => {
+   if (url==='/api/owner-listings' && options.method==='GET') return Response.json({items:[]});
+   if (url==='/api/listings?view=places') return Response.json({items:[{id:'isolated',label:'Test town',latitude:1,longitude:2}]});
+   throw Error('Unexpected fixture request');
+ };
+`;
+source.head.append(sandboxScript);
+for (const name of ['owners.js','owner-guided.mjs']) {
+  const script = source.createElement('script'); script.src = name; script.defer = true;
+  if (name.endsWith('.mjs')) script.type = 'module';
+  source.head.append(script);
+}
+const key = 'lockd:owner-draft:v2:isolated-wizard-user';
+const previous = localStorage.getItem(key);
+const frame = document.createElement('iframe');
+const loaded = () => new Promise(resolve => frame.addEventListener('load', resolve, {once:true}));
+async function openForm() {
+  const ready = loaded(); frame.srcdoc = source.documentElement.outerHTML;
+  if (!frame.isConnected) document.body.append(frame);
+  await ready;
+  return frame.contentDocument;
+}
+try {
+  check(['127.0.0.1','localhost','[::1]'].includes(location.hostname), 'Run on localhost');
+  localStorage.removeItem(key);
+  let doc = await openForm();
+  const el = id => doc.getElementById(id);
+  const form = el('owner-listing-form');
+  check(!el('owner-workspace').hidden && form.querySelector('progress').max===6, 'Wizard must initialize six steps in the signed-in workspace');
+  check(form.querySelector('[data-suggest]') && el('listing-description').isConnected, 'Suggestion control must attach to the real form');
+  el('listing-category').value = 'other'; el('listing-category').dispatchEvent(new Event('change',{bubbles:true}));
+  el('listing-title').value = 'Browser regression'; el('listing-title').dispatchEvent(new Event('input',{bubbles:true}));
+  form.querySelector('.owner-wizard-nav .button').click();
+  check(form.querySelector('progress').value===2, 'Continue should open the area step');
+  el('listing-place-search').value = 'Test town'; el('listing-place-search-button').click();
+  await new Promise(resolve=>setTimeout(resolve,0)); el('listing-place-results').querySelector('button').click();
+  form.querySelector('.owner-wizard-nav .button').click();
+  check(form.querySelector('progress').value===3 && !el('listing-description').closest('.owner-form-section').hidden, 'Description should be visible on step three');
+  check(JSON.parse(localStorage.getItem(key)).title==='Browser regression', 'Draft must save to the active account');
+  doc = await openForm();
+  check(el('listing-title').value==='Browser regression' && el('listing-location').value==='Test town', 'Draft should survive a reload');
+  sandboxScript.textContent = sandboxScript.textContent.replace('isolated-wizard-user','another-wizard-user');
+  doc = await openForm();
+  check(!el('listing-title').value && !el('listing-location').value, 'A new account should see a clean form');
+  result.textContent = 'PASS · Wizard steps, writing controls, place selection, draft restoration and account isolation';
+} catch(error) { result.textContent = 'FAIL · ' + error.message; }
+finally {
+  if (previous === null) localStorage.removeItem(key); else localStorage.setItem(key,previous);
+}
+</script>

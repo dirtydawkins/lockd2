@@ -69,3 +69,11 @@ Account motion refinement adds short panel entrances, menu open transitions, set
 The description step in the lister wizard offers optional wording suggestions from the existing server-side NVIDIA integration. The owner endpoint verifies the Supabase session and confirmed email, limits requests per account per instance, and sends only title, category, public copy and selected product facts. It never saves or publishes the suggestion. The lister can preview, apply, edit or undo using the ordinary listing form. Private address, directions, images, account and payment fields are excluded.
 
 Verification: 10 owner API tests passed (including authorization, allowed inputs, malformed model output, throttling and no publication) and all 15 marketplace checks passed. An isolated inbuilt-browser exercise verified applying, undoing and invalidating suggestions after an edit. A signed-in production generation has not been verified.
+
+## Lister workspace release · 22 November 2026
+
+Fixed wizard initialization: the editor now mounts after its description field is attached to the form. Draft recovery is scoped to the signed-in account. Legacy device drafts without an account identifier are not automatically restored. Database-backed listings are unchanged. Saving or publishing a listing now remains successful if the following dashboard refresh fails.
+
+The workspace groups sign-in choices, removes repeated status badges and opens directly on the dashboard for returning listers. Writers can cancel a suggestion, review both fields, apply and undo. Edits to unrelated fields preserve undo. NVIDIA generation requests a structured response and the API distinguishes temporary identity-service errors from expired sessions. The privacy notice describes the information sent to NVIDIA.
+
+Verified 157 Node tests and 15 release checks. Browser checks on the actual wizard with isolated identity, locality and generation responses passed for navigation, draft restoration, cross-account isolation, cancel, stale results, apply and undo. Desktop (1280px) and phone (390px) layouts fit. Real production generation under a lister session requires authenticated verification.

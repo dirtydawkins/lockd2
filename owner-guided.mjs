@@ -8,10 +8,10 @@ if(form){
  const firstGrid=document.createElement('div');firstGrid.className='owner-form-grid';firstGrid.append(get('listing-category').closest('label'),get('listing-title').closest('label'));first.append(firstGrid);
  area.append(get('owner-location-picker'));
  details.append(get('listing-summary').closest('label'),get('listing-description').closest('label'),get('owner-category-fields'));
- attachWording(form, get('listing-description').closest('label'));
  const photos=existing[2],price=existing[1];photos.querySelector('h4').textContent='Add your photos.';price.querySelector('h4').textContent='Set your price and dates.';
  review.innerHTML='<h4 tabindex="-1">Ready to share?</h4><p class="owner-help">Check the details renters will see. You can edit or pause your listing later.</p><dl class="owner-review-list"></dl>';
  const panels=[first,area,details,photos,price,review],footer=form.querySelector('.owner-form-footer');basics.remove();for(const item of panels)footer.before(item);
+ attachWording(form, get('listing-description').closest('label'));
  const progress=document.createElement('div');progress.className='owner-wizard-progress';progress.innerHTML='<p aria-live="polite"></p><progress max="6" value="1" aria-label="Listing progress"></progress>';form.prepend(progress);
  const nav=document.createElement('div');nav.className='owner-wizard-nav';const back=document.createElement('button'),next=document.createElement('button');back.type=next.type='button';back.className='owner-text-link';next.className='button button-dark';back.textContent='Back';next.textContent='Continue';nav.append(back,next);footer.before(nav);
  const publish=form.querySelector('[value="publish"]'),preview=get('owner-preview-open');let step=0;

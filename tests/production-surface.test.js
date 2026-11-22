@@ -11,7 +11,12 @@ test('production packaging excludes fixtures and legacy duplicates but retains f
  assert.equal(ignore.includes('lib/'),false,'server RPC helpers must be uploaded for Vercel function tracing');
  assert.ok(fs.readdirSync('api').filter(name=>name.endsWith('.js')).length<=12,'stay within the existing Vercel Hobby function limit');
 });
-test('unfinished capabilities are hidden until the backend enables them',()=>{
- for(const file of ['account.html','owners.html','trust.html','rental.html'])assert.match(fs.readFileSync(file,'utf8'),/data-lockd-messaging-entry[^>]*hidden/);
+test('workspace messaging capabilities start hidden and rental contact needs a real listing',()=>{
+ for(const file of ['owners.html','trust.html'])assert.match(fs.readFileSync(file,'utf8'),/data-lockd-messaging-entry[^>]*hidden/);
  assert.match(fs.readFileSync('messaging-onboarding.mjs','utf8'),/capabilities\.enabled===true/);
+ assert.match(fs.readFileSync('account.html','utf8'),/href="messages\.html\?inbox=renting" data-account-messages/);
+ assert.match(fs.readFileSync('rental.html','utf8'),/id="rental-messages"[^>]*hidden/);
+ const rental=fs.readFileSync('rental.js','utf8');
+ assert.match(rental,/messages\.html\?listing=\$\{encodeURIComponent\(data\.item\.id\)\}/);
+ assert.match(rental,/messagesLink\.hidden = !data\.item\.id/);
 });
