@@ -6,6 +6,7 @@ node_modules/
 tests/
 services/
 infra/
+clients/
 .github/
 .env*
 render.yaml

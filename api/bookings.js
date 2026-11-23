@@ -39,6 +39,7 @@ function date(s) {
 }
 safeErrors.add("The price changed. Review the current total.");
 module.exports = async (req, res) => {
+  if (req.query?.view === "overclock-pilot") return require("../lib/overclock-api")(req, res);
   if (req.query?.view === "checkout") return require("../lib/checkout-api")(req,res);
   const send = (code, data) => {
     res.setHeader("Cache-Control", "no-store");

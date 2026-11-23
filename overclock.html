@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OVERCLOCK — LOCKD</title>
+  <meta name="description" content="Request early access to LOCKD’s remote workstation pilot.">
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./brand-refinement.css">
+  <link rel="stylesheet" href="./overclock.css">
+  <script defer src="./account-service.js"></script>
+  <script type="module" src="./overclock.mjs"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header overclock-header">
+    <a class="brand" href="index.html" aria-label="LOCKD home"><img class="brand-image" src="./assets/brand/lockd.svg" alt="LOCKD" width="1330" height="317"></a>
+    <a class="header-cta" href="tech.html">Tech &amp; Gadgets</a>
+  </header>
+  <main id="main" class="section-shell overclock-shell">
+    <section class="overclock-intro" aria-labelledby="overclock-title">
+      <p class="eyebrow">LOCKD // OVERCLOCK</p>
+      <h1 id="overclock-title">Power beyond your hardware.</h1>
+      <p>Use a more powerful computer from the one you already have. We’re starting with a small pilot for 3D artists and creators in Kenya.</p>
+      <dl class="overclock-tracks">
+        <div><dt>Studio</dt><dd>Creative work and 3D rendering. First in the pilot.</dd></div>
+        <div><dt>Play</dt><dd>Remote gaming. Planned.</dd></div>
+        <div><dt>AI</dt><dd>Run and train AI models on a remote computer. Planned.</dd></div>
+      </dl>
+      <div class="overclock-download">
+        <a class="text-button" href="./downloads/OverclockConnect-0.1.0-windows-x64.exe" download>Download Windows preview <span aria-hidden="true">↓</span></a>
+        <p>For 64-bit Windows. Open the app to visit the pilot page or check your connection to LOCKD. Windows may show a warning because this preview is unsigned.</p>
+      </div>
+    </section>
+    <section class="overclock-pilot" aria-labelledby="pilot-title">
+      <h2 id="pilot-title">Get early access</h2>
+      <p>Save what you’d like to use OVERCLOCK for. A request is free and does not reserve a computer.</p>
+      <a id="pilot-signin" class="button button-burgundy" href="account.html?returnTo=%2Foverclock.html" hidden>Sign in to request access</a>
+      <button id="pilot-retry" class="text-button" type="button" hidden>Try again</button>
+      <form id="pilot-form" hidden>
+        <label for="pilot-track">What would you use it for?</label>
+        <select id="pilot-track" name="track">
+          <option value="studio">Studio · creative work</option>
+          <option value="play">Play · gaming</option>
+          <option value="ai">AI · run and train models</option>
+        </select>
+        <button class="button button-burgundy" type="submit">Request access</button>
+        <button id="pilot-withdraw" class="text-button" type="button" hidden>Withdraw request</button>
+      </form>
+      <p id="pilot-status" role="status">Checking your account…</p>
+      <noscript><p>Enable JavaScript to manage your pilot request.</p></noscript>
+    </section>
+  </main>
+  <footer class="site-footer"><div class="footer-bottom"><span>© LOCKD</span><a href="privacy.html">Privacy</a></div></footer>
+</body>
+</html>

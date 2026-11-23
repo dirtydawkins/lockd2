@@ -77,3 +77,13 @@ Fixed wizard initialization: the editor now mounts after its description field i
 The workspace groups sign-in choices, removes repeated status badges and opens directly on the dashboard for returning listers. Writers can cancel a suggestion, review both fields, apply and undo. Edits to unrelated fields preserve undo. NVIDIA generation requests a structured response and the API distinguishes temporary identity-service errors from expired sessions. The privacy notice describes the information sent to NVIDIA.
 
 Verified 157 Node tests and 15 release checks. Browser checks on the actual wizard with isolated identity, locality and generation responses passed for navigation, draft restoration, cross-account isolation, cancel, stale results, apply and undo. Desktop (1280px) and phone (390px) layouts fit. Real production generation under a lister session requires authenticated verification.
+
+## OVERCLOCK pilot foundation
+
+Tech & Gadgets links to the remote workstation pilot. Existing LOCKD accounts can create, edit or withdraw one interest request. Migration `20261123_0029_lockd_overclock_pilot.sql` limits requests to their account owner. The existing bookings function routes the private pilot action without adding another deployed function. Interest requests have no inventory, booking, payment or entitlement effect.
+
+The Windows x64 lab client opens the pilot in the system browser and checks website reachability. It compiled and launched on Windows. The read-only Linux preflight reports KVM access, QEMU, virsh and graphics devices in IOMMU groups. The current Windows machine correctly failed that preflight.
+
+Verification passed for eight focused tests, including cross-account read/delete isolation, and all 15 marketplace checks. Chrome rendered the mobile-width pilot and its sign-in state with isolated configuration. The built-in browser timed out. The migration and web changes remain local. VM provisioning, a native authenticated streaming session, compute reservation and billing require the physical Linux GPU pilot and end-to-end verification.
+
+The Windows x64 preview release packages version 0.1.0 as a standalone executable with an unsigned-build label. The production Supabase migration was applied to the existing LOCKD project. The preview opens the pilot and measures website reachability. It has no remote desktop session or billing controls.
