@@ -511,23 +511,24 @@
 
   function setFilterDrawerOpen(open) {
     if (!form || !filterToggle || !filterDrawer) return;
-    if (!open && form.contains(document.activeElement)) filterToggle.focus();
+    if (!open && filterDrawer.contains(document.activeElement)) filterToggle.focus();
     filterDrawer.classList.toggle("is-open", open);
     filterToggle.setAttribute("aria-expanded", String(open));
-    form.inert = !open;
-    form.setAttribute("aria-hidden", String(!open));
+    filterDrawer.hidden = !open;
+
   }
 
-  const mobileFilters = window.matchMedia("(max-width: 760px)");
   function syncFilterDrawer() {
-    if (!filterToggle || !filterDrawer) return;
-    const mobile = mobileFilters.matches;
-    filterToggle.hidden = !mobile;
-    filterDrawer.classList.toggle("is-collapsible", mobile);
-    const hasActiveSelection = Object.entries(activeParams()).some(([key, value]) => key !== "sort" && !(key === "quantity" && value === "1"));
-    setFilterDrawerOpen(!mobile || hasActiveSelection);
+    filterToggle.hidden = false;
+    const advanced = Object.keys(activeParams()).some(key =>
+      !["q", "group", "sort", "quantity", "useCase"].includes(key)
+    ) || Number(filterFields.quantity.value) > 1;
+    setFilterDrawerOpen(advanced);
     updateFilterToggle();
   }
+  form.addEventListener("invalid", event => {
+    if (filterDrawer.contains(event.target)) setFilterDrawerOpen(true);
+  }, true);
 
   let group = initialGroup;
   document.querySelectorAll("[data-group]").forEach((link) => {
@@ -553,18 +554,22 @@
   filterFields.startDate.min = localDate;
   filterFields.endDate.min = filterFields.startDate.value || localDate;
   filterFields.startDate.addEventListener("change", () => { filterFields.endDate.min = filterFields.startDate.value || localDate; });
-  if (group !== "all") document.querySelector(".tech-hero-copy .eyebrow").textContent = `LOCKD / THE TECH EDIT · ${groupLabels[group].toUpperCase()}`;
+  if (group !== "all") document.querySelector(".tech-hero-copy .eyebrow").textContent = `${groupLabels[group].toUpperCase()}`;
 
   filterToggle?.addEventListener("click", () => {
     const open = filterToggle.getAttribute("aria-expanded") !== "true";
     setFilterDrawerOpen(open);
   });
   syncFilterDrawer();
-  mobileFilters.addEventListener("change", syncFilterDrawer);
+
 
   form.addEventListener("submit", async event => {
     event.preventDefault();
     clearTimeout(searchTimer);
+    if (window.LockdRentalSearch.isWorkstationQuery(filterFields.q.value)) {
+      window.location.assign("overclock.html");
+      return;
+    }
     if (!await window.LockdRentalSearch.interpret(form, filterFields, 'technology', status)) return;
     setUrlFromFilters();
     loadListings();
@@ -590,7 +595,7 @@
     group = "all";
     selectedUseCase = "";
     document.querySelectorAll("[data-group]").forEach((link) => link.setAttribute("aria-current", String(link.dataset.group === "all")));
-    document.querySelector(".tech-hero-copy .eyebrow").textContent = "LOCKD / THE TECH EDIT";
+    document.querySelector(".tech-hero-copy .eyebrow").textContent = "Equipment rentals";
     setUrlFromFilters();
     syncFilterDrawer();
     loadListings();

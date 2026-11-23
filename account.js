@@ -88,8 +88,28 @@
     }
   }
 
+  async function showWorkstationRequest(userId) {
+    const description = $("#account-workstation-status");
+    description.textContent = "Request Studio access or update your existing request.";
+    try {
+      const session = await account.getSession();
+      if (session?.user?.id !== userId) return;
+      const response = await fetch("/api/bookings?view=overclock-pilot", {
+        headers: { Authorization: "Bearer " + session.access_token },
+        cache: "no-store", signal: AbortSignal.timeout(8000)
+      });
+      if (!response.ok) return;
+      const { item } = await response.json();
+      const tracks = { studio: "Studio", play: "Play", ai: "AI" };
+      if (activeUser?.id === userId && Object.hasOwn(tracks, item?.track)) {
+        description.textContent = "Your " + tracks[item.track] + " access request is saved.";
+      }
+    } catch { /* The manage link remains available when the status cannot load. */ }
+  }
+
   function showDashboard(user) {
     activeUser = user;
+    void showWorkstationRequest(user.id);
     const providers = new Set([...(user.app_metadata?.providers || []), ...(user.identities || []).map(identity => identity.provider)]);
     const email = providers.has("email");
     const google = providers.has("google");

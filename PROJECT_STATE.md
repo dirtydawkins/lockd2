@@ -101,3 +101,9 @@ OVERCLOCK Connect 0.1.1 uses a redrawn client mark based on the supplied artwork
 The product page now leads with a GPU cooling photograph selected from the owner-supplied November 23 archive. It replaces the workstation photograph on this page. The artwork is editorial and does not describe host inventory. Independent third-party photo licensing was not established. The page self-hosts Manrope, Instrument Serif and IBM Plex Mono with their OFL notices. Connect uses a flat two-colour SVG and matching multi-size Windows icon. The download section shows a capture from the compiled application.
 
 The Windows x64 standalone EXE was built and launched. Home, Connection and Settings rendered. A live website check succeeded. The pilot database test and 15 marketplace checks passed. Headless Chrome captured desktop and mobile layouts, including a 360px iframe. No authenticated production pilot request, remote session, installer signing or multi-DPI Windows testing was performed.
+
+## Equipment discovery and remote workstation access
+
+Tech & Gadgets keeps search visible, with advanced filters in a dedicated disclosure. Category links open equipment results directly. The homepage, catalogue, Tech & Gadgets and account overview now reach the existing OVERCLOCK service. Explicit product-name and remote workstation searches open the product page. The signed-in overview reads the existing private access request in the background. Sign-in from the pilot returns to its access section.
+
+Verified filter expansion in the in-app browser and checked layout widths at 360, 390 and 1440 pixels. The private pilot database test and all 15 marketplace checks passed. Studio requests are distinct from paid bookings. Host inventory, metered sessions, remote delivery and live checkout for compute remain unavailable.

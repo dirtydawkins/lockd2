@@ -46,5 +46,8 @@
     }
     return true;
   }
-  window.LockdRentalSearch = { interpret, natural };
+  function isWorkstationQuery(term) {
+    return /^(?:lockd[ ]+)?(?:overclock(?: connect)?|(?:remote|virtual) workstations?)$/i.test(term.trim());
+  }
+  window.LockdRentalSearch = { interpret, natural, isWorkstationQuery };
 })();

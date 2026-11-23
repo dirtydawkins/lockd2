@@ -136,3 +136,27 @@
   .tech-filter-drawer { transition: none; }
   .tech-card-image img, .tech-photo-card > img, .tech-favourite, .tech-categories a { transition: none; }
 }
+
+/* Keep the primary search available while detailed filters are folded away. */
+.tech-shell .tech-hero { min-height:0; padding:clamp(1.25rem,4vw,3.75rem) 0; gap:clamp(1.25rem,5vw,5rem); }
+.tech-shell .tech-hero h1 { font-size:clamp(3rem,7vw,6.5rem); letter-spacing:-.055em; }
+.tech-shell .tech-hero-image { width:min(100%,380px); aspect-ratio:1; height:auto; }
+.tech-shell .tech-hero-image img { object-fit:contain; }
+.tech-shell .tech-catalogue { padding-top:clamp(2rem,4vw,4rem); scroll-margin-top:6rem; }
+.tech-shell .tech-section-heading h2 { font-size:clamp(2.25rem,4vw,3.75rem); }
+.tech-shell .tech-filters { display:flex; align-items:end; flex-wrap:wrap; gap:.8rem 1.25rem; }
+.tech-shell .tech-search-field { flex:1 1 15rem; }
+.tech-shell .tech-filter-toggle:not([hidden]) { display:inline-flex; align-items:center; min-height:44px; margin:0; }
+.tech-advanced { flex-basis:100%; display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,145px),1fr)); gap:1rem; }
+.tech-advanced[hidden] { display:none; }
+.tech-virtual { display:grid; grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr); align-items:center; background:#261e21; color:#fff7ef; overflow:hidden; margin:1rem 0 2rem; border-radius:16px; }
+.tech-virtual img { width:100%; height:100%; max-height:290px; object-fit:cover; object-position:center 58%; }
+.tech-virtual div { padding:clamp(1.4rem,4vw,3.5rem); }
+.tech-virtual .eyebrow { color:#e4bfc4; }.tech-virtual h2 { font-size:clamp(2rem,4vw,3.75rem); scroll-margin-top:8rem; }
+.tech-virtual p:not(.eyebrow) { max-width:43ch; margin:1rem 0; }.tech-virtual a { color:inherit; border-color:currentColor; }
+@media(max-width:760px){
+ .tech-shell .tech-hero { grid-template-columns:minmax(0,1fr) minmax(0,.55fr); }.tech-shell .tech-hero-copy { padding:0; }
+ .tech-shell .tech-hero-image { aspect-ratio:2/3; }
+ .tech-shell .tech-hero-lede { margin:.8rem 0 1rem; }.tech-shell .tech-filters .tech-search-field { flex-basis:100%; }
+ .tech-virtual { grid-template-columns:1fr; }.tech-virtual img { height:145px; }.tech-shell .tech-filters input,.tech-shell .tech-filters select { font-size:1rem; }
+}

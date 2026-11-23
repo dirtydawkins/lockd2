@@ -57,6 +57,10 @@
       resetPreview();
       const term = searchInput.value.trim();
       const category = searchCategory?.value || "";
+      if (category === "overclock" || (!category && window.LockdRentalSearch.isWorkstationQuery(term))) {
+        window.location.assign("overclock.html");
+        return;
+      }
       const place = searchLocation?.value.trim() || "";
       const direct = resultsUrl({ q: term, category, location: place, kind: term && !category && !place ? "all" : "" });
       const natural = window.LockdRentalSearch.natural(term);
@@ -106,7 +110,7 @@
       window.clearTimeout(suggestionTimer);
       suggestionRequest?.abort();
       const term = searchInput.value.trim();
-      if (!searchSuggestions || term.length < 2) {
+      if (!searchSuggestions || term.length < 2 || searchCategory?.value === "overclock") {
         searchSuggestions?.replaceChildren();
         return;
       }

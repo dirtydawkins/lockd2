@@ -58,43 +58,43 @@
 
       <section class="tech-hero" aria-labelledby="tech-title">
         <div class="tech-hero-copy">
-          <p class="eyebrow"><span class="eyebrow-rule"></span> TECH &amp; GADGETS</p>
+          <p class="eyebrow"><span class="eyebrow-rule"></span> Equipment rentals</p>
           <h1 id="tech-title">Tech &amp; gadgets.</h1>
-          <p class="tech-hero-lede">Browse consoles, phones, computers and equipment. Compare models, included accessories and rental rates.</p>
-          <a class="text-button" href="overclock.html">Explore remote workstations <span aria-hidden="true">↗</span></a>
-          <a class="text-button" href="#published-rentals">Explore rentals <span aria-hidden="true">↘</span></a>
+          <p class="tech-hero-lede">Find a console for the weekend, a laptop for work or gear for your next shoot.</p>
+          <a class="button button-burgundy" href="#published-rentals">Browse equipment</a>
         </div>
         <figure class="tech-hero-image">
-          <img src="./WhatsApp%20Image%202026-10-27%20at%2023.34.41.jpeg" alt="PlayStation console and controller beside a television, shown as an editorial category illustration" fetchpriority="high" width="736" height="1104" srcset="./assets/responsive/ade5057c50f063c2-320.webp 320w, ./assets/responsive/ade5057c50f063c2-480.webp 480w, ./assets/responsive/ade5057c50f063c2-736.webp 736w" sizes="(max-width: 760px) 100vw, 60vw" decoding="async">
-          <figcaption>Gaming & entertainment</figcaption>
+          <img src="./WhatsApp%20Image%202026-10-27%20at%2023.34.41.jpeg" alt="PlayStation console and controller beside a television, ready for play" fetchpriority="high" width="736" height="1104" srcset="./assets/responsive/ade5057c50f063c2-320.webp 320w, ./assets/responsive/ade5057c50f063c2-480.webp 480w, ./assets/responsive/ade5057c50f063c2-736.webp 736w" sizes="(max-width: 760px) 100vw, 60vw" decoding="async">
+
         </figure>
-        <div class="tech-hero-side" aria-hidden="true"><span>TECHNOLOGY</span></div>
+
       </section>
 
       <nav class="tech-categories" aria-label="Browse technology categories" id="tech-categories">
         <a href="tech.html" data-group="all">All technology</a>
-        <a href="tech.html?group=gaming" data-group="gaming">Gaming</a>
-        <a href="tech.html?group=phones" data-group="phones">Phones</a>
-        <a href="tech.html?group=computers" data-group="computers">Computers &amp; tablets</a>
-        <a href="tech.html?group=creator" data-group="creator">Cameras &amp; creator gear</a>
-        <a href="tech.html?group=audio" data-group="audio">Audio &amp; events</a>
-        <a href="tech.html?group=work" data-group="work">Work &amp; productivity</a>
+        <a href="tech.html?group=gaming#published-rentals" data-group="gaming">Gaming</a>
+        <a href="tech.html?group=phones#published-rentals" data-group="phones">Phones</a>
+        <a href="tech.html?group=computers#published-rentals" data-group="computers">Computers &amp; tablets</a>
+        <a href="tech.html?group=creator#published-rentals" data-group="creator">Cameras &amp; creator gear</a>
+        <a href="tech.html?group=audio#published-rentals" data-group="audio">Audio &amp; events</a>
+        <a href="tech.html?group=work#published-rentals" data-group="work">Work &amp; productivity</a>
+        <a href="#remote-title">Remote workstations</a>
       </nav>
 
       <section class="tech-catalogue" id="published-rentals" aria-labelledby="published-title">
         <div class="tech-section-heading">
           <div>
-            <p class="eyebrow">Real items, listed on LOCKD</p>
-            <h2 id="published-title">Find your<br><em>gear.</em></h2>
+
+            <h2 id="published-title">Equipment rentals</h2>
           </div>
-          <p class="tech-section-copy">Compare models, accessories and rental prices. Choose your dates to check availability.</p>
+          <p class="tech-section-copy">Search by model or choose dates to check availability.</p>
         </div>
 
-        <button class="text-button tech-filter-toggle" id="tech-filter-toggle" type="button" aria-controls="tech-filter-drawer" aria-expanded="true" hidden>Filters</button>
-        <div class="tech-filter-drawer" id="tech-filter-drawer">
-          <div class="tech-filter-drawer-inner">
         <form class="tech-filters" id="tech-filter-form" aria-label="Filter technology rentals">
-          <label class="tech-search-field">Search<input type="search" name="q" id="tech-search" placeholder="Model, feature or use" autocomplete="off"></label>
+          <label class="tech-search-field">Search equipment<input type="search" name="q" id="tech-search" placeholder="Try a laptop or a console" autocomplete="off"></label>
+          <button class="button button-burgundy" type="submit">Search</button>
+          <button class="text-button tech-filter-toggle" id="tech-filter-toggle" type="button" aria-controls="tech-filter-drawer" aria-expanded="true" hidden>Filters</button>
+          <div class="tech-advanced" id="tech-filter-drawer">
           <label>Brand<input type="search" name="brand" id="tech-brand" list="tech-brands" placeholder="Any brand" autocomplete="off"><datalist id="tech-brands"></datalist></label>
           <label>Type<select name="type" id="tech-type"><option value="">All types</option><option value="gaming">Gaming</option><option value="phone">Phones</option><option value="computer">Computers</option><option value="tablet">Tablets</option><option value="camera">Cameras</option><option value="lens">Lenses</option><option value="audio">Audio</option><option value="creator">Creator gear</option><option value="projector">Projectors</option></select></label>
           <label>Condition<select name="condition" id="tech-condition"><option value="">Any condition</option><option value="new">New</option><option value="excellent">Excellent</option><option value="good">Good</option><option value="fair">Fair</option><option value="refurbished">Refurbished</option></select></label>
@@ -109,12 +109,10 @@
           <label>Collection<select name="collection" id="tech-collection"><option value="">Any option</option><option value="yes">Collection available</option></select></label>
           <label>Delivery<select name="delivery" id="tech-delivery"><option value="">Any option</option><option value="yes">Delivery available</option></select></label>
           <label>Sort<select name="sort" id="tech-sort"><option value="relevance">Most relevant</option><option value="newest">Recently added</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option></select></label>
-          <button class="button button-burgundy" type="submit">Search tech</button>
+          </div>
           <button class="text-button tech-clear-filters" type="reset" id="clear-tech-filters">Clear filters</button>
           <button class="text-button tech-save-search" type="button" id="save-tech-search">Save this search</button>
         </form>
-          </div>
-        </div>
 
         <div class="tech-results-head">
           <p id="tech-result-count" aria-live="polite"></p>
@@ -127,7 +125,14 @@
         <p class="catalogue-status tech-status" id="tech-status" role="status" aria-live="polite">Finding technology rentals…</p>
         <div class="tech-listing-grid" id="tech-listing-grid"></div>
         <button class="button button-paper tech-load-more" id="tech-load-more" type="button" hidden>Load more</button>
-        <p class="tech-date-note">Choose a rental to check dates and request a reservation.</p>
+
+      </section>
+
+      <section class="tech-virtual" aria-labelledby="remote-title">
+        <img src="./assets/photos/overclock-cooling.webp" width="736" height="1308" alt="" loading="lazy">
+        <div><p class="eyebrow">LOCKD // OVERCLOCK</p><h2 id="remote-title">Remote workstations</h2>
+          <p>Need more power for a 3D project? Request Studio access and use Connect on your Windows PC.</p>
+          <a class="text-button" href="overclock.html">Explore the Studio pilot</a></div>
       </section>
 
       <section class="tech-personal" aria-label="Your saved items and history">
@@ -143,25 +148,25 @@
 
       <section class="tech-photo-guide" aria-labelledby="tech-photo-guide-title">
         <div class="tech-section-heading">
-          <div><p class="eyebrow">Browse by category</p><h2 id="tech-photo-guide-title">Browse equipment.</h2></div>
-          <p class="tech-section-copy">Choose a category to see models, accessories and rental rates.</p>
+          <div><h2 id="tech-photo-guide-title">Browse equipment.</h2></div>
+
         </div>
         <div class="tech-photo-grid">
-          <a class="tech-photo-card" href="tech.html?group=gaming">
+          <a class="tech-photo-card" href="tech.html?group=gaming#published-rentals">
             <img src="./assets/photos/playstation5-setup.jpeg" alt="PlayStation 5-family console and white DualSense controller beside a television" width="736" height="1104" srcset="./assets/responsive/ade5057c50f063c2-320.webp 320w, ./assets/responsive/ade5057c50f063c2-480.webp 480w, ./assets/responsive/ade5057c50f063c2-736.webp 736w" sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 33vw" decoding="async" loading="lazy">
-            <div><p class="eyebrow">PLAY · GAMING</p><h3>Gaming</h3><p>Consoles, controllers and complete setups listed on LOCKD.</p><span class="text-button">Browse gaming</span></div>
+            <div><h3>Gaming</h3></div>
           </a>
-          <a class="tech-photo-card" href="tech.html?group=phones">
+          <a class="tech-photo-card" href="tech.html?group=phones#published-rentals">
             <img src="./assets/photos/iphone-pro-burgundy.jpeg" alt="Burgundy iPhone-style phone with three rear camera lenses" width="736" height="981" srcset="./assets/responsive/5374e546a37f3502-320.webp 320w, ./assets/responsive/5374e546a37f3502-480.webp 480w, ./assets/responsive/5374e546a37f3502-736.webp 736w" sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 33vw" decoding="async" loading="lazy">
-            <div><p class="eyebrow">PHONES · EVERYDAY TECH</p><h3>Phones</h3><p>Compare models, condition, accessories and rental prices.</p><span class="text-button">Browse phones</span></div>
+            <div><h3>Phones</h3></div>
           </a>
-          <a class="tech-photo-card" href="tech.html?group=computers">
+          <a class="tech-photo-card" href="tech.html?group=computers#published-rentals">
             <img src="./assets/photos/gaming-pc-purple-rgb.jpeg" alt="Custom gaming PC tower with purple RGB fans and a glass side panel" width="640" height="853" srcset="./assets/responsive/a93792108670a9bc-320.webp 320w, ./assets/responsive/a93792108670a9bc-480.webp 480w, ./assets/responsive/a93792108670a9bc-640.webp 640w" sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 33vw" decoding="async" loading="lazy">
-            <div><p class="eyebrow">COMPUTERS · WORK &amp; PLAY</p><h3>Computers</h3><p>Browse laptops, desktops and the specifications provided with each listing.</p><span class="text-button">Browse computers</span></div>
+            <div><h3>Computers</h3></div>
           </a>
-          <a class="tech-photo-card" href="tech.html?group=creator">
+          <a class="tech-photo-card" href="tech.html?group=creator#published-rentals">
             <img src="./assets/photos/gaming-pc-white-liquid-cooled.jpeg" alt="White custom PC tower with RGB lighting and visible liquid-cooling components" width="736" height="920" srcset="./assets/responsive/ead412966a183f67-320.webp 320w, ./assets/responsive/ead412966a183f67-480.webp 480w, ./assets/responsive/ead412966a183f67-736.webp 736w" sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 33vw" decoding="async" loading="lazy">
-            <div><p class="eyebrow">CREATOR GEAR</p><h3>Make something</h3><p>Find cameras, creator computers and accessories for your next project.</p><span class="text-button">Browse creator gear</span></div>
+            <div><h3>Creator gear</h3></div>
           </a>
         </div>
       </section>

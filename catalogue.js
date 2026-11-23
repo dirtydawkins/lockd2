@@ -645,6 +645,10 @@
 
     document.querySelector('#assisted-search-answer').hidden = true;
     readFormState({ querySortDefault: true });
+    if (!category && window.LockdRentalSearch.isWorkstationQuery(query)) {
+      window.location.assign("overclock.html");
+      return;
+    }
     if ((filterState.startDate && !filterState.endDate) || (!filterState.startDate && filterState.endDate) || (filterState.startDate && filterState.endDate && filterState.endDate <= filterState.startDate)) {
       if(document.querySelector('#catalogue-more-filters'))document.querySelector('#catalogue-more-filters').open=true;
       document.querySelector("#catalogue-end-date")?.setCustomValidity("Choose an end date after the start date.");
