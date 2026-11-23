@@ -8,6 +8,8 @@
 .overclock-tracks dd { margin: .2rem 0 0; }
 .overclock-download { margin-top: 1.75rem; padding-top: 1.25rem; border-top: 1px solid var(--line); }
 .overclock-download h3 { margin: 0; font-size: 1.35rem; }
+.overclock-app-heading { display: flex; align-items: center; gap: .75rem; }
+.overclock-app-heading img { flex: none; }
 .overclock-download p { color: var(--muted); font-size: .875rem; margin: .4rem 0 0; }
 .overclock-download .button { margin-top: .9rem; }
 .overclock-download .overclock-download-note { font-size: .8rem; margin-top: .65rem; }

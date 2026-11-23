@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
@@ -9,8 +10,8 @@ using System.Windows.Forms;
 
 [assembly: AssemblyTitle("OVERCLOCK Connect Preview")]
 [assembly: AssemblyProduct("LOCKD OVERCLOCK")]
-[assembly: AssemblyVersion("0.1.0.0")]
-[assembly: AssemblyFileVersion("0.1.0.0")]
+[assembly: AssemblyVersion("0.1.1.0")]
+[assembly: AssemblyFileVersion("0.1.1.0")]
 
 namespace OverclockConnect
 {
@@ -50,6 +51,15 @@ namespace OverclockConnect
                 FlowDirection = FlowDirection.TopDown, Padding = new Padding(25)
             };
             Controls.Add(layout);
+            using (Stream stream = typeof(ConnectWindow).Assembly.GetManifestResourceStream("OverclockConnect.ico"))
+            using (var artwork = new Icon(stream, 48, 48))
+            {
+                Icon = (Icon)artwork.Clone();
+                layout.Controls.Add(new PictureBox
+                {
+                    Image = artwork.ToBitmap(), Size = new Size(48, 48), SizeMode = PictureBoxSizeMode.Zoom
+                });
+            }
             layout.Controls.Add(new Label { Text = "OVERCLOCK Connect", AutoSize = true, Font = new Font("Segoe UI", 21, FontStyle.Bold) });
             layout.Controls.Add(new Label
             {
