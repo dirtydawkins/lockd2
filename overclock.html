@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>OVERCLOCK — LOCKD</title>
-  <meta name="description" content="Request early access to LOCKD’s remote workstation pilot.">
+  <meta name="description" content="Explore LOCKD Studio and download OVERCLOCK Connect for Windows.">
   <link rel="icon" href="./assets/brand/overclock-connect.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./styles.css">
   <link rel="stylesheet" href="./brand-refinement.css">
@@ -18,20 +18,35 @@
     <a class="brand" href="index.html" aria-label="LOCKD home"><img class="brand-image" src="./assets/brand/lockd.svg" alt="LOCKD" width="1330" height="317"></a>
     <a class="header-cta" href="tech.html">Tech &amp; Gadgets</a>
   </header>
-  <main id="main" class="section-shell overclock-shell">
-    <section class="overclock-intro" aria-labelledby="overclock-title">
-      <p class="eyebrow">LOCKD // OVERCLOCK</p>
-      <h1 id="overclock-title">Power beyond your hardware.</h1>
-      <p>Use a more powerful computer from the one you already have. We’re starting with a small pilot for 3D artists and creators in Kenya.</p>
-      <dl class="overclock-tracks">
-        <div><dt>Studio</dt><dd>Creative work and 3D rendering. First in the pilot.</dd></div>
-        <div><dt>Play</dt><dd>Remote gaming. Planned.</dd></div>
-        <div><dt>AI</dt><dd>Run and train AI models on a remote computer. Planned.</dd></div>
-      </dl>
+  <main id="main" class="oc">
+    <section class="oc-hero" aria-labelledby="oc-title">
+      <div class="oc-wrap oc-lead">
+        <p class="oc-label">LOCKD // OVERCLOCK</p>
+        <h1 id="oc-title">Power beyond<br>your hardware.</h1>
+        <p class="oc-summary">Keep the computer you know. Request a remote workstation for 3D modelling, rendering and creative work.</p>
+        <div class="oc-actions"><a class="oc-primary" href="#access">Request Studio access</a><a href="#connect">Connect for Windows</a></div>
+      </div>
+      <figure><img src="./assets/photos/overclock-cooling.webp" alt="Close-up of a graphics card’s cooling fans" width="736" height="1308" fetchpriority="high"></figure>
     </section>
-    <section class="overclock-pilot" aria-labelledby="pilot-title">
-      <h2 id="pilot-title">Get early access</h2>
-      <p>Save what you’d like to use OVERCLOCK for. A request is free and does not reserve a computer.</p>
+    <section class="oc-section oc-pair" aria-labelledby="how-title">
+      <div><p class="oc-label">Getting started</p><h2 id="how-title">How it works.</h2></div>
+      <ol class="oc-steps"><li><strong>Choose your focus</strong><p>Studio is the first pilot, for creators in Kenya. You can also register interest in gaming or AI.</p></li>
+      <li><strong>Request access</strong><p>Use your LOCKD account to save your choice. You can change or withdraw it here.</p></li>
+      <li><strong>Get your PC ready</strong><p>Download Connect and check your connection to LOCKD. A request does not reserve a workstation.</p></li></ol>
+    </section>
+    <section class="oc-divisions oc-section" aria-label="OVERCLOCK divisions">
+      <article><p class="oc-label">First pilot</p><h2>Studio</h2><p>Work on a 3D scene or render a project.</p></article>
+      <article><p class="oc-label">Planned</p><h2>Play</h2><p>Play PC games on remote hardware.</p></article>
+      <article><p class="oc-label">Planned</p><h2>AI</h2><p>Run and train models on a remote computer.</p></article>
+    </section>
+    <section id="connect" class="oc-client oc-pair oc-section">
+      <div><img src="./assets/brand/overclock-connect.svg" width="52" height="52" alt=""><h2>Connect for Windows.</h2>
+      <p>Manage your Studio request and check your connection to LOCKD from your desktop.</p>
+      <a class="oc-primary" href="./downloads/OverclockConnect-0.2.0-windows-x64.exe" download>Download for Windows</a>
+      <small>Version 0.2.0 · Windows x64 · Standalone EXE<br>Unsigned download. Windows may show a publisher warning.</small></div>
+      <img class="oc-screen" src="./assets/brand/overclock-workspace.png" width="890" height="520" loading="lazy" alt="Connect home screen with Studio access and connection check">
+    </section>
+    <section id="access" class="oc-pair oc-section"><div><p class="oc-label">Studio pilot</p><h2>Request access.</h2><p>Tell us what you’d like to use OVERCLOCK for.</p></div><div class="oc-form">
       <a id="pilot-signin" class="button button-burgundy" href="account.html?returnTo=%2Foverclock.html" hidden>Sign in to request access</a>
       <button id="pilot-retry" class="text-button" type="button" hidden>Try again</button>
       <form id="pilot-form" hidden>
@@ -46,21 +61,8 @@
       </form>
       <p id="pilot-status" role="status">Checking your account…</p>
       <noscript><p>Enable JavaScript to manage your pilot request.</p></noscript>
-      <div class="overclock-download">
-        <div class="overclock-app-heading">
-          <img src="./assets/brand/overclock-connect.svg" width="48" height="48" alt="">
-          <h3>OVERCLOCK Connect for Windows</h3>
-        </div>
-        <p>Open the pilot page and check your connection to LOCKD from the app.</p>
-        <a class="button button-paper" href="./downloads/OverclockConnect-0.1.1-windows-x64.exe" download>Download Windows preview <span aria-hidden="true">↓</span></a>
-        <p class="overclock-download-note">64-bit Windows. Windows may show a warning because this preview is unsigned.</p>
-      </div>
-    </section>
-    <figure class="overclock-editorial">
-      <img src="./assets/photos/dual-monitor-gaming-setup.jpeg" alt="Desktop PC, monitor and keyboard at a workstation" width="736" height="981" loading="lazy" decoding="async">
-      <figcaption>Workstation inspiration</figcaption>
-    </figure>
+    </div></section>
   </main>
-  <footer class="site-footer"><div class="footer-bottom"><span>© LOCKD</span><a href="privacy.html">Privacy</a></div></footer>
+  <footer class="site-footer"><div class="footer-bottom"><span>© LOCKD</span><a href="tech.html">Tech &amp; Gadgets</a><a href="privacy.html">Privacy</a></div></footer>
 </body>
 </html>

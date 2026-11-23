@@ -95,3 +95,9 @@ The rental page places booking review beside the dates it uses. The button locks
 All 29 focused tests and 15 marketplace checks passed. The isolated database test publishes a real fixture through the base lister RPC, verifies the public dates, then checks customer requests, lister acceptance, capacity and authorization. Production reports booking requests enabled and zero listing rows. No production bookings or charges were created. OVERCLOCK streaming still requires a separate host.
 
 OVERCLOCK Connect 0.1.1 uses a redrawn client mark based on the supplied artwork. The SVG appears on the download panel and as the OVERCLOCK favicon. The Windows build embeds a multiresolution icon for Explorer, the title bar and the app header. Windows launch, icon extraction and the embedded icon resource were verified locally.
+
+## OVERCLOCK Connect 0.2.0
+
+The product page now leads with a GPU cooling photograph selected from the owner-supplied November 23 archive. It replaces the workstation photograph on this page. The artwork is editorial and does not describe host inventory. Independent third-party photo licensing was not established. The page self-hosts Manrope, Instrument Serif and IBM Plex Mono with their OFL notices. Connect uses a flat two-colour SVG and matching multi-size Windows icon. The download section shows a capture from the compiled application.
+
+The Windows x64 standalone EXE was built and launched. Home, Connection and Settings rendered. A live website check succeeded. The pilot database test and 15 marketplace checks passed. Headless Chrome captured desktop and mobile layouts, including a 360px iframe. No authenticated production pilot request, remote session, installer signing or multi-DPI Windows testing was performed.
