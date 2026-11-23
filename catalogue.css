@@ -175,6 +175,9 @@
 .availability-box { margin-top: 1.8rem; padding: 1.25rem; border: 1px solid var(--line); background: #f1ece6; }
 .availability-box .eyebrow { margin-bottom: .55rem; font-size: .58rem; }
 .availability-box h2 { margin-bottom: 1rem; font-size: 2rem; }
+.reservation-request { border-top: 1px solid var(--line); padding-top: 1rem; margin-top: 1rem; }
+.reservation-request p { margin: .75rem 0 0; }
+.reservation-request p:empty { display: none; }
 .availability-form { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
 .availability-form label { display: grid; gap: .3rem; color: #625b55; font-size: .65rem; font-weight: 600; }
 .availability-form input { min-height: 42px; padding: .55rem; font-size: .7rem; }

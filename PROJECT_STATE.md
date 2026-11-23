@@ -87,3 +87,9 @@ The Windows x64 lab client opens the pilot in the system browser and checks webs
 Verification passed for eight focused tests, including cross-account read/delete isolation, and all 15 marketplace checks. Chrome rendered the mobile-width pilot and its sign-in state with isolated configuration. The built-in browser timed out. The migration and web changes remain local. VM provisioning, a native authenticated streaming session, compute reservation and billing require the physical Linux GPU pilot and end-to-end verification.
 
 The Windows x64 preview release packages version 0.1.0 as a standalone executable with an unsigned-build label. The production Supabase migration was applied to the existing LOCKD project. The preview opens the pilot and measures website reachability. It has no remote desktop session or billing controls.
+
+## Marketplace booking review and OVERCLOCK page
+
+The rental page places booking review beside the dates it uses. The button locks before account validation, drops quotes for edited inputs and reuses the original request after a lost response. The catalogue distinguishes an empty inventory from a filtered search. OVERCLOCK groups the Windows download with account actions and places existing workstation photography in an editorial section.
+
+All 29 focused tests and 15 marketplace checks passed. The isolated database test publishes a real fixture through the base lister RPC, verifies the public dates, then checks customer requests, lister acceptance, capacity and authorization. Production reports booking requests enabled and zero listing rows. No production bookings or charges were created. OVERCLOCK streaming still requires a separate host.

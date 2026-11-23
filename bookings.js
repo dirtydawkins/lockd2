@@ -173,50 +173,61 @@
       .catch(() => {});
     const form = document.querySelector("#availability-form");
     const message = box.querySelector("[role=status]");
+    const btn = box.querySelector("button");
+    const reviewLabel = "Review booking request";
+    const details = () => ({
+      listingId: form.dataset.listingId,
+      startDate: form.startDate.value,
+      endDate: form.endDate.value,
+      quantity: Number(form.quantity.value),
+    });
     let key = null,
       previous = "",
       attempted = null;
-    box.querySelector("button").addEventListener("click", async (event) => {
-      if (!form.reportValidity()) return;
-      const listingId = form.dataset.listingId;
-      if (!listingId) return;
-      const body = {
-        listingId,
-        startDate: form.startDate.value,
-        endDate: form.endDate.value,
-        quantity: Number(form.quantity.value),
-      };
-      let session;
-      try {
-        session = await account.getSession();
-      } catch (e) {
-        message.textContent =
-          e.message || "Sign-in could not be checked. Please retry.";
-        return;
-      }
-      if (!session) {
-        const u = new URL(location.href);
-        Object.entries(body)
-          .filter(([k]) => k !== "listingId")
-          .forEach(([k, v]) => u.searchParams.set(k, v));
-        location.assign(account.authLink({ returnTo: u.pathname + u.search }));
-        return;
-      }
+    form.addEventListener("input", () => {
+      if (btn.disabled) return;
+      if (attempted) return;
+      delete btn.dataset.reviewed;
+      btn.textContent = reviewLabel;
+      message.textContent = "";
+    });
+    btn.addEventListener("click", async () => {
+      if (btn.disabled) return;
+      if (!attempted && !form.reportValidity()) return;
+      const body = details();
+      if (!body.listingId) return;
       const current = JSON.stringify(body);
-      if (previous !== current) {
-        key = crypto.randomUUID();
-        previous = current;
-        attempted = null;
-      }
-      const btn = event.currentTarget;
       btn.disabled = true;
+      message.textContent = attempted && previous === current ? "Checking your request…" : "Checking your booking details…";
       try {
+        const session = await account.getSession();
+        if (!session) {
+          const u = new URL(location.href);
+          Object.entries(body)
+            .filter(([k]) => k !== "listingId")
+            .forEach(([k, v]) => u.searchParams.set(k, v));
+          location.assign(account.authLink({ returnTo: u.pathname + u.search }));
+          return;
+        }
+        if (!attempted && previous !== current) {
+          key = crypto.randomUUID();
+          previous = current;
+          attempted = null;
+        }
         let item;
         if (attempted) {
           ({ item } = await request("POST", attempted));
         } else {
           const quote = await request("POST", { ...body, action: "quote" });
-          message.textContent = `${quote.item.currency} ${quote.item.totalAmount} total, including ${quote.item.depositAmount} refundable deposit. You won’t be charged when you send this request.`;
+          if (current !== JSON.stringify(details())) {
+            delete btn.dataset.reviewed;
+            btn.textContent = reviewLabel;
+            message.textContent = "Your dates or quantity changed. Review the updated total.";
+            return;
+          }
+          const money = new Intl.NumberFormat("en-KE", { style: "currency", currency: quote.item.currency });
+          const deposit = Number(quote.item.depositAmount) > 0 ? ` Includes a ${money.format(quote.item.depositAmount)} refundable deposit.` : "";
+          message.textContent = `${money.format(quote.item.totalAmount)} total.${deposit} No payment is due when you send the request.`;
           const reviewed = JSON.stringify([
             current,
             quote.item.currency,
@@ -241,10 +252,13 @@
         btn.dataset.sent = "true";
         location.assign("checkout.html?booking="+encodeURIComponent(item.id));
       } catch (e) {
-        message.textContent = e.message;
+        message.textContent = e.message || "We couldn’t check your booking. Try again.";
         if (e.status >= 400 && e.status < 500) {
           attempted = null;
           delete btn.dataset.reviewed;
+          btn.textContent = reviewLabel;
+        } else if (attempted) {
+          btn.textContent = "Retry booking request";
         }
       } finally {
         btn.disabled = btn.dataset.sent === "true";

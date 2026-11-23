@@ -523,11 +523,21 @@
       if (vehicleCount) vehicleCount.textContent = category === "drive" ? (items.length ? `${totalLabel}${countSuffix} ${totalLabel === 1 ? "vehicle" : "vehicles"}` : "") : "";
       if (items.length === 0) {
         status.dataset.kind = "empty";
-        status.textContent = `No listings matched your search. Try a different location, category, date, or price range${category === "drive" ? ", or browse the drive edit below" : ""}.`;
+        const narrowed = category || query || locationQuery || filterKeys.some(key => filterState[key]);
+        status.textContent = narrowed
+          ? "No rentals match these filters. Try a wider search."
+          : "There are no rentals listed yet.";
+        if (!narrowed) {
+          const link = document.createElement("a");
+          link.href = "owners.html";
+          link.className = "text-button";
+          link.textContent = "List a rental";
+          status.append(document.createElement("br"), link);
+        }
       } else {
         status.dataset.kind = "loaded";
         status.textContent = filterState.startDate && filterState.endDate
-          ? "Published listings with calendar capacity for the selected dates. Check availability again before contacting the lister."
+          ? "Showing rentals for your selected dates. Open a listing to review the price and send a request."
           : "Choose dates to check availability.";
       }
       loadMoreButton.hidden = !hasMore;

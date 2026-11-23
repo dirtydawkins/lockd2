@@ -18,9 +18,8 @@ test("reservation PostgreSQL functions enforce capacity, identity, money and tra
       "utf8",
     ),
   );
-  await db.exec(
-    "alter table public.lockd_listings add column deposit_amount numeric(12,2), add column deposit_currency text;",
-  );
+  await db.exec("create function auth.jwt() returns jsonb language sql as $$select '{}'::jsonb$$;");
+  await db.exec(readFileSync("supabase/migrations/20261028_0002_lockd_tech_discovery.sql", "utf8"));
   await db.exec(
     readFileSync(
       "supabase/migrations/20261031_0008_lockd_reservations.sql",
@@ -28,8 +27,9 @@ test("reservation PostgreSQL functions enforce capacity, identity, money and tra
     ),
   );
   await db.exec(
-    `insert into lockd_listings(id,owner_id,slug,title,category,price_amount,currency,price_unit,listing_status,approval_status,deposit_amount,deposit_currency) values('${listing}','${owner}','test','Test rental','drive',10.25,'KES','day','published','approved',5,'KES');insert into lockd_listing_availability select '${listing}',current_date+i,1,now() from generate_series(0,30)i;`,
+    "create schema storage; create table storage.buckets(id text primary key, name text, public boolean, file_size_limit bigint, allowed_mime_types text[]); create table storage.objects(bucket_id text, name text); alter table storage.objects enable row level security; create function storage.foldername(text) returns text[] language sql as $$select string_to_array($1, '/')$$;",
   );
+  await db.exec(readFileSync("supabase/migrations/20261028_0004_lockd_owner_publishing.sql", "utf8"));
   const as = async (id) => {
     await db.exec("reset role");
     await db.query("select set_config('request.jwt.claim.sub',$1,false)", [id]);
@@ -42,6 +42,25 @@ test("reservation PostgreSQL functions enforce capacity, identity, money and tra
     );
   let booking;
   try {
+    await t.test("lister publication makes the rental and its calendar discoverable", async () => {
+      const photo = `${owner}/${listing}/a1b2c3d4-1234-4567-8321-1234567890ab.jpg`;
+      await db.query("insert into storage.objects values ('lockd-listings',$1)", [photo]);
+      await as(owner);
+      const published = (await db.query(
+        "select create_lockd_listing($1::jsonb, jsonb_build_object('startDate',current_date,'endDate',current_date+31,'units',1), true) item",
+        [JSON.stringify({
+          id: listing, slug: "test", title: "Test rental", category: "camera",
+          description: "Camera with one battery and a charger for collection.",
+          price_amount: 10.25, currency: "KES", price_unit: "day", deposit_amount: 5,
+          images: [photo], location_label: "Nairobi",
+          attributes: { brand: "Test camera", model: "Test model", condition: "good" }
+        })],
+      )).rows[0].item;
+      assert.equal(published.listing_status, "published");
+      await db.exec("reset role; set role anon");
+      assert.equal((await db.query("select slug from lockd_listings where id=$1", [listing])).rows[0].slug, "test");
+      assert.equal((await db.query("select check_lockd_listing_availability($1,current_date+1,current_date+3,1) available", [listing])).rows[0].available, true);
+    });
     await t.test("disabled operations fail closed", async () => {
       await as(customer);
       await assert.rejects(request(), /not enabled/);

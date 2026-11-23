@@ -12,6 +12,7 @@ test("lost reservation responses retry the same request without quoting against 
   };
   const message = { textContent: "" };
   const form = {
+    addEventListener() {},
     dataset: { listingId: "test-listing" },
     reportValidity: () => true,
     startDate: { value: "2090-01-01" },
@@ -74,7 +75,10 @@ test("lost reservation responses retry the same request without quoting against 
     location: { href: "https://lockd.test/rental.html", assign(url) { target = url; } },
     Date,
   });
-  await click({ currentTarget: button });
+  const event = { currentTarget: button };
+  const reviewing = click(event);
+  event.currentTarget = null;
+  await reviewing;
   assert.equal(button.textContent, "Send booking request");
   await click({ currentTarget: button });
   assert.equal(message.textContent, "Lost response");
