@@ -25,3 +25,6 @@
 .oc a:focus-visible,.oc-form :focus-visible{outline:3px solid #ba626e;outline-offset:4px}
 @media(max-width:760px){.oc-hero,.oc-pair{grid-template-columns:1fr}.oc-hero figure{height:clamp(12rem,52vw,24rem)}.oc h1{font-size:clamp(2.9rem,10vw,4.1rem)}.oc-lead{padding-bottom:2rem}.oc-divisions{grid-template-columns:1fr;gap:1rem}.oc-divisions h2{font-size:2rem;margin-bottom:.35rem}.oc-divisions p{margin-block:.5rem}.oc-client{gap:1.4rem}}
 @media(prefers-reduced-motion:no-preference){.oc-primary{transition:transform 160ms ease,box-shadow 160ms ease}.oc-primary:hover{transform:translateY(-1px);box-shadow:0 3px 10px #231b1b24}}
+#host-form input,#host-form textarea{padding:.75rem;border:1px solid #bdafaa;border-radius:6px;font:inherit;background:#fffcf8;color:#211d1c;width:100%}
+#host-list details{border-top:1px solid #cfc4be;padding:.7rem 0}#host-list summary{cursor:pointer;font-weight:650}.pc-report{white-space:pre-line;overflow-wrap:anywhere}
+#pc-search-results a{display:grid;gap:.3rem;padding:.9rem 0;text-decoration:none;border-top:1px solid #cfc4be}#pc-search-results span{font-size:.9rem;overflow-wrap:anywhere}

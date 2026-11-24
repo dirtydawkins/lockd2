@@ -11,6 +11,8 @@
   <link rel="stylesheet" href="./overclock.css">
   <script defer src="./account-service.js"></script>
   <script type="module" src="./overclock.mjs"></script>
+  <script type="module" src="./overclock-hosts.mjs"></script>
+  <script type="module" src="./overclock-computers.mjs"></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -24,7 +26,7 @@
         <p class="oc-label">LOCKD // OVERCLOCK</p>
         <h1 id="oc-title">Power beyond<br>your hardware.</h1>
         <p class="oc-summary">Keep the computer you know. Request a remote workstation for 3D modelling, rendering and creative work.</p>
-        <div class="oc-actions"><a class="oc-primary" href="#access">Request Studio access</a><a href="#connect">Connect for Windows</a></div>
+        <div class="oc-actions"><a class="oc-primary" href="#access">Request Studio access</a><a href="#list-pc">Register your PC</a><a href="#connect">Windows app</a></div>
       </div>
       <figure><img src="./assets/photos/overclock-cooling.webp" alt="Close-up of a graphics card’s cooling fans" width="736" height="1308" fetchpriority="high"></figure>
     </section>
@@ -39,11 +41,26 @@
       <article><p class="oc-label">Planned</p><h2>Play</h2><p>Play PC games on remote hardware.</p></article>
       <article><p class="oc-label">Planned</p><h2>AI</h2><p>Run and train models on a remote computer.</p></article>
     </section>
+    <section id="computers" class="oc-pair oc-section">
+      <div><p class="oc-label">Equipment rentals</p><h2>Rent a computer locally.</h2><p>Choose a PC for collection or delivery. Open its listing for specifications, dates and the rental price.</p>
+      <button type="button" id="pc-nearby" class="button button-paper">Find PCs near me</button></div>
+      <div><p id="pc-search-status" role="status">Finding computers…</p><div id="pc-search-results"></div><a href="rentals.html?category=laptop">View all computers</a></div>
+    </section>
+    <section id="list-pc" class="oc-pair oc-section">
+      <div><p class="oc-label">For listers</p><h2>Register your PC.</h2><p>Open My PC in <a href="#connect">Connect for Windows</a> to bring over its specifications, or enter them here. Your registration stays private until a separate host review.</p></div>
+      <div class="oc-form">
+        <a id="host-signin" class="oc-primary" href="account.html?returnTo=%2Foverclock.html%23list-pc" hidden>Sign in to register</a>
+        <form id="host-form" hidden><label for="pc-name">Name this PC</label><input id="pc-name" name="pcName" required maxlength="80" placeholder="Studio desktop">
+          <label for="pc-specs">PC specifications</label><textarea id="pc-specs" name="specs" required minlength="5" maxlength="1000" rows="4" placeholder="Processor, graphics and memory"></textarea>
+          <button class="button button-burgundy" type="submit">Save PC</button></form>
+        <p id="host-status" role="status"></p><div id="host-list"></div>
+      </div>
+    </section>
     <section id="connect" class="oc-client oc-pair oc-section">
       <div><img src="./assets/brand/overclock-connect.svg" width="52" height="52" alt=""><h2>Connect for Windows.</h2>
-      <p>Manage your Studio request and check your connection to LOCKD from your desktop.</p>
-      <a class="oc-primary" href="./downloads/OverclockConnect-0.2.0-windows-x64.exe" download>Download for Windows</a>
-      <small>Version 0.2.0 · Windows x64 · Standalone EXE<br>Unsigned download. Windows may show a publisher warning.</small></div>
+      <p>Check your PC’s processor, graphics and memory, then add those details to your LOCKD account.</p>
+      <a class="oc-primary" href="./downloads/OverclockConnect-0.3.0-windows-x64.exe" download>Download for Windows</a>
+      <small>Version 0.3.0 · Windows x64 · Standalone EXE<br>Unsigned download. Windows may show a publisher warning.</small></div>
       <img class="oc-screen" src="./assets/brand/overclock-workspace.png" width="890" height="520" loading="lazy" alt="Connect home screen with Studio access and connection check">
     </section>
     <section id="access" class="oc-pair oc-section"><div><p class="oc-label">Studio pilot</p><h2>Request access.</h2><p>Tell us what you’d like to use OVERCLOCK for.</p></div><div class="oc-form">

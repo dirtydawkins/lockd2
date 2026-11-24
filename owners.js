@@ -205,6 +205,29 @@
       if (descriptor.type === "textarea" || descriptor.key === "amenities" || descriptor.key === "included_accessories") field.classList.add("owner-field-wide");
       grid.append(field);
     });
+    if (category === "laptop") {
+      const picker = document.createElement("select");
+      const label = document.createElement("label");
+      label.className = "owner-field owner-field-wide";
+      label.textContent = "Use specifications from a registered PC";
+      picker.append(new Option("Choose a PC", ""));
+      label.append(picker);
+      label.hidden = true;
+      grid.prepend(label);
+      window.LockdAccount.listComputers().then(rows => {
+        if (!label.isConnected) return;
+        for (const pc of rows) picker.append(new Option(pc.name, pc.id));
+        label.hidden = rows.length === 0;
+        picker.addEventListener("change", () => {
+          const pc = rows.find(row => row.id === picker.value);
+          if (!pc) return;
+          const field = grid.querySelector('[data-attribute="specifications"]');
+          field.value = pc.reported_specs;
+          grid.querySelector('[data-attribute="product_type"]').value = "computer";
+          field.dispatchEvent(new Event("input", { bubbles: true }));
+        });
+      }).catch(() => {});
+    }
     host.append(fieldset);
     const unitSelect = $("#listing-price-unit");
     const units = category === "stay" ? ["night", "week", "month"] : category === "experience" ? ["trip", "hour", "day"] : category === "drive" ? ["day", "week", "month"] : ["hour", "day", "week", "month"];

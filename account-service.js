@@ -612,6 +612,9 @@
   });
 
   window.LockdAccount = {
+    listComputers: () => supabaseRequest("lockd_overclock_hosts?select=id,name,reported_specs&order=registered_at.desc"),
+    registerComputer: (name, specs) => supabaseRequest("rpc/register_lockd_overclock_pc", { method: "POST", body: { p_name: name, p_specs: specs } }),
+    removeComputer: id => supabaseRequest("lockd_overclock_hosts?id=eq." + encodeURIComponent(id), { method: "DELETE" }),
     init, getConfig: () => init(), getSession, signUp, signIn, signOut, resendVerification,
     requestPasswordReset, updatePassword, startOAuth, completeCallback, getProfile, saveProfile, profilePhotoUrl, saveProfilePhoto, removeProfilePhoto,
     listSavedListings, saveFavorite, removeFavorite, refreshFavoriteIds, ensureFavoriteIds,

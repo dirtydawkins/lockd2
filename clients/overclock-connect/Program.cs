@@ -10,8 +10,8 @@ using System.Windows.Forms;
 
 [assembly: AssemblyTitle("OVERCLOCK Connect")]
 [assembly: AssemblyProduct("LOCKD OVERCLOCK")]
-[assembly: AssemblyVersion("0.2.0.0")]
-[assembly: AssemblyFileVersion("0.2.0.0")]
+[assembly: AssemblyVersion("0.3.0.0")]
+[assembly: AssemblyFileVersion("0.3.0.0")]
 
 namespace OverclockConnect
 {
@@ -60,7 +60,7 @@ namespace OverclockConnect
                 rail.Controls.Add(new PictureBox { Image = artwork.ToBitmap(), Size = new Size(48, 48) });
             }
             Copy(rail, "Connect", 18);
-            foreach (var page in new[] { "Home", "Connection", "Settings" })
+            foreach (var page in new[] { "Home", "My PC", "Connection", "Settings" })
             {
                 string target = page;
                 var button = Action(rail, target, false);
@@ -76,6 +76,8 @@ namespace OverclockConnect
         readonly FlowLayoutPanel content = Column(28);
         string lastResult = "Ready to check.";
         bool checking;
+        bool scanning;
+        string hardware = "";
 
         static FlowLayoutPanel Column(int padding)
         {
@@ -123,6 +125,41 @@ namespace OverclockConnect
                 Link("Manage Studio access", "overclock.html#access", true);
                 Action(content, "Check connection", false).Click += delegate { ShowPage("Connection"); };
             }
+            else if (page == "My PC")
+            {
+                Copy(content, "Your PC", 26);
+                Copy(content, "Check the processor, graphics and memory. Review the details before sending them to LOCKD for review.", 11);
+                var specs = new TextBox { Multiline = true, ReadOnly = true, ScrollBars = ScrollBars.Vertical,
+                    Width = 330, Height = 94, AccessibleName = "PC specifications", Text = hardware };
+                content.Controls.Add(specs);
+                var inspect = Action(content, "Check this PC", true);
+                var open = Action(content, "Register this PC", false);
+                inspect.Enabled = !scanning;
+                open.Enabled = hardware.Length > 0;
+                inspect.Click += async delegate {
+                    scanning = true;
+                    inspect.Enabled = open.Enabled = false;
+                    specs.Text = "Checking this PC…";
+                    try { hardware = await Task.Run(new Func<string>(Hardware.Inspect)); }
+                    catch (Exception error) {
+                        if (!(error is System.Management.ManagementException || error is UnauthorizedAccessException ||
+                              error is System.Runtime.InteropServices.COMException || error is System.Security.SecurityException)) throw;
+                        hardware = "";
+                    }
+                    finally { scanning = false; }
+                    if (IsDisposed || Disposing) return;
+                    if (!specs.IsDisposed) {
+                        specs.Text = hardware.Length == 0 ? "Windows could not read these details. You can enter them in your listing." : hardware;
+                        inspect.Enabled = true;
+                        open.Enabled = hardware.Length > 0;
+                    } else if (content.Tag as string == "My PC") ShowPage("My PC");
+                };
+                open.Click += delegate {
+                    var link = new Uri(Pilot, "overclock.html#pc-specs=" + Uri.EscapeDataString(hardware));
+                    try { Process.Start(new ProcessStartInfo(link.AbsoluteUri) { UseShellExecute = true }); }
+                    catch (System.ComponentModel.Win32Exception) { MessageBox.Show(this, "Copy the specifications into the Computers section of your LOCKD listing."); }
+                };
+            }
             else if (page == "Connection")
             {
                 Copy(content, "Connection check", 26);
@@ -148,8 +185,9 @@ namespace OverclockConnect
                 Copy(content, "Your profile and preferences open in your usual browser.", 11);
                 Link("Account settings", "settings.html", true);
                 Link("Privacy notice", "privacy.html", false);
-                Copy(content, "Connect 0.2.0   /   Windows x64", 10);
+                Copy(content, "Connect 0.3.0   /   Windows x64", 10);
             }
+            content.Tag = page;
             content.ResumeLayout(true);
         }
 
